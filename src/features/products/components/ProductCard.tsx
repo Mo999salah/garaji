@@ -1,5 +1,6 @@
+import { Image } from 'expo-image';
 import type { ReactNode } from 'react';
-import { Image, Pressable, Text, View } from 'react-native';
+import { Pressable, Text, View } from 'react-native';
 
 import { formatProductPrice } from '@/features/products/selectors/productSelectors';
 import type { Product } from '@/shared/types/product';
@@ -17,9 +18,9 @@ export function ProductCard({ onPress, product, rightSlot, showStatus = false }:
       <View className="h-20 w-20 items-center justify-center overflow-hidden rounded-lg bg-brand-50">
         {product.imageUrl ? (
           <Image
-            accessibilityIgnoresInvertColors
+            accessibilityLabel={`${product.name} image`}
             className="h-full w-full"
-            resizeMode="cover"
+            contentFit="cover"
             source={{ uri: product.imageUrl }}
           />
         ) : (

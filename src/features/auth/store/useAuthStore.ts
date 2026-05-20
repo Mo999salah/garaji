@@ -1,86 +1,168 @@
-import * as SecureStore from 'expo-secure-store';
-import { Platform } from 'react-native';
 import create from 'zustand';
 
-import { signInWithMockRole } from '@/features/auth/services/mockAuthService';
+import {
+  AuthFlowError,
+  getCurrentAuthUser,
+  signInWithEmail,
+  signOutSupabase,
+  signUpWithEmail,
+  type SignInCredentials,
+  type SignUpCredentials,
+} from '@/features/auth/services/supabaseAuthService';
+import { useOrderStore } from '@/features/orders/store/useOrderStore';
+import { useProductStore } from '@/features/products/store/useProductStore';
 import type { AuthUser, UserRole } from '@/shared/types/auth';
+import { resetSessionStores } from '@/shared/lib/sessionStores';
 
-type AuthStatus = 'idle' | 'loading' | 'authenticated' | 'unauthenticated';
-const SESSION_KEY = 'qitaa-auth-session';
-let webSession: string | null = null;
+type AuthStatus = 'idle' | 'loading' | 'authenticated' | 'unauthenticated' | 'blocked';
 
 interface AuthState {
   user: AuthUser | null;
   status: AuthStatus;
   hasHydrated: boolean;
+  errorMessage: string | null;
+  infoMessage: string | null;
   hydrateSession: () => Promise<void>;
-  signInAsRole: (role: UserRole) => Promise<void>;
+  signIn: (credentials: SignInCredentials) => Promise<AuthUser>;
+  signUp: (credentials: SignUpCredentials) => Promise<{ user: AuthUser | null; message: string }>;
   signOut: () => Promise<void>;
+  clearError: () => void;
+  clearInfo: () => void;
+  setInfoMessage: (message: string | null) => void;
 }
 
-async function getStoredSession() {
-  if (Platform.OS === 'web') {
-    return webSession;
+function getErrorMessage(error: unknown) {
+  if (error instanceof AuthFlowError) {
+    return error.message;
   }
 
-  return SecureStore.getItemAsync(SESSION_KEY);
+  return 'Something went wrong. Please try again.';
 }
 
-async function setStoredSession(value: string) {
-  if (Platform.OS === 'web') {
-    webSession = value;
+async function syncRoleData(user: AuthUser) {
+  if (user.role === 'customer') {
+    await Promise.all([
+      useProductStore.getState().loadCatalog(),
+      useOrderStore.getState().loadCustomerOrders(user.id),
+    ]);
     return;
   }
 
-  await SecureStore.setItemAsync(SESSION_KEY, value);
-}
-
-async function clearStoredSession() {
-  if (Platform.OS === 'web') {
-    webSession = null;
-    return;
+  if (user.merchantId) {
+    await Promise.all([
+      useProductStore.getState().loadMerchantCatalog(user.merchantId),
+      useOrderStore.getState().loadMerchantOrders(user.merchantId),
+    ]);
   }
-
-  await SecureStore.deleteItemAsync(SESSION_KEY);
 }
 
 export const useAuthStore = create<AuthState>((set, get) => ({
   user: null,
   status: 'idle',
   hasHydrated: false,
+  errorMessage: null,
+  infoMessage: null,
   hydrateSession: async () => {
-    if (get().hasHydrated) {
-      return;
-    }
-
-    set({ status: 'loading' });
+    set({ status: 'loading', errorMessage: null });
 
     try {
-      const storedSession = await getStoredSession();
-      const parsedSession = storedSession
-        ? (JSON.parse(storedSession) as { user?: AuthUser })
-        : null;
+      const user = await getCurrentAuthUser();
+
+      if (user) {
+        await syncRoleData(user);
+      }
 
       set({
-        user: parsedSession?.user ?? null,
-        status: parsedSession?.user ? 'authenticated' : 'unauthenticated',
+        user,
+        status: user ? 'authenticated' : 'unauthenticated',
         hasHydrated: true,
+        errorMessage: null,
       });
-    } catch {
-      await clearStoredSession();
-      set({ user: null, status: 'unauthenticated', hasHydrated: true });
+    } catch (error) {
+      set({
+        user: null,
+        status: 'blocked',
+        hasHydrated: true,
+        errorMessage: getErrorMessage(error),
+      });
     }
   },
-  signInAsRole: async (role) => {
-    set({ status: 'loading' });
-    const user = await signInWithMockRole(role);
-    await setStoredSession(JSON.stringify({ user }));
-    set({ user, status: 'authenticated', hasHydrated: true });
+  signIn: async (credentials) => {
+    set({ status: 'loading', errorMessage: null, infoMessage: null });
+
+    try {
+      const user = await signInWithEmail(credentials);
+      await syncRoleData(user);
+      set({ user, status: 'authenticated', hasHydrated: true, errorMessage: null, infoMessage: null });
+      return user;
+    } catch (error) {
+      const message = getErrorMessage(error);
+      set({ user: null, status: 'unauthenticated', hasHydrated: true, errorMessage: message });
+      throw new AuthFlowError(message);
+    }
+  },
+  signUp: async (credentials) => {
+    set({ status: 'loading', errorMessage: null, infoMessage: null });
+
+    try {
+      const result = await signUpWithEmail(credentials);
+
+      if (result.needsEmailConfirmation) {
+        const message = 'Check your email to confirm your account, then sign in.';
+        set({
+          user: null,
+          status: 'unauthenticated',
+          hasHydrated: true,
+          errorMessage: null,
+          infoMessage: message,
+        });
+        return { user: null, message };
+      }
+
+      if (result.user) {
+        try {
+          await syncRoleData(result.user);
+        } catch (syncError) {
+          if (__DEV__) {
+            console.warn('[auth] post-signup data sync failed', syncError);
+          }
+        }
+      }
+
+      set({
+        user: result.user,
+        status: result.user ? 'authenticated' : 'unauthenticated',
+        hasHydrated: true,
+        errorMessage: null,
+        infoMessage: null,
+      });
+
+      return { user: result.user, message: 'Account created.' };
+    } catch (error) {
+      const message = getErrorMessage(error);
+      set({ user: null, status: 'unauthenticated', hasHydrated: true, errorMessage: message });
+      throw new AuthFlowError(message);
+    }
   },
   signOut: async () => {
-    await clearStoredSession();
-    set({ user: null, status: 'unauthenticated', hasHydrated: true });
+    set({ status: 'loading', errorMessage: null, infoMessage: null });
+
+    try {
+      await signOutSupabase();
+    } finally {
+      resetSessionStores();
+      set({
+        user: null,
+        status: 'unauthenticated',
+        hasHydrated: true,
+        errorMessage: null,
+        infoMessage: null,
+      });
+    }
   },
+  clearError: () => set({ errorMessage: null }),
+  clearInfo: () => set({ infoMessage: null }),
+  setInfoMessage: (message) => set({ infoMessage: message }),
 }));
 
 export function getHomePathForRole(role: UserRole) {

@@ -2,6 +2,8 @@ export interface Product {
   id: string;
   merchantId: string;
   categoryId: string;
+  categoryName?: string;
+  merchantName?: string;
   name: string;
   brand: string;
   description: string;

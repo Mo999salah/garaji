@@ -15,9 +15,10 @@ export default function MerchantProductsScreen() {
   const user = useAuthStore((state) => state.user);
   const products = useProductStore((state) => state.products);
   const toggleProductActive = useProductStore((state) => state.toggleProductActive);
+  const merchantId = user?.merchantId;
   const merchantProducts = useMemo(
-    () => (user ? getMerchantProducts(products, user.id) : []),
-    [products, user],
+    () => (merchantId ? getMerchantProducts(products, merchantId) : []),
+    [merchantId, products],
   );
 
   return (
@@ -55,7 +56,11 @@ export default function MerchantProductsScreen() {
                       accessibilityLabel={`${product.isActive ? 'Deactivate' : 'Activate'} ${
                         product.name
                       }`}
-                      onPress={() => user && toggleProductActive(product.id, user.id)}
+                      onPress={() => {
+                        if (merchantId) {
+                          void toggleProductActive(product.id, merchantId);
+                        }
+                      }}
                       variant="secondary"
                     >
                       {product.isActive ? 'Pause' : 'Activate'}

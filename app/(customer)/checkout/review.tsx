@@ -27,12 +27,12 @@ export default function CheckoutReviewScreen() {
   const itemCount = getCartItemCount(items);
   const hasMultipleMerchants = hasMixedMerchantCart(items);
 
-  const placeOrder = () => {
+  const placeOrder = async () => {
     if (!user || hasMultipleMerchants) {
       return;
     }
 
-    const order = createOrderFromCart(user, items, notes);
+    const order = await createOrderFromCart(user, items, notes);
 
     if (order) {
       clearCart();
@@ -63,15 +63,14 @@ export default function CheckoutReviewScreen() {
         </View>
 
         <AppCard>
-          <Text className="text-base font-semibold text-ink">Mock subtotal</Text>
+          <Text className="text-base font-semibold text-ink">Subtotal</Text>
           <Text className="mt-2 text-3xl font-bold text-brand-700">{formatCurrency(subtotal)}</Text>
           <Text className="mt-2 text-sm text-muted">
-            {itemCount} item{itemCount === 1 ? '' : 's'} ready for future order creation.
+            {itemCount} item{itemCount === 1 ? '' : 's'} in this order.
           </Text>
           {hasMultipleMerchants ? (
             <Text className="mt-3 text-sm font-semibold text-red-600">
-              Mock checkout currently supports one merchant per order. Remove items from other
-              merchants before placing this order.
+              Checkout supports one merchant per order. Remove items from other merchants first.
             </Text>
           ) : null}
         </AppCard>
@@ -88,8 +87,8 @@ export default function CheckoutReviewScreen() {
 
         <AppCard>
           <View className="mt-4 gap-3">
-            <AppButton disabled={hasMultipleMerchants || !user} onPress={placeOrder}>
-              Place mock order
+            <AppButton disabled={hasMultipleMerchants || !user} onPress={() => void placeOrder()}>
+              Place order
             </AppButton>
             <AppButton onPress={() => router.push('/(customer)/cart')} variant="secondary">
               Back to cart

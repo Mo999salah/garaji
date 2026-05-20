@@ -11,24 +11,27 @@ import { ScreenContainer } from '@/shared/components/ScreenContainer';
 export default function EditProductScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const user = useAuthStore((state) => state.user);
+  const merchantId = user?.merchantId;
   const product = useProductStore((state) =>
-    user ? state.products.find((item) => item.id === id && item.merchantId === user.id) : undefined,
+    merchantId
+      ? state.products.find((item) => item.id === id && item.merchantId === merchantId)
+      : undefined,
   );
   const updateProduct = useProductStore((state) => state.updateProduct);
 
-  const handleSubmit = (values: ProductFormValues) => {
-    if (!user || !product) {
+  const handleSubmit = async (values: ProductFormValues) => {
+    if (!merchantId || !product) {
       return;
     }
 
-    const updated = updateProduct(product.id, user.id, values);
+    const updated = await updateProduct(product.id, merchantId, values);
 
     if (updated) {
       router.replace('/(merchant)/products');
     }
   };
 
-  if (!user || !product) {
+  if (!merchantId || !product) {
     return (
       <ScreenContainer>
         <EmptyState

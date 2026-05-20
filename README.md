@@ -1,68 +1,76 @@
 # Qitaa
 
-Production-oriented Expo React Native scaffold for a B2B ordering app.
+Production-oriented Expo React Native app for B2B ordering.
 
 ## Structure
 
 - `app/` - Expo Router routes and protected role groups.
-- `app/(auth)/` - mock login flow.
+- `app/(auth)/` - Supabase email/password auth, signup, and password reset.
 - `app/(customer)/` - customer-only screens guarded by role.
 - `app/(merchant)/` - merchant-only screens guarded by role.
-- `src/features/auth/` - auth business logic, mock auth service, and centralized Zustand store.
-- `src/features/products/` - product mock data, selectors, form validation, UI, and mutations.
-- `src/features/cart/` - local mock cart state, totals, and cart item UI.
+- `src/features/auth/` - auth service, session listener, and centralized Zustand store.
+- `src/features/products/` - catalog services, selectors, forms, and store.
+- `src/features/cart/` - persisted local cart with single-merchant enforcement.
+- `src/features/orders/` - order services, selectors, UI, and store.
 - `src/shared/components/` - reusable NativeWind UI primitives.
-- `src/shared/lib/` - app services such as TanStack Query and Supabase client setup.
-- `src/shared/types/` - typed auth and ordering models.
-- `src/styles/global.css` - NativeWind CSS entry.
+- `src/shared/lib/` - Supabase client, query client, and session helpers.
+- `src/shared/types/` - typed auth, catalog, order, and database models.
+- `supabase/migrations/` - schema, RLS, profile bootstrap, and atomic order RPC.
 
 ## Auth
 
-Auth state is centralized in `useAuthStore`. The current implementation uses mock role login and stores the mobile session with `expo-secure-store`; web development uses an in-memory fallback because SecureStore is a native mobile API. Route-group layouts guard access by reading the centralized user role, not by trusting the navigation path.
+Auth state lives in `useAuthStore` and syncs with Supabase Auth:
 
-## Supabase
+- Sessions persist with `expo-secure-store` on native and AsyncStorage on web.
+- `useAuthSessionListener` keeps the store aligned with token refresh and sign-out events.
+- Sign-up metadata is trusted only by the database trigger in `20260520103000_auth_profile_bootstrap.sql`.
+- Sign-out clears cart, catalog cache, and order cache via `resetSessionStores`.
 
-`src/shared/lib/supabase.ts` is ready for `EXPO_PUBLIC_SUPABASE_URL` and `EXPO_PUBLIC_SUPABASE_ANON_KEY`. Replace the mock service in `src/features/auth/services/mockAuthService.ts` when backend auth is introduced.
+Configure:
 
-Database design lives in `supabase/migrations/20260519112000_initial_qitaa_schema.sql`. The app is not connected to Supabase yet.
+```env
+EXPO_PUBLIC_SUPABASE_URL=
+EXPO_PUBLIC_SUPABASE_ANON_KEY=
+```
 
-### Schema Overview
+Apply migrations before testing signup:
 
-- `profiles` maps one row to each `auth.users` account and stores the app role: `customer` or `merchant`.
-- `merchants` stores merchant business records and links each merchant to its owner profile.
-- `categories` stores shared catalog categories.
-- `products` stores merchant-owned catalog items with category, price, unit, image URL, and active state.
-- `orders` stores customer orders assigned to one merchant with status, notes, subtotal, and timestamps.
-- `order_items` stores order line snapshots. A trigger validates the product and copies product name, brand, price, and unit at insert time. Another trigger recalculates order subtotal from line items.
+```bash
+supabase db push
+```
 
-### RLS Overview
+## Catalog and orders
 
-RLS is enabled on all app tables. Customers can read and update only their own profile, read categories and active products, create their own orders, and read their own orders and order items. Merchant owners can read and update their merchant record, manage products for their own merchant, read orders assigned to their merchant, and update only the `status` column on those orders.
+When Supabase env vars are present:
 
-Order status transitions are enforced by a database trigger:
+- Products and categories load from `products`, `categories`, and `merchants`.
+- Customer checkout calls `create_order_with_items` for atomic order creation.
+- Merchant and customer order lists load from `orders` + `order_items`.
 
-- `pending -> processing`
-- `processing -> on_the_way`
-- `on_the_way -> delivered`
-- `pending -> cancelled`
+Without Supabase configuration, the app falls back to in-memory mock catalog and orders for local UI work.
 
-Delivered and cancelled orders cannot be changed. The migration also uses column-level grants so authenticated clients cannot update protected fields such as profile role, order subtotal, order ownership, or order item snapshots.
+## Cart rules
 
-### Mock App Mapping
+- Cart items persist locally between app restarts.
+- Only one merchant is allowed per cart; adding a product from another merchant is blocked at add time.
+- Checkout still validates mixed merchants as a final guard.
 
-- `useAuthStore` maps to `profiles` plus Supabase Auth.
-- `useProductStore` maps to `categories` and `products`.
-- `useCartStore` stays local at first; it becomes the client-side draft used to create `orders` and `order_items`.
-- `useOrderStore` maps to `orders` and `order_items`.
+## Database highlights
 
-### Future Connection Order
+- `orders.customer_name` stores a customer display snapshot for merchant order views.
+- `create_order_with_items` creates an order and its line items in one transaction.
+- Merchants can cancel orders while status is `pending`, `processing`, or `on_the_way`.
 
-Connect authentication and profile loading first, then merchant/profile role routing, then categories/products reads, then merchant product mutations, and finally order creation/status updates. Cart can remain local until the order creation API is wired.
+## Scripts
 
-## Products
+```bash
+npm start
+npm run typecheck
+npm run doctor
+```
 
-Products use mock data in `src/features/products/data/mockProducts.ts` and mock mutations in `src/features/products/store/useProductStore.ts`. Customer screens read active products through selectors. Merchant screens filter products by the authenticated user id from `useAuthStore`, not by route params.
+Optional Supabase type generation:
 
-## Cart
-
-The cart is customer-only and local/mock for now. `src/features/cart/store/useCartStore.ts` owns item mutations, and selectors calculate totals. Product details add items by looking up products from the product store, preventing inactive products from being added and merging duplicate products by increasing quantity.
+```bash
+supabase gen types typescript --local > src/shared/types/supabase.generated.ts
+```

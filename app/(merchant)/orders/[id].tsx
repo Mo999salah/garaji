@@ -21,8 +21,11 @@ import { ScreenContainer } from '@/shared/components/ScreenContainer';
 export default function MerchantOrderDetailsScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const user = useAuthStore((state) => state.user);
+  const merchantId = user?.merchantId;
   const order = useOrderStore((state) =>
-    user ? state.orders.find((item) => item.id === id && item.merchantId === user.id) : undefined,
+    merchantId
+      ? state.orders.find((item) => item.id === id && item.merchantId === merchantId)
+      : undefined,
   );
   const updateOrderStatus = useOrderStore((state) => state.updateOrderStatus);
 
@@ -38,16 +41,17 @@ export default function MerchantOrderDetailsScreen() {
   }
 
   const nextStatus = getNextOrderStatus(order.status);
-  const canCancel = order.status === 'pending';
+  const canCancel =
+    order.status === 'pending' || order.status === 'processing' || order.status === 'on_the_way';
 
   const advanceStatus = () => {
-    if (nextStatus) {
-      updateOrderStatus(order.id, user.id, nextStatus);
+    if (nextStatus && merchantId) {
+      void updateOrderStatus(order.id, merchantId, nextStatus);
     }
   };
 
   const cancelOrder = () => {
-    const runCancel = () => updateOrderStatus(order.id, user.id, 'cancelled');
+    const runCancel = () => merchantId && void updateOrderStatus(order.id, merchantId, 'cancelled');
 
     if (Platform.OS === 'web') {
       if (window.confirm('Cancel this order?')) {

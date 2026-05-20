@@ -1,6 +1,7 @@
 import type { CartItem } from '@/features/cart/types';
 import type { AuthUser } from '@/shared/types/auth';
 import type { Order, OrderItem, OrderStatus } from '@/shared/types/order';
+import { createClientId } from '@/shared/lib/id';
 
 export const statusLabels: Record<OrderStatus, string> = {
   pending: 'Pending',
@@ -33,8 +34,8 @@ export function canTransitionOrderStatus(currentStatus: OrderStatus, nextStatus:
     return false;
   }
 
-  if (currentStatus === 'pending' && nextStatus === 'cancelled') {
-    return true;
+  if (nextStatus === 'cancelled') {
+    return currentStatus === 'pending' || currentStatus === 'processing' || currentStatus === 'on_the_way';
   }
 
   return nextStatusByStatus[currentStatus] === nextStatus;
@@ -53,7 +54,11 @@ export function formatOrderDate(value: string) {
 }
 
 export function formatOrderId(orderId: string) {
-  return orderId.replace('order-', '#');
+  if (orderId.startsWith('order-')) {
+    return orderId.replace('order-', '#');
+  }
+
+  return `#${orderId.slice(0, 8).toUpperCase()}`;
 }
 
 export function buildOrderFromCart(params: {
@@ -84,9 +89,9 @@ export function buildOrderFromCart(params: {
   }));
 
   return {
-    id: `order-${Date.now()}`,
+    id: createClientId('order'),
     customerId: params.customer.id,
-    customerName: params.customer.companyName,
+    customerName: params.customer.fullName,
     merchantId: firstItem.merchantId,
     status: 'pending',
     items: orderItems,

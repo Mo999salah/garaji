@@ -21,8 +21,10 @@ export default function MerchantHomeScreen() {
         <View className="flex-row items-start justify-between gap-4">
           <View className="flex-1">
             <Text className="text-sm font-semibold text-brand-700">Merchant portal</Text>
-            <Text className="mt-2 text-3xl font-bold text-ink">{user?.companyName}</Text>
-            <Text className="mt-1 text-base text-muted">Welcome, {user?.displayName}</Text>
+            <Text className="mt-2 text-3xl font-bold text-ink">{user?.fullName}</Text>
+            <Text className="mt-1 text-base text-muted">
+              {user?.merchantName ?? 'Merchant workspace'}
+            </Text>
           </View>
           <AppButton onPress={handleSignOut} variant="ghost">
             Sign out

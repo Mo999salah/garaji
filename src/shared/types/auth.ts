@@ -3,8 +3,10 @@ export type UserRole = 'customer' | 'merchant';
 export interface AuthUser {
   id: string;
   role: UserRole;
-  displayName: string;
-  companyName: string;
+  fullName: string;
+  phone?: string;
+  merchantId?: string;
+  merchantName?: string;
   createdAt: string;
 }
 

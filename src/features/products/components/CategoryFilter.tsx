@@ -1,6 +1,6 @@
 import { Pressable, ScrollView, Text } from 'react-native';
 
-import { productCategories } from '@/features/products/data/mockProducts';
+import { useProductStore } from '@/features/products/store/useProductStore';
 
 interface CategoryFilterProps {
   selectedCategoryId: string;
@@ -8,6 +8,8 @@ interface CategoryFilterProps {
 }
 
 export function CategoryFilter({ selectedCategoryId, onSelect }: CategoryFilterProps) {
+  const categories = useProductStore((state) => state.categories);
+
   return (
     <ScrollView
       horizontal
@@ -15,7 +17,7 @@ export function CategoryFilter({ selectedCategoryId, onSelect }: CategoryFilterP
       contentContainerClassName="gap-2 py-1"
       accessibilityRole="tablist"
     >
-      {productCategories.map((category) => {
+      {categories.map((category) => {
         const isSelected = selectedCategoryId === category.id;
 
         return (

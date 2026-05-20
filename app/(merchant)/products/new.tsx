@@ -11,17 +11,18 @@ import { ScreenContainer } from '@/shared/components/ScreenContainer';
 export default function NewProductScreen() {
   const user = useAuthStore((state) => state.user);
   const addProduct = useProductStore((state) => state.addProduct);
+  const merchantId = user?.merchantId;
 
-  const handleSubmit = (values: ProductFormValues) => {
-    if (!user) {
+  const handleSubmit = async (values: ProductFormValues) => {
+    if (!merchantId) {
       return;
     }
 
-    addProduct(user.id, values);
+    await addProduct(merchantId, values);
     router.replace('/(merchant)/products');
   };
 
-  if (!user) {
+  if (!merchantId) {
     return (
       <ScreenContainer>
         <EmptyState title="Session required" message="Sign in again to manage products." />

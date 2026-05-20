@@ -2,7 +2,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { Controller, useForm } from 'react-hook-form';
 import { Pressable, Switch, Text, View } from 'react-native';
 
-import { productCategories } from '@/features/products/data/mockProducts';
+import { useProductStore } from '@/features/products/store/useProductStore';
 import {
   productFormSchema,
   type ProductFormInput,
@@ -17,10 +17,8 @@ interface ProductFormProps {
   onSubmit: (values: ProductFormValues) => void;
 }
 
-const editableCategories = productCategories.filter((category) => category.id !== 'all');
-
 const baseDefaults: ProductFormInput = {
-  categoryId: 'brakes',
+  categoryId: '',
   name: '',
   brand: '',
   description: '',
@@ -31,13 +29,19 @@ const baseDefaults: ProductFormInput = {
 };
 
 export function ProductForm({ defaultValues, onSubmit, submitLabel }: ProductFormProps) {
+  const categories = useProductStore((state) => state.categories);
+  const editableCategories = categories.filter((category) => category.id !== 'all');
   const {
     control,
     handleSubmit,
     formState: { errors, isSubmitting },
   } = useForm<ProductFormInput, unknown, ProductFormValues>({
     resolver: zodResolver(productFormSchema),
-    defaultValues: { ...baseDefaults, ...defaultValues },
+    defaultValues: {
+      ...baseDefaults,
+      categoryId: editableCategories[0]?.id ?? '',
+      ...defaultValues,
+    },
   });
 
   return (

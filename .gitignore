@@ -9,6 +9,9 @@ dist/
 web-build/
 expo-env.d.ts
 
+# Supabase
+supabase/.temp/
+
 # Native
 .kotlin/
 *.orig.*
@@ -32,6 +35,9 @@ yarn-error.*
 *.pem
 
 # local env files
+.env
+.env.local
+.env.*.local
 .env*.local
 
 # typescript

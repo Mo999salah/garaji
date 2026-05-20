@@ -12,7 +12,8 @@ import { ScreenContainer } from '@/shared/components/ScreenContainer';
 export default function MerchantOrdersScreen() {
   const user = useAuthStore((state) => state.user);
   const orders = useOrderStore((state) => state.orders);
-  const merchantOrders = user ? getMerchantOrders(orders, user.id) : [];
+  const merchantId = user?.merchantId;
+  const merchantOrders = merchantId ? getMerchantOrders(orders, merchantId) : [];
 
   return (
     <ScreenContainer>
