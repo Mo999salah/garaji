@@ -3,6 +3,10 @@ import type { Product } from '@/shared/types/product';
 export interface ProductFilters {
   categoryId?: string;
   query?: string;
+  vehicleMake?: string;
+  vehicleModel?: string;
+  fitmentYear?: number;
+  status?: 'all' | 'active' | 'inactive';
 }
 
 export function formatProductPrice(product: Product) {
@@ -41,10 +45,21 @@ export function filterActiveProducts(products: Product[], filters: ProductFilter
 
 export function filterProducts(products: Product[], filters: ProductFilters) {
   const normalizedQuery = filters.query?.trim().toLowerCase() ?? '';
+  const normalizedMake = filters.vehicleMake?.trim().toLowerCase() ?? '';
+  const normalizedModel = filters.vehicleModel?.trim().toLowerCase() ?? '';
 
   return products.filter((product) => {
     const matchesCategory =
       !filters.categoryId || filters.categoryId === 'all' || product.categoryId === filters.categoryId;
+    const matchesStatus =
+      !filters.status ||
+      filters.status === 'all' ||
+      (filters.status === 'active' ? product.isActive : !product.isActive);
+    const matchesVehicleMake =
+      !normalizedMake || product.vehicleMake?.toLowerCase().includes(normalizedMake);
+    const matchesVehicleModel =
+      !normalizedModel || product.vehicleModel?.toLowerCase().includes(normalizedModel);
+    const matchesYear = matchesFitmentYear(product, filters.fitmentYear);
     const matchesQuery =
       !normalizedQuery ||
       [
@@ -56,10 +71,32 @@ export function filterProducts(products: Product[], filters: ProductFilters) {
         product.vehicleModel,
       ].some((field) => field?.toLowerCase().includes(normalizedQuery));
 
-    return matchesCategory && matchesQuery;
+    return (
+      matchesCategory &&
+      matchesStatus &&
+      matchesVehicleMake &&
+      matchesVehicleModel &&
+      matchesYear &&
+      matchesQuery
+    );
   });
 }
 
 export function getMerchantProducts(products: Product[], merchantId: string) {
   return products.filter((product) => product.merchantId === merchantId);
+}
+
+function matchesFitmentYear(product: Product, fitmentYear?: number) {
+  if (!fitmentYear) {
+    return true;
+  }
+
+  if (!product.yearStart && !product.yearEnd) {
+    return true;
+  }
+
+  const startsBeforeOrAt = !product.yearStart || product.yearStart <= fitmentYear;
+  const endsAfterOrAt = !product.yearEnd || product.yearEnd >= fitmentYear;
+
+  return startsBeforeOrAt && endsAfterOrAt;
 }
