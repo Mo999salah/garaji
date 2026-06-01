@@ -85,11 +85,16 @@ This runs:
 
 - `npm run typecheck`
 - `npm test`
+- `npm run release:check`
 - `npm run doctor`
 - `npx expo export --platform web`
 
 Focused logic tests live in `tests/` and cover cart validation, product availability filters,
 and order status transitions.
+
+`npm run release:check` verifies release-critical files without connecting to production services:
+empty Supabase public env placeholders, required RLS/RPC migrations, inventory migration coverage,
+Expo Router/SecureStore configuration, and required npm scripts.
 
 ## Scripts
 
@@ -98,6 +103,7 @@ npm start
 npm run typecheck
 npm test
 npm run doctor
+npm run release:check
 npm run quality:check
 ```
 

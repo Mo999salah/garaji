@@ -10,7 +10,8 @@
     "typecheck": "tsc --noEmit",
     "test": "tsx --test tests/**/*.test.ts",
     "doctor": "npx expo-doctor",
-    "quality:check": "npm run typecheck && npm test && npm run doctor && npx expo export --platform web",
+    "release:check": "node scripts/check-release-readiness.mjs",
+    "quality:check": "npm run typecheck && npm test && npm run release:check && npm run doctor && npx expo export --platform web",
     "db:push": "supabase db push",
     "db:status": "supabase migration list"
   },
