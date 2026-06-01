@@ -2,7 +2,7 @@ import { router } from 'expo-router';
 import { Text, View } from 'react-native';
 
 import { useAuthStore } from '@/features/auth/store/useAuthStore';
-import { getCartItemCount } from '@/features/cart/selectors/cartSelectors';
+import { formatCurrency, getCartItemCount, getCartSubtotal } from '@/features/cart/selectors/cartSelectors';
 import { useCartStore } from '@/features/cart/store/useCartStore';
 import { OrderCard } from '@/features/orders/components/OrderCard';
 import { getCustomerOrders } from '@/features/orders/selectors/orderSelectors';
@@ -14,9 +14,19 @@ import { ScreenContainer } from '@/shared/components/ScreenContainer';
 
 export default function CustomerHomeScreen() {
   const { signOut, user } = useAuthStore();
-  const cartCount = useCartStore((state) => getCartItemCount(state.items));
+  const cartItems = useCartStore((state) => state.items);
+  const cartCount = getCartItemCount(cartItems);
+  const cartSubtotal = getCartSubtotal(cartItems);
   const orders = useOrderStore((state) => state.orders);
   const recentOrders = user ? getCustomerOrders(orders, user.id).slice(0, 3) : [];
+  const activeOrderCount = user
+    ? getCustomerOrders(orders, user.id).filter(
+        (order) =>
+          order.status === 'pending' ||
+          order.status === 'processing' ||
+          order.status === 'on_the_way',
+      ).length
+    : 0;
 
   const handleSignOut = async () => {
     await signOut();
@@ -56,6 +66,19 @@ export default function CustomerHomeScreen() {
             </AppButton>
           </View>
         </AppCard>
+
+        <View className="flex-row gap-3">
+          <AppCard className="flex-1">
+            <Text className="text-xs font-semibold uppercase text-muted">Cart</Text>
+            <Text className="mt-2 text-2xl font-bold text-ink">{cartCount}</Text>
+            <Text className="mt-1 text-xs text-muted">{formatCurrency(cartSubtotal)}</Text>
+          </AppCard>
+          <AppCard className="flex-1">
+            <Text className="text-xs font-semibold uppercase text-muted">Active orders</Text>
+            <Text className="mt-2 text-2xl font-bold text-ink">{activeOrderCount}</Text>
+            <Text className="mt-1 text-xs text-muted">Awaiting merchant progress</Text>
+          </AppCard>
+        </View>
 
         {recentOrders.length ? (
           <View className="gap-3">

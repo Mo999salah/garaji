@@ -56,6 +56,23 @@ export function getNextOrderStatus(status: OrderStatus) {
   return nextStatusByStatus[status] ?? null;
 }
 
+export function getCustomerOrderStatusMessage(status: OrderStatus) {
+  switch (status) {
+    case 'pending':
+      return 'Waiting for the merchant to review stock and accept the order.';
+    case 'processing':
+      return 'The merchant accepted the order and reserved the requested stock.';
+    case 'on_the_way':
+      return 'The order is on the way. Keep this page for delivery follow-up.';
+    case 'delivered':
+      return 'The order is complete.';
+    case 'cancelled':
+      return 'The order was cancelled. Contact the merchant before placing it again.';
+    default:
+      return 'Track this order as the merchant updates its status.';
+  }
+}
+
 export function canTransitionOrderStatus(currentStatus: OrderStatus, nextStatus: OrderStatus) {
   if (currentStatus === 'delivered' || currentStatus === 'cancelled') {
     return false;

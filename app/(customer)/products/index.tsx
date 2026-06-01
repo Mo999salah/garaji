@@ -10,6 +10,8 @@ import {
   getFitmentYearOptions,
   getVehicleMakeOptions,
   getVehicleModelOptions,
+  isProductReadyToOrder,
+  type ProductFilters,
 } from '@/features/products/selectors/productSelectors';
 import { useProductStore } from '@/features/products/store/useProductStore';
 import { AppButton } from '@/shared/components/AppButton';
@@ -48,6 +50,8 @@ export default function CustomerProductsScreen() {
   const [vehicleMake, setVehicleMake] = useState('');
   const [vehicleModel, setVehicleModel] = useState('');
   const [fitmentYear, setFitmentYear] = useState('');
+  const [inventoryStatus, setInventoryStatus] =
+    useState<ProductFilters['inventoryStatus']>('all');
   const products = useProductStore((state) => state.products);
   const fitmentYearNumber = Number(fitmentYear);
   const hasFitmentYear = fitmentYear.trim().length > 0 && Number.isFinite(fitmentYearNumber);
@@ -72,6 +76,7 @@ export default function CustomerProductsScreen() {
     Boolean(vehicleMake.trim()) ||
     Boolean(vehicleModel.trim()) ||
     Boolean(fitmentYear.trim()) ||
+    inventoryStatus !== 'all' ||
     categoryId !== 'all';
 
   const filteredProducts = useMemo(
@@ -82,6 +87,7 @@ export default function CustomerProductsScreen() {
         vehicleMake,
         vehicleModel,
         fitmentYear: hasFitmentYear ? fitmentYearNumber : undefined,
+        inventoryStatus,
       }),
     [
       categoryId,
@@ -89,11 +95,13 @@ export default function CustomerProductsScreen() {
       hasFitmentYear,
       products,
       query,
+      inventoryStatus,
       vehicleMake,
       vehicleModel,
     ],
   );
   const activeProductCount = activeProducts.length;
+  const readyProductCount = activeProducts.filter(isProductReadyToOrder).length;
 
   const clearFilters = () => {
     setCategoryId('all');
@@ -101,6 +109,7 @@ export default function CustomerProductsScreen() {
     setVehicleMake('');
     setVehicleModel('');
     setFitmentYear('');
+    setInventoryStatus('all');
   };
 
   return (
@@ -113,7 +122,8 @@ export default function CustomerProductsScreen() {
             Search active products from approved merchants.
           </Text>
           <Text className="mt-2 text-sm text-muted">
-            {filteredProducts.length} of {activeProductCount} active products
+            {filteredProducts.length} of {activeProductCount} active products - {readyProductCount}{' '}
+            ready to order
           </Text>
         </View>
 
@@ -198,6 +208,28 @@ export default function CustomerProductsScreen() {
               Clear filters
             </AppButton>
           ) : null}
+        </View>
+
+        <View className="gap-3 rounded-lg border border-line bg-white p-4">
+          <Text className="text-base font-semibold text-ink">Availability</Text>
+          <View className="flex-row gap-2">
+            <View className="flex-1">
+              <AppButton
+                onPress={() => setInventoryStatus('all')}
+                variant={inventoryStatus === 'all' ? 'primary' : 'secondary'}
+              >
+                All
+              </AppButton>
+            </View>
+            <View className="flex-1">
+              <AppButton
+                onPress={() => setInventoryStatus('in_stock')}
+                variant={inventoryStatus === 'in_stock' ? 'primary' : 'secondary'}
+              >
+                Ready
+              </AppButton>
+            </View>
+          </View>
         </View>
 
         <CategoryFilter onSelect={setCategoryId} selectedCategoryId={categoryId} />

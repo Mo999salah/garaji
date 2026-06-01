@@ -8,4 +8,5 @@ export interface CartItem {
   quantity: number;
   unit: string;
   minOrderQuantity: number;
+  stockQuantity?: number;
 }

@@ -9,12 +9,21 @@ import { AppButton } from '@/shared/components/AppButton';
 
 interface CartItemRowProps {
   item: CartItem;
+  availabilityMessage?: string | null;
+  disableIncrease?: boolean;
   onDecrease: () => void;
   onIncrease: () => void;
   onRemove: () => void;
 }
 
-export function CartItemRow({ item, onDecrease, onIncrease, onRemove }: CartItemRowProps) {
+export function CartItemRow({
+  availabilityMessage,
+  disableIncrease,
+  item,
+  onDecrease,
+  onIncrease,
+  onRemove,
+}: CartItemRowProps) {
   return (
     <View className="rounded-lg border border-line bg-white p-4">
       <View className="gap-1">
@@ -27,6 +36,12 @@ export function CartItemRow({ item, onDecrease, onIncrease, onRemove }: CartItem
           {formatCurrency(item.unitPrice)} / {item.unit}
         </Text>
         <Text className="text-xs text-muted">Minimum order {item.minOrderQuantity}</Text>
+        {typeof item.stockQuantity === 'number' ? (
+          <Text className="text-xs text-muted">Available stock {item.stockQuantity}</Text>
+        ) : null}
+        {availabilityMessage ? (
+          <Text className="text-sm font-semibold text-red-600">{availabilityMessage}</Text>
+        ) : null}
       </View>
 
       <View className="mt-4 flex-row items-center justify-between gap-3">
@@ -37,7 +52,12 @@ export function CartItemRow({ item, onDecrease, onIncrease, onRemove }: CartItem
           <View className="min-h-12 min-w-14 items-center justify-center rounded-lg border border-line bg-surface px-3">
             <Text className="text-base font-bold text-ink">{item.quantity}</Text>
           </View>
-          <AppButton accessibilityLabel={`Increase ${item.name}`} onPress={onIncrease} variant="secondary">
+          <AppButton
+            accessibilityLabel={`Increase ${item.name}`}
+            disabled={disableIncrease}
+            onPress={onIncrease}
+            variant="secondary"
+          >
             +
           </AppButton>
         </View>

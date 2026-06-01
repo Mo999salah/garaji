@@ -1,4 +1,5 @@
 import { router, Stack, useLocalSearchParams } from 'expo-router';
+import { useState } from 'react';
 import { Alert, Platform, Text, View } from 'react-native';
 
 import {
@@ -32,6 +33,7 @@ function showMixedMerchantMessage() {
 
 export default function CustomerProductDetailsScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
+  const [cartMessage, setCartMessage] = useState<string | null>(null);
   const product = useProductStore((state) =>
     state.products.find((item) => item.id === id && item.isActive),
   );
@@ -58,12 +60,36 @@ export default function CustomerProductDetailsScreen() {
     categories.find((category) => category.id === product.categoryId)?.name ??
     'Uncategorized';
   const merchantLabel = product.merchantName ?? 'Merchant';
+  const isOutOfStock =
+    typeof product.stockQuantity === 'number' &&
+    product.stockQuantity < product.minOrderQuantity;
+  const availabilityLabel = isOutOfStock
+    ? 'Not enough stock for the minimum order'
+    : typeof product.stockQuantity === 'number'
+      ? `${product.stockQuantity} ${product.unit} ready to order`
+      : 'Stock will be confirmed by the merchant';
 
   const handleAddToCart = () => {
+    setCartMessage(null);
     const result = addProduct(product);
 
     if (!result.ok && result.reason === 'mixed_merchant') {
       showMixedMerchantMessage();
+      return;
+    }
+
+    if (!result.ok && result.reason === 'out_of_stock') {
+      setCartMessage('This product does not have enough stock for the minimum order.');
+      return;
+    }
+
+    if (!result.ok && result.reason === 'stock_limit') {
+      setCartMessage('Your cart already has the available stock for this product.');
+      return;
+    }
+
+    if (result.ok) {
+      setCartMessage('Added to cart.');
     }
   };
 
@@ -84,8 +110,20 @@ export default function CustomerProductDetailsScreen() {
               {formatCurrency(cartItem.unitPrice * cartItem.quantity)})
             </Text>
           ) : null}
+          <Text
+            className={`mt-2 text-sm font-semibold ${
+              isOutOfStock ? 'text-red-600' : 'text-brand-700'
+            }`}
+          >
+            {availabilityLabel}
+          </Text>
+          {cartMessage ? (
+            <Text className="mt-2 text-sm font-semibold text-brand-700">{cartMessage}</Text>
+          ) : null}
           <View className="mt-4 gap-3">
-            <AppButton onPress={handleAddToCart}>Add to cart</AppButton>
+            <AppButton disabled={isOutOfStock} onPress={handleAddToCart}>
+              Add minimum order
+            </AppButton>
             <AppButton onPress={() => router.push('/(customer)/cart')} variant="secondary">
               View cart{cartCount ? ` (${cartCount})` : ''}
             </AppButton>

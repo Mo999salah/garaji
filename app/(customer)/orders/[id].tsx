@@ -9,6 +9,7 @@ import { OrderTimeline } from '@/features/orders/components/OrderTimeline';
 import {
   formatOrderDate,
   formatOrderId,
+  getCustomerOrderStatusMessage,
 } from '@/features/orders/selectors/orderSelectors';
 import { useOrderStore } from '@/features/orders/store/useOrderStore';
 import { AppButton } from '@/shared/components/AppButton';
@@ -64,6 +65,9 @@ export default function CustomerOrderDetailsScreen() {
 
         <AppCard>
           <Text className="text-lg font-semibold text-ink">Status timeline</Text>
+          <Text className="mt-2 text-sm leading-5 text-muted">
+            {getCustomerOrderStatusMessage(order.status)}
+          </Text>
           <View className="mt-4">
             <OrderTimeline status={order.status} />
           </View>

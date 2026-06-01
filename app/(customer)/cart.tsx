@@ -4,10 +4,14 @@ import { Alert, Platform, Text, View } from 'react-native';
 import { CartItemRow } from '@/features/cart/components/CartItemRow';
 import {
   formatCurrency,
+  getCartItemAvailabilityMessage,
   getCartItemCount,
   getCartSubtotal,
+  getCartValidationIssues,
 } from '@/features/cart/selectors/cartSelectors';
 import { useCartStore } from '@/features/cart/store/useCartStore';
+import { hasMixedMerchantCart } from '@/features/orders/selectors/orderSelectors';
+import { useProductStore } from '@/features/products/store/useProductStore';
 import { AppButton } from '@/shared/components/AppButton';
 import { AppCard } from '@/shared/components/AppCard';
 import { EmptyState } from '@/shared/components/EmptyState';
@@ -19,9 +23,13 @@ export default function CustomerCartScreen() {
   const decreaseQuantity = useCartStore((state) => state.decreaseQuantity);
   const removeItem = useCartStore((state) => state.removeItem);
   const clearCart = useCartStore((state) => state.clearCart);
+  const products = useProductStore((state) => state.products);
 
   const subtotal = getCartSubtotal(items);
   const itemCount = getCartItemCount(items);
+  const validationIssues = getCartValidationIssues(items, products);
+  const hasMultipleMerchants = hasMixedMerchantCart(items);
+  const hasBlockingIssues = hasMultipleMerchants || validationIssues.length > 0;
 
   const confirmClearCart = () => {
     if (!items.length) {
@@ -62,6 +70,13 @@ export default function CustomerCartScreen() {
             <View className="gap-3">
               {items.map((item) => (
                 <CartItemRow
+                  availabilityMessage={getCartItemAvailabilityMessage(item, products)}
+                  disableIncrease={products.some(
+                    (product) =>
+                      product.id === item.productId &&
+                      typeof product.stockQuantity === 'number' &&
+                      item.quantity >= product.stockQuantity,
+                  )}
                   item={item}
                   key={item.productId}
                   onDecrease={() => decreaseQuantity(item.productId)}
@@ -80,8 +95,28 @@ export default function CustomerCartScreen() {
                 {itemCount} item{itemCount === 1 ? '' : 's'} across {items.length} product
                 {items.length === 1 ? '' : 's'}
               </Text>
+              {hasBlockingIssues ? (
+                <View className="mt-3 gap-1">
+                  {hasMultipleMerchants ? (
+                    <Text className="text-sm font-semibold text-red-600">
+                      Checkout supports one merchant per order. Remove items from other merchants.
+                    </Text>
+                  ) : null}
+                  {validationIssues.map((issue) => (
+                    <Text
+                      className="text-sm font-semibold text-red-600"
+                      key={`${issue.productId}-${issue.message}`}
+                    >
+                      {issue.message}
+                    </Text>
+                  ))}
+                </View>
+              ) : null}
               <View className="mt-4 gap-3">
-                <AppButton onPress={() => router.push('/(customer)/checkout/review')}>
+                <AppButton
+                  disabled={hasBlockingIssues}
+                  onPress={() => router.push('/(customer)/checkout/review')}
+                >
                   Checkout
                 </AppButton>
                 <AppButton onPress={() => router.push('/(customer)/products')} variant="secondary">

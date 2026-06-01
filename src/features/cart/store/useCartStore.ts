@@ -9,7 +9,7 @@ import type { Product } from '@/shared/types/product';
 
 export type AddProductResult =
   | { ok: true }
-  | { ok: false; reason: 'inactive' | 'mixed_merchant' };
+  | { ok: false; reason: 'inactive' | 'mixed_merchant' | 'out_of_stock' | 'stock_limit' };
 
 interface CartState {
   items: CartItem[];
@@ -32,6 +32,7 @@ function toCartItem(product: Product): CartItem {
     quantity: product.minOrderQuantity,
     unit: product.unit,
     minOrderQuantity: product.minOrderQuantity,
+    stockQuantity: product.stockQuantity,
   };
 }
 
@@ -44,6 +45,13 @@ export const useCartStore = create(
           return { ok: false, reason: 'inactive' };
         }
 
+        if (
+          typeof product.stockQuantity === 'number' &&
+          product.stockQuantity < product.minOrderQuantity
+        ) {
+          return { ok: false, reason: 'out_of_stock' };
+        }
+
         const { items } = get();
         const cartMerchantId = items[0]?.merchantId;
 
@@ -51,13 +59,24 @@ export const useCartStore = create(
           return { ok: false, reason: 'mixed_merchant' };
         }
 
+        let addResult: AddProductResult = { ok: true };
+
         set((state) => {
           const existingItem = state.items.find((item) => item.productId === product.id);
 
           if (existingItem) {
+            const nextQuantity = existingItem.quantity + 1;
+
+            if (typeof product.stockQuantity === 'number' && nextQuantity > product.stockQuantity) {
+              addResult = { ok: false, reason: 'stock_limit' };
+              return state;
+            }
+
             return {
               items: state.items.map((item) =>
-                item.productId === product.id ? { ...item, quantity: item.quantity + 1 } : item,
+                item.productId === product.id
+                  ? { ...item, quantity: nextQuantity, stockQuantity: product.stockQuantity }
+                  : item,
               ),
             };
           }
@@ -65,12 +84,20 @@ export const useCartStore = create(
           return { items: [toCartItem(product), ...state.items] };
         });
 
-        return { ok: true };
+        return addResult;
       },
       increaseQuantity: (productId) => {
         set((state) => ({
           items: state.items.map((item) =>
-            item.productId === productId ? { ...item, quantity: item.quantity + 1 } : item,
+            item.productId === productId
+              ? {
+                  ...item,
+                  quantity:
+                    typeof item.stockQuantity === 'number'
+                      ? Math.min(item.stockQuantity, item.quantity + 1)
+                      : item.quantity + 1,
+                }
+              : item,
           ),
         }));
       },

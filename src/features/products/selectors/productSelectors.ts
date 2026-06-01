@@ -7,7 +7,7 @@ export interface ProductFilters {
   vehicleModel?: string;
   fitmentYear?: number;
   status?: 'all' | 'active' | 'inactive';
-  inventoryStatus?: 'all' | 'low_stock';
+  inventoryStatus?: 'all' | 'in_stock' | 'low_stock';
 }
 
 export function formatProductPrice(product: Product) {
@@ -41,6 +41,13 @@ export function isLowStockProduct(product: Product) {
   return (
     typeof product.stockQuantity === 'number' &&
     product.stockQuantity <= product.minOrderQuantity
+  );
+}
+
+export function isProductReadyToOrder(product: Product) {
+  return (
+    product.isActive &&
+    (typeof product.stockQuantity !== 'number' || product.stockQuantity >= product.minOrderQuantity)
   );
 }
 
@@ -106,7 +113,9 @@ export function filterProducts(products: Product[], filters: ProductFilters) {
     const matchesInventoryStatus =
       !filters.inventoryStatus ||
       filters.inventoryStatus === 'all' ||
-      isLowStockProduct(product);
+      (filters.inventoryStatus === 'low_stock'
+        ? isLowStockProduct(product)
+        : isProductReadyToOrder(product));
     const matchesVehicleMake =
       !normalizedMake || product.vehicleMake?.toLowerCase().includes(normalizedMake);
     const matchesVehicleModel =
