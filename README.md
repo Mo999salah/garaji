@@ -61,6 +61,7 @@ merchant@qitaa.local
 - Cart items persist locally between app restarts.
 - Only one merchant is allowed per cart; adding a product from another merchant is blocked at add time.
 - Checkout still validates mixed merchants as a final guard.
+- Checkout validates active products, minimum order quantity, and tracked stock before submission.
 
 ## Database highlights
 
@@ -70,13 +71,34 @@ merchant@qitaa.local
 - Base catalog categories are seeded by migration so product creation works after `db:push`.
 - Order item snapshots preserve the product part number and enforce minimum order quantity.
 - Merchants can cancel orders while status is `pending`, `processing`, or `on_the_way`.
+- `update_order_status` moves merchant orders and adjusts tracked inventory in one transaction.
+
+## Quality gate
+
+Run the full local release gate before handing off or deploying a build:
+
+```bash
+npm run quality:check
+```
+
+This runs:
+
+- `npm run typecheck`
+- `npm test`
+- `npm run doctor`
+- `npx expo export --platform web`
+
+Focused logic tests live in `tests/` and cover cart validation, product availability filters,
+and order status transitions.
 
 ## Scripts
 
 ```bash
 npm start
 npm run typecheck
+npm test
 npm run doctor
+npm run quality:check
 ```
 
 Optional Supabase type generation:
