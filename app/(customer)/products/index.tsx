@@ -1,16 +1,46 @@
 import type { Href } from 'expo-router';
 import { router } from 'expo-router';
 import { useMemo, useState } from 'react';
-import { Text, View } from 'react-native';
+import { Pressable, Text, View } from 'react-native';
 
 import { CategoryFilter } from '@/features/products/components/CategoryFilter';
 import { ProductCard } from '@/features/products/components/ProductCard';
-import { filterActiveProducts } from '@/features/products/selectors/productSelectors';
+import {
+  filterActiveProducts,
+  getFitmentYearOptions,
+  getVehicleMakeOptions,
+  getVehicleModelOptions,
+} from '@/features/products/selectors/productSelectors';
 import { useProductStore } from '@/features/products/store/useProductStore';
 import { AppButton } from '@/shared/components/AppButton';
 import { AppInput } from '@/shared/components/AppInput';
 import { EmptyState } from '@/shared/components/EmptyState';
 import { ScreenContainer } from '@/shared/components/ScreenContainer';
+
+function FilterChip({
+  label,
+  onPress,
+  selected,
+}: {
+  label: string;
+  onPress: () => void;
+  selected: boolean;
+}) {
+  return (
+    <Pressable
+      accessibilityRole="button"
+      accessibilityState={{ selected }}
+      className={`min-h-10 justify-center rounded-lg border px-3 ${
+        selected ? 'border-brand-600 bg-brand-50' : 'border-line bg-white'
+      }`}
+      onPress={onPress}
+    >
+      <Text className={`text-sm font-semibold ${selected ? 'text-brand-700' : 'text-ink'}`}>
+        {label}
+      </Text>
+    </Pressable>
+  );
+}
 
 export default function CustomerProductsScreen() {
   const [categoryId, setCategoryId] = useState('all');
@@ -21,6 +51,22 @@ export default function CustomerProductsScreen() {
   const products = useProductStore((state) => state.products);
   const fitmentYearNumber = Number(fitmentYear);
   const hasFitmentYear = fitmentYear.trim().length > 0 && Number.isFinite(fitmentYearNumber);
+  const activeProducts = useMemo(() => products.filter((product) => product.isActive), [products]);
+  const vehicleMakeOptions = useMemo(() => getVehicleMakeOptions(activeProducts), [activeProducts]);
+  const vehicleModelOptions = useMemo(
+    () => getVehicleModelOptions(activeProducts, vehicleMake),
+    [activeProducts, vehicleMake],
+  );
+  const fitmentYearOptions = useMemo(
+    () =>
+      getFitmentYearOptions(activeProducts, {
+        categoryId,
+        query,
+        vehicleMake,
+        vehicleModel,
+      }),
+    [activeProducts, categoryId, query, vehicleMake, vehicleModel],
+  );
   const hasFilters =
     Boolean(query.trim()) ||
     Boolean(vehicleMake.trim()) ||
@@ -47,7 +93,7 @@ export default function CustomerProductsScreen() {
       vehicleModel,
     ],
   );
-  const activeProductCount = products.filter((product) => product.isActive).length;
+  const activeProductCount = activeProducts.length;
 
   const clearFilters = () => {
     setCategoryId('all');
@@ -81,32 +127,72 @@ export default function CustomerProductsScreen() {
 
         <View className="gap-3 rounded-lg border border-line bg-white p-4">
           <Text className="text-base font-semibold text-ink">Vehicle fitment</Text>
-          <View className="flex-row gap-3">
-            <View className="flex-1">
-              <AppInput
-                label="Make"
-                onChangeText={setVehicleMake}
-                placeholder="Toyota"
-                value={vehicleMake}
+          <View className="gap-2">
+            <Text className="text-sm font-semibold text-muted">Make</Text>
+            <View className="flex-row flex-wrap gap-2">
+              <FilterChip
+                label="All"
+                onPress={() => {
+                  setVehicleMake('');
+                  setVehicleModel('');
+                  setFitmentYear('');
+                }}
+                selected={!vehicleMake}
               />
-            </View>
-            <View className="flex-1">
-              <AppInput
-                label="Model"
-                onChangeText={setVehicleModel}
-                placeholder="Hiace"
-                value={vehicleModel}
-              />
+              {vehicleMakeOptions.map((make) => (
+                <FilterChip
+                  key={make}
+                  label={make}
+                  onPress={() => {
+                    setVehicleMake(make);
+                    setVehicleModel('');
+                    setFitmentYear('');
+                  }}
+                  selected={vehicleMake === make}
+                />
+              ))}
             </View>
           </View>
-          <AppInput
-            inputMode="numeric"
-            keyboardType="number-pad"
-            label="Year"
-            onChangeText={setFitmentYear}
-            placeholder="2020"
-            value={fitmentYear}
-          />
+
+          <View className="gap-2">
+            <Text className="text-sm font-semibold text-muted">Model</Text>
+            <View className="flex-row flex-wrap gap-2">
+              <FilterChip
+                label="All"
+                onPress={() => {
+                  setVehicleModel('');
+                  setFitmentYear('');
+                }}
+                selected={!vehicleModel}
+              />
+              {vehicleModelOptions.map((model) => (
+                <FilterChip
+                  key={model}
+                  label={model}
+                  onPress={() => {
+                    setVehicleModel(model);
+                    setFitmentYear('');
+                  }}
+                  selected={vehicleModel === model}
+                />
+              ))}
+            </View>
+          </View>
+
+          <View className="gap-2">
+            <Text className="text-sm font-semibold text-muted">Year</Text>
+            <View className="flex-row flex-wrap gap-2">
+              <FilterChip label="All" onPress={() => setFitmentYear('')} selected={!fitmentYear} />
+              {fitmentYearOptions.slice(0, 12).map((year) => (
+                <FilterChip
+                  key={year}
+                  label={String(year)}
+                  onPress={() => setFitmentYear(String(year))}
+                  selected={fitmentYear === String(year)}
+                />
+              ))}
+            </View>
+          </View>
           {hasFilters ? (
             <AppButton onPress={clearFilters} variant="ghost">
               Clear filters

@@ -36,6 +36,46 @@ export function formatProductStock(product: Product) {
   return `${product.stockQuantity} ${product.unit} available`;
 }
 
+export function getVehicleMakeOptions(products: Product[]) {
+  return getUniqueSortedValues(products.map((product) => product.vehicleMake));
+}
+
+export function getVehicleModelOptions(products: Product[], vehicleMake?: string) {
+  const normalizedMake = vehicleMake?.toLowerCase();
+  const scopedProducts = normalizedMake
+    ? products.filter((product) => product.vehicleMake?.toLowerCase() === normalizedMake)
+    : products;
+
+  return getUniqueSortedValues(scopedProducts.map((product) => product.vehicleModel));
+}
+
+export function getFitmentYearOptions(products: Product[], filters: ProductFilters = {}) {
+  const scopedProducts = filterProducts(products, {
+    ...filters,
+    fitmentYear: undefined,
+  });
+  const years = new Set<number>();
+
+  for (const product of scopedProducts) {
+    if (product.yearStart && product.yearEnd) {
+      for (let year = product.yearStart; year <= product.yearEnd; year += 1) {
+        years.add(year);
+      }
+      continue;
+    }
+
+    if (product.yearStart) {
+      years.add(product.yearStart);
+    }
+
+    if (product.yearEnd) {
+      years.add(product.yearEnd);
+    }
+  }
+
+  return Array.from(years).sort((a, b) => b - a);
+}
+
 export function filterActiveProducts(products: Product[], filters: ProductFilters) {
   return filterProducts(
     products.filter((product) => product.isActive),
@@ -99,4 +139,10 @@ function matchesFitmentYear(product: Product, fitmentYear?: number) {
   const endsAfterOrAt = !product.yearEnd || product.yearEnd >= fitmentYear;
 
   return startsBeforeOrAt && endsAfterOrAt;
+}
+
+function getUniqueSortedValues(values: Array<string | undefined>) {
+  return Array.from(
+    new Set(values.map((value) => value?.trim()).filter((value): value is string => Boolean(value))),
+  ).sort((a, b) => a.localeCompare(b));
 }
