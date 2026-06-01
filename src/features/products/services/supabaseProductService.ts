@@ -181,6 +181,31 @@ export async function updateProductRecord(
   return mapProduct(data);
 }
 
+export async function updateProductStockRecord(
+  productId: string,
+  merchantId: string,
+  nextStockQuantity: number,
+) {
+  const client = getClient();
+  const { data, error } = await client
+    .from('products')
+    .update({ stock_quantity: nextStockQuantity })
+    .eq('id', productId)
+    .eq('merchant_id', merchantId)
+    .select(productSelect)
+    .maybeSingle<DbProductRow>();
+
+  if (error) {
+    throw new ProductServiceError('Could not update product stock.');
+  }
+
+  if (!data) {
+    return null;
+  }
+
+  return mapProduct(data);
+}
+
 export async function toggleProductActiveRecord(productId: string, merchantId: string) {
   const client = getClient();
   const { data: existing, error: readError } = await client

@@ -10,6 +10,7 @@ import {
   isProductBackendReady,
   toggleProductActiveRecord,
   updateProductRecord,
+  updateProductStockRecord,
 } from '@/features/products/services/supabaseProductService';
 import type { Product, ProductCategory } from '@/shared/types/product';
 import { createClientId } from '@/shared/lib/id';
@@ -26,6 +27,11 @@ interface ProductState {
     productId: string,
     merchantId: string,
     values: ProductFormValues,
+  ) => Promise<Product | null>;
+  updateProductStock: (
+    productId: string,
+    merchantId: string,
+    nextStockQuantity: number,
   ) => Promise<Product | null>;
   toggleProductActive: (productId: string, merchantId: string) => Promise<void>;
   reset: () => void;
@@ -169,6 +175,42 @@ export const useProductStore = create<ProductState>((set, get) => ({
       isActive: values.isActive,
     };
 
+    set((state) => ({
+      products: state.products.map((product) =>
+        product.id === productId && product.merchantId === merchantId ? updatedProduct : product,
+      ),
+    }));
+
+    return updatedProduct;
+  },
+  updateProductStock: async (productId, merchantId, nextStockQuantity) => {
+    const stockQuantity = Math.max(0, Math.floor(nextStockQuantity));
+
+    if (isProductBackendReady()) {
+      const updatedProduct = await updateProductStockRecord(productId, merchantId, stockQuantity);
+
+      if (!updatedProduct) {
+        return null;
+      }
+
+      set((state) => ({
+        products: state.products.map((product) =>
+          product.id === productId ? updatedProduct : product,
+        ),
+      }));
+
+      return updatedProduct;
+    }
+
+    const existing = get().products.find(
+      (product) => product.id === productId && product.merchantId === merchantId,
+    );
+
+    if (!existing) {
+      return null;
+    }
+
+    const updatedProduct = { ...existing, stockQuantity };
     set((state) => ({
       products: state.products.map((product) =>
         product.id === productId && product.merchantId === merchantId ? updatedProduct : product,
