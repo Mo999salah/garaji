@@ -43,6 +43,9 @@ export default function MerchantOrderDetailsScreen() {
   const nextStatus = getNextOrderStatus(order.status);
   const canCancel =
     order.status === 'pending' || order.status === 'processing' || order.status === 'on_the_way';
+  const nextActionLabel = nextStatus
+    ? `Move this order to ${statusLabels[nextStatus].toLowerCase()}`
+    : 'No further workflow action is available for this order.';
 
   const advanceStatus = () => {
     if (nextStatus && merchantId) {
@@ -79,6 +82,15 @@ export default function MerchantOrderDetailsScreen() {
           </View>
           <OrderStatusBadge status={order.status} />
         </View>
+
+        <AppCard>
+          <Text className="text-xs font-semibold uppercase text-muted">Next merchant action</Text>
+          <Text className="mt-2 text-base font-semibold text-ink">{nextActionLabel}</Text>
+          <Text className="mt-2 text-sm leading-5 text-muted">
+            Review item availability before moving the order forward. Cancelling closes the request
+            and prevents further status changes.
+          </Text>
+        </AppCard>
 
         <AppCard>
           <Text className="text-lg font-semibold text-ink">Status timeline</Text>

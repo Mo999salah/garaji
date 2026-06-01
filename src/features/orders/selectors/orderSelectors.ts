@@ -11,6 +11,8 @@ export const statusLabels: Record<OrderStatus, string> = {
   cancelled: 'Cancelled',
 };
 
+export type OrderStatusFilter = 'all' | 'open' | OrderStatus;
+
 const nextStatusByStatus: Partial<Record<OrderStatus, OrderStatus>> = {
   pending: 'processing',
   processing: 'on_the_way',
@@ -23,6 +25,31 @@ export function getCustomerOrders(orders: Order[], customerId: string) {
 
 export function getMerchantOrders(orders: Order[], merchantId: string) {
   return orders.filter((order) => order.merchantId === merchantId);
+}
+
+export function filterOrdersByStatus(orders: Order[], status: OrderStatusFilter) {
+  if (status === 'all') {
+    return orders;
+  }
+
+  if (status === 'open') {
+    return orders.filter(
+      (order) =>
+        order.status === 'pending' ||
+        order.status === 'processing' ||
+        order.status === 'on_the_way',
+    );
+  }
+
+  return orders.filter((order) => order.status === status);
+}
+
+export function countOrdersByStatus(orders: Order[], status: OrderStatusFilter) {
+  return filterOrdersByStatus(orders, status).length;
+}
+
+export function getOrdersTotal(orders: Order[]) {
+  return orders.reduce((total, order) => total + order.subtotal, 0);
 }
 
 export function getNextOrderStatus(status: OrderStatus) {
