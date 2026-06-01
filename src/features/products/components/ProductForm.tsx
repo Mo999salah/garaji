@@ -22,9 +22,16 @@ const baseDefaults: ProductFormInput = {
   categoryId: '',
   name: '',
   brand: '',
+  partNumber: '',
   description: '',
+  vehicleMake: '',
+  vehicleModel: '',
+  yearStart: '',
+  yearEnd: '',
   price: 1,
   unit: 'piece',
+  stockQuantity: '',
+  minOrderQuantity: 1,
   imageUrl: '',
   isActive: true,
 };
@@ -97,6 +104,22 @@ export function ProductForm({ defaultValues, onSubmit, submitLabel }: ProductFor
 
       <Controller
         control={control}
+        name="partNumber"
+        render={({ field: { onBlur, onChange, value } }) => (
+          <AppInput
+            autoCapitalize="characters"
+            error={errors.partNumber?.message}
+            label="Part number"
+            onBlur={onBlur}
+            onChangeText={onChange}
+            placeholder="ACT1089"
+            value={value}
+          />
+        )}
+      />
+
+      <Controller
+        control={control}
         name="categoryId"
         render={({ field: { onChange, value } }) => (
           <View className="gap-2">
@@ -158,6 +181,85 @@ export function ProductForm({ defaultValues, onSubmit, submitLabel }: ProductFor
         )}
       />
 
+      <View className="gap-3 rounded-lg border border-line bg-white p-4">
+        <Text className="text-base font-semibold text-ink">Vehicle fitment</Text>
+        <View className="flex-row gap-3">
+          <View className="flex-1">
+            <Controller
+              control={control}
+              name="vehicleMake"
+              render={({ field: { onBlur, onChange, value } }) => (
+                <AppInput
+                  autoCapitalize="words"
+                  error={errors.vehicleMake?.message}
+                  label="Make"
+                  onBlur={onBlur}
+                  onChangeText={onChange}
+                  placeholder="Toyota"
+                  value={value}
+                />
+              )}
+            />
+          </View>
+          <View className="flex-1">
+            <Controller
+              control={control}
+              name="vehicleModel"
+              render={({ field: { onBlur, onChange, value } }) => (
+                <AppInput
+                  autoCapitalize="words"
+                  error={errors.vehicleModel?.message}
+                  label="Model"
+                  onBlur={onBlur}
+                  onChangeText={onChange}
+                  placeholder="Hiace"
+                  value={value}
+                />
+              )}
+            />
+          </View>
+        </View>
+
+        <View className="flex-row gap-3">
+          <View className="flex-1">
+            <Controller
+              control={control}
+              name="yearStart"
+              render={({ field: { onBlur, onChange, value } }) => (
+                <AppInput
+                  error={errors.yearStart?.message}
+                  inputMode="numeric"
+                  keyboardType="number-pad"
+                  label="From year"
+                  onBlur={onBlur}
+                  onChangeText={onChange}
+                  placeholder="2016"
+                  value={String(value ?? '')}
+                />
+              )}
+            />
+          </View>
+          <View className="flex-1">
+            <Controller
+              control={control}
+              name="yearEnd"
+              render={({ field: { onBlur, onChange, value } }) => (
+                <AppInput
+                  error={errors.yearEnd?.message}
+                  inputMode="numeric"
+                  keyboardType="number-pad"
+                  label="To year"
+                  onBlur={onBlur}
+                  onChangeText={onChange}
+                  placeholder="2025"
+                  value={String(value ?? '')}
+                />
+              )}
+            />
+          </View>
+        </View>
+      </View>
+
       <View className="flex-row gap-3">
         <View className="flex-1">
           <Controller
@@ -188,6 +290,45 @@ export function ProductForm({ defaultValues, onSubmit, submitLabel }: ProductFor
                 onChangeText={onChange}
                 placeholder="piece"
                 value={value}
+              />
+            )}
+          />
+        </View>
+      </View>
+
+      <View className="flex-row gap-3">
+        <View className="flex-1">
+          <Controller
+            control={control}
+            name="stockQuantity"
+            render={({ field: { onBlur, onChange, value } }) => (
+              <AppInput
+                error={errors.stockQuantity?.message}
+                inputMode="numeric"
+                keyboardType="number-pad"
+                label="Stock"
+                onBlur={onBlur}
+                onChangeText={onChange}
+                placeholder="24"
+                value={String(value ?? '')}
+              />
+            )}
+          />
+        </View>
+        <View className="flex-1">
+          <Controller
+            control={control}
+            name="minOrderQuantity"
+            render={({ field: { onBlur, onChange, value } }) => (
+              <AppInput
+                error={errors.minOrderQuantity?.message}
+                inputMode="numeric"
+                keyboardType="number-pad"
+                label="Minimum order"
+                onBlur={onBlur}
+                onChangeText={onChange}
+                placeholder="1"
+                value={String(value)}
               />
             )}
           />

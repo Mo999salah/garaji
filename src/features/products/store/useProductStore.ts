@@ -35,6 +35,14 @@ function normalizeImageUrl(imageUrl?: string) {
   return imageUrl?.trim() || undefined;
 }
 
+function normalizeOptionalText(value?: string) {
+  return value?.trim() || undefined;
+}
+
+function normalizeOptionalNumber(value?: number | '') {
+  return typeof value === 'number' ? value : undefined;
+}
+
 function createMockProduct(merchantId: string, values: ProductFormValues): Product {
   return {
     id: createClientId('prod'),
@@ -42,10 +50,17 @@ function createMockProduct(merchantId: string, values: ProductFormValues): Produ
     categoryId: values.categoryId,
     name: values.name.trim(),
     brand: values.brand.trim(),
+    partNumber: values.partNumber.trim(),
     description: values.description.trim(),
+    vehicleMake: normalizeOptionalText(values.vehicleMake),
+    vehicleModel: normalizeOptionalText(values.vehicleModel),
+    yearStart: normalizeOptionalNumber(values.yearStart),
+    yearEnd: normalizeOptionalNumber(values.yearEnd),
     price: values.price,
     unit: values.unit.trim(),
     imageUrl: normalizeImageUrl(values.imageUrl),
+    stockQuantity: normalizeOptionalNumber(values.stockQuantity),
+    minOrderQuantity: values.minOrderQuantity,
     isActive: values.isActive,
     createdAt: new Date().toISOString(),
   };
@@ -140,10 +155,17 @@ export const useProductStore = create<ProductState>((set, get) => ({
       categoryId: values.categoryId,
       name: values.name.trim(),
       brand: values.brand.trim(),
+      partNumber: values.partNumber.trim(),
       description: values.description.trim(),
+      vehicleMake: normalizeOptionalText(values.vehicleMake),
+      vehicleModel: normalizeOptionalText(values.vehicleModel),
+      yearStart: normalizeOptionalNumber(values.yearStart),
+      yearEnd: normalizeOptionalNumber(values.yearEnd),
       price: values.price,
       unit: values.unit.trim(),
       imageUrl: normalizeImageUrl(values.imageUrl),
+      stockQuantity: normalizeOptionalNumber(values.stockQuantity),
+      minOrderQuantity: values.minOrderQuantity,
       isActive: values.isActive,
     };
 

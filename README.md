@@ -44,6 +44,7 @@ supabase db push
 When Supabase env vars are present:
 
 - Products and categories load from `products`, `categories`, and `merchants`.
+- Products include part numbers, vehicle fitment, optional stock, and minimum order quantity.
 - Customer checkout calls `create_order_with_items` for atomic order creation.
 - Merchant and customer order lists load from `orders` + `order_items`.
 
@@ -67,6 +68,7 @@ merchant@qitaa.local
 - `create_order_with_items` creates an order and its line items in one transaction.
 - Direct client inserts into `orders` and `order_items` are revoked after the RPC migration.
 - Base catalog categories are seeded by migration so product creation works after `db:push`.
+- Order item snapshots preserve the product part number and enforce minimum order quantity.
 - Merchants can cancel orders while status is `pending`, `processing`, or `on_the_way`.
 
 ## Scripts

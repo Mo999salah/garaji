@@ -27,10 +27,17 @@ export interface DbProductRow {
   category_id: string;
   name: string;
   brand: string;
+  part_number: string | null;
   description: string;
+  vehicle_make: string | null;
+  vehicle_model: string | null;
+  year_start: number | null;
+  year_end: number | null;
   price: number;
   unit: string;
   image_url: string | null;
+  stock_quantity: number | null;
+  min_order_quantity: number;
   is_active: boolean;
   created_at: string;
 }
@@ -53,6 +60,7 @@ export interface DbOrderItemRow {
   product_id: string;
   name: string;
   brand: string;
+  part_number: string | null;
   unit_price: number;
   quantity: number;
   unit: string;

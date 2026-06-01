@@ -20,9 +20,13 @@ export function CartItemRow({ item, onDecrease, onIncrease, onRemove }: CartItem
       <View className="gap-1">
         <Text className="text-xs font-semibold uppercase text-muted">{item.brand}</Text>
         <Text className="text-lg font-bold leading-6 text-ink">{item.name}</Text>
+        {item.partNumber ? (
+          <Text className="text-xs font-semibold uppercase text-brand-700">{item.partNumber}</Text>
+        ) : null}
         <Text className="text-sm text-muted">
           {formatCurrency(item.unitPrice)} / {item.unit}
         </Text>
+        <Text className="text-xs text-muted">Minimum order {item.minOrderQuantity}</Text>
       </View>
 
       <View className="mt-4 flex-row items-center justify-between gap-3">

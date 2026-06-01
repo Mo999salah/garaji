@@ -3,7 +3,9 @@ export interface CartItem {
   merchantId: string;
   name: string;
   brand: string;
+  partNumber?: string;
   unitPrice: number;
   quantity: number;
   unit: string;
+  minOrderQuantity: number;
 }

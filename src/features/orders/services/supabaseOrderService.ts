@@ -23,6 +23,7 @@ function mapOrderItem(row: DbOrderItemRow): OrderItem {
     productId: row.product_id,
     name: row.name,
     brand: row.brand,
+    partNumber: row.part_number ?? undefined,
     unitPrice: Number(row.unit_price),
     quantity: row.quantity,
     unit: row.unit,
@@ -52,7 +53,7 @@ async function fetchOrderItems(orderIds: string[]) {
   const client = getClient();
   const { data, error } = await client
     .from('order_items')
-    .select('id, order_id, product_id, name, brand, unit_price, quantity, unit')
+    .select('id, order_id, product_id, name, brand, part_number, unit_price, quantity, unit')
     .in('order_id', orderIds);
 
   if (error) {

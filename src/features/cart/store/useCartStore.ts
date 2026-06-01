@@ -27,9 +27,11 @@ function toCartItem(product: Product): CartItem {
     merchantId: product.merchantId,
     name: product.name,
     brand: product.brand,
+    partNumber: product.partNumber,
     unitPrice: product.price,
-    quantity: 1,
+    quantity: product.minOrderQuantity,
     unit: product.unit,
+    minOrderQuantity: product.minOrderQuantity,
   };
 }
 
@@ -76,7 +78,15 @@ export const useCartStore = create(
         set((state) => ({
           items: state.items
             .map((item) =>
-              item.productId === productId ? { ...item, quantity: item.quantity - 1 } : item,
+              item.productId === productId
+                ? {
+                    ...item,
+                    quantity:
+                      item.quantity <= (item.minOrderQuantity ?? 1)
+                        ? 0
+                        : item.quantity - 1,
+                  }
+                : item,
             )
             .filter((item) => item.quantity > 0),
         }));

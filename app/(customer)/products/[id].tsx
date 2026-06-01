@@ -7,7 +7,11 @@ import {
 } from '@/features/cart/selectors/cartSelectors';
 import { useCartStore } from '@/features/cart/store/useCartStore';
 import { ProductCard } from '@/features/products/components/ProductCard';
-import { formatProductPrice } from '@/features/products/selectors/productSelectors';
+import {
+  formatProductFitment,
+  formatProductPrice,
+  formatProductStock,
+} from '@/features/products/selectors/productSelectors';
 import { useProductStore } from '@/features/products/store/useProductStore';
 import { AppButton } from '@/shared/components/AppButton';
 import { AppCard } from '@/shared/components/AppCard';
@@ -93,8 +97,16 @@ export default function CustomerProductDetailsScreen() {
           <Text className="mt-3 text-base leading-6 text-muted">{product.description}</Text>
           <View className="mt-4 gap-2">
             <Text className="text-sm text-muted">Brand: {product.brand}</Text>
+            {product.partNumber ? (
+              <Text className="text-sm text-muted">Part number: {product.partNumber}</Text>
+            ) : null}
             <Text className="text-sm text-muted">Category: {categoryLabel}</Text>
             <Text className="text-sm text-muted">Merchant: {merchantLabel}</Text>
+            <Text className="text-sm text-muted">Fitment: {formatProductFitment(product)}</Text>
+            <Text className="text-sm text-muted">Stock: {formatProductStock(product)}</Text>
+            <Text className="text-sm text-muted">
+              Minimum order: {product.minOrderQuantity} {product.unit}
+            </Text>
           </View>
         </AppCard>
       </View>

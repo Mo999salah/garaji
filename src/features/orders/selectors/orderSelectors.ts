@@ -83,6 +83,7 @@ export function buildOrderFromCart(params: {
     productId: item.productId,
     name: item.name,
     brand: item.brand,
+    partNumber: item.partNumber,
     unitPrice: item.unitPrice,
     quantity: item.quantity,
     unit: item.unit,

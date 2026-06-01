@@ -3,6 +3,9 @@ import type { DbCategoryRow, DbMerchantRow, DbProductRow } from '@/shared/types/
 import type { Product, ProductCategory } from '@/shared/types/product';
 import type { ProductFormValues } from '@/features/products/schemas/productSchema';
 
+const productSelect =
+  'id, merchant_id, category_id, name, brand, part_number, description, vehicle_make, vehicle_model, year_start, year_end, price, unit, image_url, stock_quantity, min_order_quantity, is_active, created_at';
+
 export class ProductServiceError extends Error {
   constructor(message: string) {
     super(message);
@@ -27,12 +30,47 @@ function mapProduct(row: DbProductRow, extras?: { categoryName?: string; merchan
     merchantName: extras?.merchantName,
     name: row.name,
     brand: row.brand,
+    partNumber: row.part_number ?? '',
     description: row.description,
+    vehicleMake: row.vehicle_make ?? undefined,
+    vehicleModel: row.vehicle_model ?? undefined,
+    yearStart: row.year_start ?? undefined,
+    yearEnd: row.year_end ?? undefined,
     price: Number(row.price),
     unit: row.unit,
     imageUrl: row.image_url ?? undefined,
+    stockQuantity: row.stock_quantity ?? undefined,
+    minOrderQuantity: row.min_order_quantity,
     isActive: row.is_active,
     createdAt: row.created_at,
+  };
+}
+
+function normalizeOptionalText(value?: string) {
+  return value?.trim() || null;
+}
+
+function normalizeOptionalNumber(value?: number | '') {
+  return typeof value === 'number' ? value : null;
+}
+
+function getProductPayload(values: ProductFormValues) {
+  return {
+    category_id: values.categoryId,
+    name: values.name.trim(),
+    brand: values.brand.trim(),
+    part_number: values.partNumber.trim(),
+    description: values.description.trim(),
+    vehicle_make: normalizeOptionalText(values.vehicleMake),
+    vehicle_model: normalizeOptionalText(values.vehicleModel),
+    year_start: normalizeOptionalNumber(values.yearStart),
+    year_end: normalizeOptionalNumber(values.yearEnd),
+    price: values.price,
+    unit: values.unit.trim(),
+    image_url: values.imageUrl?.trim() || null,
+    stock_quantity: normalizeOptionalNumber(values.stockQuantity),
+    min_order_quantity: values.minOrderQuantity,
+    is_active: values.isActive,
   };
 }
 
@@ -62,9 +100,7 @@ export async function fetchCatalogProducts(): Promise<Product[]> {
     await Promise.all([
       client
         .from('products')
-        .select(
-          'id, merchant_id, category_id, name, brand, description, price, unit, image_url, is_active, created_at',
-        )
+        .select(productSelect)
         .order('created_at', { ascending: false }),
       client.from('categories').select('id, name'),
       client.from('merchants').select('id, name'),
@@ -91,9 +127,7 @@ export async function fetchMerchantProducts(merchantId: string): Promise<Product
   const client = getClient();
   const { data, error } = await client
     .from('products')
-    .select(
-      'id, merchant_id, category_id, name, brand, description, price, unit, image_url, is_active, created_at',
-    )
+    .select(productSelect)
     .eq('merchant_id', merchantId)
     .order('created_at', { ascending: false });
 
@@ -110,18 +144,9 @@ export async function insertProduct(merchantId: string, values: ProductFormValue
     .from('products')
     .insert({
       merchant_id: merchantId,
-      category_id: values.categoryId,
-      name: values.name.trim(),
-      brand: values.brand.trim(),
-      description: values.description.trim(),
-      price: values.price,
-      unit: values.unit.trim(),
-      image_url: values.imageUrl?.trim() || null,
-      is_active: values.isActive,
+      ...getProductPayload(values),
     })
-    .select(
-      'id, merchant_id, category_id, name, brand, description, price, unit, image_url, is_active, created_at',
-    )
+    .select(productSelect)
     .single<DbProductRow>();
 
   if (error || !data) {
@@ -139,21 +164,10 @@ export async function updateProductRecord(
   const client = getClient();
   const { data, error } = await client
     .from('products')
-    .update({
-      category_id: values.categoryId,
-      name: values.name.trim(),
-      brand: values.brand.trim(),
-      description: values.description.trim(),
-      price: values.price,
-      unit: values.unit.trim(),
-      image_url: values.imageUrl?.trim() || null,
-      is_active: values.isActive,
-    })
+    .update(getProductPayload(values))
     .eq('id', productId)
     .eq('merchant_id', merchantId)
-    .select(
-      'id, merchant_id, category_id, name, brand, description, price, unit, image_url, is_active, created_at',
-    )
+    .select(productSelect)
     .maybeSingle<DbProductRow>();
 
   if (error) {
@@ -185,9 +199,7 @@ export async function toggleProductActiveRecord(productId: string, merchantId: s
     .update({ is_active: !existing.is_active })
     .eq('id', productId)
     .eq('merchant_id', merchantId)
-    .select(
-      'id, merchant_id, category_id, name, brand, description, price, unit, image_url, is_active, created_at',
-    )
+    .select(productSelect)
     .maybeSingle<DbProductRow>();
 
   if (error || !data) {
