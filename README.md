@@ -47,7 +47,13 @@ When Supabase env vars are present:
 - Customer checkout calls `create_order_with_items` for atomic order creation.
 - Merchant and customer order lists load from `orders` + `order_items`.
 
-Without Supabase configuration, the app falls back to in-memory mock catalog and orders for local UI work.
+Without Supabase configuration, the app falls back to local demo auth, in-memory catalog,
+and in-memory orders for UI work. Use either email below with any non-empty password:
+
+```text
+customer@qitaa.local
+merchant@qitaa.local
+```
 
 ## Cart rules
 
@@ -59,6 +65,8 @@ Without Supabase configuration, the app falls back to in-memory mock catalog and
 
 - `orders.customer_name` stores a customer display snapshot for merchant order views.
 - `create_order_with_items` creates an order and its line items in one transaction.
+- Direct client inserts into `orders` and `order_items` are revoked after the RPC migration.
+- Base catalog categories are seeded by migration so product creation works after `db:push`.
 - Merchants can cancel orders while status is `pending`, `processing`, or `on_the_way`.
 
 ## Scripts

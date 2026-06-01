@@ -58,7 +58,7 @@ export default function CheckoutReviewScreen() {
           <Text className="text-sm font-semibold text-brand-700">Checkout</Text>
           <Text className="mt-2 text-3xl font-bold text-ink">Review order</Text>
           <Text className="mt-2 text-base leading-6 text-muted">
-            Confirm the mock order before it is sent to the merchant queue.
+            Confirm the order before it is sent to the merchant queue.
           </Text>
         </View>
 

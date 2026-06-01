@@ -24,7 +24,7 @@ export default function CustomerOrdersScreen() {
           <Text className="text-sm font-semibold text-brand-700">Orders</Text>
           <Text className="mt-2 text-3xl font-bold text-ink">Order history</Text>
           <Text className="mt-2 text-base leading-6 text-muted">
-            Track submitted mock orders and merchant progress.
+            Track submitted orders and merchant progress.
           </Text>
         </View>
 
@@ -55,7 +55,7 @@ export default function CustomerOrdersScreen() {
         ) : (
           <EmptyState
             title="No orders yet"
-            message="Place a mock order from your cart to start tracking fulfillment."
+            message="Place an order from your cart to start tracking fulfillment."
           />
         )}
       </View>

@@ -47,6 +47,47 @@ function getSupabaseClient() {
   return supabase;
 }
 
+function createLocalAuthUser(credentials: {
+  fullName?: string;
+  phone?: string;
+  role: UserRole;
+  merchantName?: string;
+}): AuthUser {
+  const fullName = credentials.fullName?.trim() || (
+    credentials.role === 'customer' ? 'Demo Customer' : 'Demo Merchant'
+  );
+
+  return {
+    id: `mock-${credentials.role}-user`,
+    role: credentials.role,
+    fullName,
+    phone: credentials.phone?.trim() || undefined,
+    merchantId: credentials.role === 'merchant' ? 'mock-merchant-user' : undefined,
+    merchantName:
+      credentials.role === 'merchant'
+        ? credentials.merchantName?.trim() || 'Qitaa Demo Supply'
+        : undefined,
+    createdAt: new Date().toISOString(),
+  };
+}
+
+function getLocalUserForEmail(email: string): AuthUser {
+  const normalizedEmail = email.trim().toLowerCase();
+
+  if (normalizedEmail.includes('merchant')) {
+    return createLocalAuthUser({
+      role: 'merchant',
+      fullName: 'Demo Merchant',
+      merchantName: 'Qitaa Demo Supply',
+    });
+  }
+
+  return createLocalAuthUser({
+    role: 'customer',
+    fullName: 'Demo Customer',
+  });
+}
+
 interface SupabaseAuthErrorDetails {
   code?: string;
   message?: string;
@@ -231,6 +272,10 @@ async function loadProfileUser(authUserId: string): Promise<AuthUser> {
 }
 
 export async function requestPasswordReset(email: string) {
+  if (!isSupabaseConfigured) {
+    return;
+  }
+
   const client = getSupabaseClient();
   const { error } = await client.auth.resetPasswordForEmail(email.trim(), {
     redirectTo: undefined,
@@ -243,6 +288,10 @@ export async function requestPasswordReset(email: string) {
 }
 
 export async function getCurrentAuthUser() {
+  if (!isSupabaseConfigured) {
+    return null;
+  }
+
   const client = getSupabaseClient();
   const { data, error } = await client.auth.getSession();
 
@@ -258,6 +307,15 @@ export async function getCurrentAuthUser() {
 }
 
 export async function signInWithEmail({ email, password }: SignInCredentials) {
+  if (!isSupabaseConfigured) {
+    if (!password) {
+      throw new AuthFlowError('Enter your password.');
+    }
+
+    await new Promise((resolve) => setTimeout(resolve, 300));
+    return getLocalUserForEmail(email);
+  }
+
   const client = getSupabaseClient();
   const { data, error } = await client.auth.signInWithPassword({
     email: email.trim(),
@@ -273,6 +331,15 @@ export async function signInWithEmail({ email, password }: SignInCredentials) {
 }
 
 export async function signUpWithEmail(credentials: SignUpCredentials): Promise<SignUpResult> {
+  if (!isSupabaseConfigured) {
+    await new Promise((resolve) => setTimeout(resolve, 300));
+
+    return {
+      user: createLocalAuthUser(credentials),
+      needsEmailConfirmation: false,
+    };
+  }
+
   const client = getSupabaseClient();
   const { data, error } = await client.auth.signUp({
     email: credentials.email.trim(),
@@ -316,6 +383,10 @@ export async function signUpWithEmail(credentials: SignUpCredentials): Promise<S
 }
 
 export async function signOutSupabase() {
+  if (!isSupabaseConfigured) {
+    return;
+  }
+
   const client = getSupabaseClient();
   const { error } = await client.auth.signOut();
 

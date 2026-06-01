@@ -49,7 +49,7 @@ export default function CustomerCartScreen() {
             <Text className="text-sm font-semibold text-brand-700">Cart</Text>
             <Text className="mt-2 text-3xl font-bold text-ink">Review items</Text>
             <Text className="mt-2 text-base leading-6 text-muted">
-              Adjust quantities before order creation is added.
+              Adjust quantities before sending the order to the merchant.
             </Text>
           </View>
           <AppButton disabled={!items.length} onPress={confirmClearCart} variant="ghost">
@@ -93,7 +93,7 @@ export default function CustomerCartScreen() {
         ) : (
           <EmptyState
             title="Your cart is empty"
-            message="Browse the catalog and add products to prepare a mock order."
+            message="Browse the catalog and add products to prepare an order."
           />
         )}
       </View>

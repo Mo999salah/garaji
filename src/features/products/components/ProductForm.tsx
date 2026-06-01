@@ -1,5 +1,6 @@
 import { zodResolver } from '@hookform/resolvers/zod';
-import { Controller, useForm } from 'react-hook-form';
+import { useEffect } from 'react';
+import { Controller, useForm, useWatch } from 'react-hook-form';
 import { Pressable, Switch, Text, View } from 'react-native';
 
 import { useProductStore } from '@/features/products/store/useProductStore';
@@ -34,6 +35,7 @@ export function ProductForm({ defaultValues, onSubmit, submitLabel }: ProductFor
   const {
     control,
     handleSubmit,
+    setValue,
     formState: { errors, isSubmitting },
   } = useForm<ProductFormInput, unknown, ProductFormValues>({
     resolver: zodResolver(productFormSchema),
@@ -43,6 +45,21 @@ export function ProductForm({ defaultValues, onSubmit, submitLabel }: ProductFor
       ...defaultValues,
     },
   });
+  const selectedCategoryId = useWatch({ control, name: 'categoryId' });
+
+  useEffect(() => {
+    if (!editableCategories.length) {
+      return;
+    }
+
+    const categoryExists = editableCategories.some(
+      (category) => category.id === selectedCategoryId,
+    );
+
+    if (!selectedCategoryId || !categoryExists) {
+      setValue('categoryId', editableCategories[0].id, { shouldValidate: true });
+    }
+  }, [editableCategories, selectedCategoryId, setValue]);
 
   return (
     <View className="gap-4">
@@ -84,31 +101,38 @@ export function ProductForm({ defaultValues, onSubmit, submitLabel }: ProductFor
         render={({ field: { onChange, value } }) => (
           <View className="gap-2">
             <Text className="text-sm font-semibold text-ink">Category</Text>
-            <View className="flex-row flex-wrap gap-2">
-              {editableCategories.map((category) => {
-                const selected = category.id === value;
+            {editableCategories.length ? (
+              <View className="flex-row flex-wrap gap-2">
+                {editableCategories.map((category) => {
+                  const selected = category.id === value;
 
-                return (
-                  <Pressable
-                    accessibilityRole="radio"
-                    accessibilityState={{ checked: selected }}
-                    className={`min-h-11 justify-center rounded-lg border px-4 ${
-                      selected ? 'border-brand-600 bg-brand-50' : 'border-line bg-white'
-                    }`}
-                    key={category.id}
-                    onPress={() => onChange(category.id)}
-                  >
-                    <Text
-                      className={`text-sm font-semibold ${
-                        selected ? 'text-brand-700' : 'text-ink'
+                  return (
+                    <Pressable
+                      accessibilityRole="radio"
+                      accessibilityState={{ checked: selected }}
+                      className={`min-h-11 justify-center rounded-lg border px-4 ${
+                        selected ? 'border-brand-600 bg-brand-50' : 'border-line bg-white'
                       }`}
+                      key={category.id}
+                      onPress={() => onChange(category.id)}
                     >
-                      {category.name}
-                    </Text>
-                  </Pressable>
-                );
-              })}
-            </View>
+                      <Text
+                        className={`text-sm font-semibold ${
+                          selected ? 'text-brand-700' : 'text-ink'
+                        }`}
+                      >
+                        {category.name}
+                      </Text>
+                    </Pressable>
+                  );
+                })}
+              </View>
+            ) : (
+              <Text className="rounded-lg border border-line bg-white p-4 text-sm text-muted">
+                Categories are still loading. Apply Supabase migrations and seed categories before
+                creating products.
+              </Text>
+            )}
             {errors.categoryId?.message ? (
               <Text className="text-sm text-red-600">{errors.categoryId.message}</Text>
             ) : null}
@@ -206,7 +230,11 @@ export function ProductForm({ defaultValues, onSubmit, submitLabel }: ProductFor
         )}
       />
 
-      <AppButton loading={isSubmitting} onPress={handleSubmit(onSubmit)}>
+      <AppButton
+        disabled={!editableCategories.length}
+        loading={isSubmitting}
+        onPress={handleSubmit(onSubmit)}
+      >
         {submitLabel}
       </AppButton>
     </View>

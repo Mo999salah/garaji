@@ -28,6 +28,8 @@ interface OrderState {
   reset: () => void;
 }
 
+let localDemoOrders: Order[] = [];
+
 export const useOrderStore = create<OrderState>((set, get) => ({
   orders: [],
   lastCreatedOrderId: null,
@@ -35,7 +37,7 @@ export const useOrderStore = create<OrderState>((set, get) => ({
   errorMessage: null,
   loadCustomerOrders: async (customerId) => {
     if (!isOrderBackendReady()) {
-      set({ orders: get().orders.filter((order) => order.customerId === customerId) });
+      set({ orders: localDemoOrders.filter((order) => order.customerId === customerId) });
       return;
     }
 
@@ -53,7 +55,7 @@ export const useOrderStore = create<OrderState>((set, get) => ({
   },
   loadMerchantOrders: async (merchantId) => {
     if (!isOrderBackendReady()) {
-      set({ orders: get().orders.filter((order) => order.merchantId === merchantId) });
+      set({ orders: localDemoOrders.filter((order) => order.merchantId === merchantId) });
       return;
     }
 
@@ -105,6 +107,8 @@ export const useOrderStore = create<OrderState>((set, get) => ({
       return null;
     }
 
+    localDemoOrders = [order, ...localDemoOrders];
+
     set((state) => ({
       orders: [order, ...state.orders],
       lastCreatedOrderId: order.id,
@@ -143,11 +147,17 @@ export const useOrderStore = create<OrderState>((set, get) => ({
     }
 
     set((state) => ({
-      orders: state.orders.map((item) =>
-        item.id === orderId && item.merchantId === merchantId
-          ? { ...item, status: nextStatus, updatedAt: new Date().toISOString() }
-          : item,
-      ),
+      orders: state.orders.map((item) => {
+        if (item.id !== orderId || item.merchantId !== merchantId) {
+          return item;
+        }
+
+        const updatedOrder = { ...item, status: nextStatus, updatedAt: new Date().toISOString() };
+        localDemoOrders = localDemoOrders.map((localOrder) =>
+          localOrder.id === orderId ? updatedOrder : localOrder,
+        );
+        return updatedOrder;
+      }),
     }));
 
     return true;

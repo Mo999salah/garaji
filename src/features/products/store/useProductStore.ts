@@ -53,7 +53,7 @@ function createMockProduct(merchantId: string, values: ProductFormValues): Produ
 
 export const useProductStore = create<ProductState>((set, get) => ({
   products: isProductBackendReady() ? [] : mockProducts,
-  categories: productCategories,
+  categories: isProductBackendReady() ? [] : productCategories,
   isLoading: false,
   errorMessage: null,
   loadCatalog: async () => {
@@ -177,7 +177,7 @@ export const useProductStore = create<ProductState>((set, get) => ({
   reset: () => {
     set({
       products: isProductBackendReady() ? [] : mockProducts,
-      categories: productCategories,
+      categories: isProductBackendReady() ? [] : productCategories,
       isLoading: false,
       errorMessage: null,
     });
