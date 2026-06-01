@@ -18,6 +18,24 @@ function getClient() {
   return supabase;
 }
 
+function getOrderStatusErrorMessage(error?: { message?: string } | null) {
+  const message = error?.message ?? '';
+
+  if (message.includes('Requested quantity exceeds available stock')) {
+    return 'Cannot accept this order because one or more items do not have enough stock.';
+  }
+
+  if (message.includes('Invalid order status transition')) {
+    return 'This order cannot move to the selected status.';
+  }
+
+  if (message.includes('Only the merchant owner can update this order')) {
+    return 'Only the assigned merchant can update this order.';
+  }
+
+  return 'Could not update order status.';
+}
+
 function mapOrderItem(row: DbOrderItemRow): OrderItem {
   return {
     productId: row.product_id,
@@ -168,7 +186,7 @@ export async function updateOrderStatusRecord(
   });
 
   if (error || !updatedOrderId) {
-    throw new OrderServiceError('Could not update order status.');
+    throw new OrderServiceError(getOrderStatusErrorMessage(error));
   }
 
   const { data, error: orderError } = await client

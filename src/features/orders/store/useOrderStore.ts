@@ -125,6 +125,8 @@ export const useOrderStore = create<OrderState>((set, get) => ({
       return false;
     }
 
+    set({ errorMessage: null });
+
     if (isOrderBackendReady()) {
       try {
         const updatedOrder = await updateOrderStatusRecord(orderId, merchantId, nextStatus);
@@ -135,6 +137,7 @@ export const useOrderStore = create<OrderState>((set, get) => ({
 
         set((state) => ({
           orders: state.orders.map((item) => (item.id === orderId ? updatedOrder : item)),
+          errorMessage: null,
         }));
 
         return true;
@@ -158,6 +161,7 @@ export const useOrderStore = create<OrderState>((set, get) => ({
         );
         return updatedOrder;
       }),
+      errorMessage: null,
     }));
 
     return true;

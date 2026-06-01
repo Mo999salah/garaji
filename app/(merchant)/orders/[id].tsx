@@ -28,6 +28,7 @@ export default function MerchantOrderDetailsScreen() {
       : undefined,
   );
   const updateOrderStatus = useOrderStore((state) => state.updateOrderStatus);
+  const orderErrorMessage = useOrderStore((state) => state.errorMessage);
 
   if (!user || !order) {
     return (
@@ -109,6 +110,11 @@ export default function MerchantOrderDetailsScreen() {
               <AppButton onPress={cancelOrder} variant="secondary">
                 Cancel order
               </AppButton>
+            ) : null}
+            {orderErrorMessage ? (
+              <Text className="text-sm font-semibold leading-5 text-red-600">
+                {orderErrorMessage}
+              </Text>
             ) : null}
           </View>
         </AppCard>
