@@ -161,18 +161,27 @@ export async function updateOrderStatusRecord(
   nextStatus: OrderStatus,
 ) {
   const client = getClient();
-  const { data, error } = await client
+  const { data: updatedOrderId, error } = await client.rpc('update_order_status', {
+    p_order_id: orderId,
+    p_merchant_id: merchantId,
+    p_next_status: nextStatus,
+  });
+
+  if (error || !updatedOrderId) {
+    throw new OrderServiceError('Could not update order status.');
+  }
+
+  const { data, error: orderError } = await client
     .from('orders')
-    .update({ status: nextStatus })
-    .eq('id', orderId)
-    .eq('merchant_id', merchantId)
     .select(
       'id, customer_id, customer_name, merchant_id, status, notes, subtotal, created_at, updated_at',
     )
+    .eq('id', String(updatedOrderId))
+    .eq('merchant_id', merchantId)
     .maybeSingle<DbOrderRow>();
 
-  if (error) {
-    throw new OrderServiceError('Could not update order status.');
+  if (orderError) {
+    throw new OrderServiceError('Order was updated but could not be loaded.');
   }
 
   if (!data) {
