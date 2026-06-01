@@ -16,6 +16,7 @@ import {
 import { useProductStore } from '@/features/products/store/useProductStore';
 import { AppButton } from '@/shared/components/AppButton';
 import { AppInput } from '@/shared/components/AppInput';
+import { DataStatus } from '@/shared/components/DataStatus';
 import { EmptyState } from '@/shared/components/EmptyState';
 import { ScreenContainer } from '@/shared/components/ScreenContainer';
 
@@ -53,6 +54,9 @@ export default function CustomerProductsScreen() {
   const [inventoryStatus, setInventoryStatus] =
     useState<ProductFilters['inventoryStatus']>('all');
   const products = useProductStore((state) => state.products);
+  const isLoading = useProductStore((state) => state.isLoading);
+  const errorMessage = useProductStore((state) => state.errorMessage);
+  const loadCatalog = useProductStore((state) => state.loadCatalog);
   const fitmentYearNumber = Number(fitmentYear);
   const hasFitmentYear = fitmentYear.trim().length > 0 && Number.isFinite(fitmentYearNumber);
   const activeProducts = useMemo(() => products.filter((product) => product.isActive), [products]);
@@ -126,6 +130,14 @@ export default function CustomerProductsScreen() {
             ready to order
           </Text>
         </View>
+
+        <DataStatus
+          errorMessage={errorMessage}
+          errorTitle="Catalog unavailable"
+          isLoading={isLoading && !products.length}
+          loadingLabel="Loading catalog"
+          onRetry={() => void loadCatalog()}
+        />
 
         <AppInput
           accessibilityLabel="Search products"

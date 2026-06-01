@@ -17,6 +17,7 @@ import {
 import { useOrderStore } from '@/features/orders/store/useOrderStore';
 import { AppButton } from '@/shared/components/AppButton';
 import { AppCard } from '@/shared/components/AppCard';
+import { DataStatus } from '@/shared/components/DataStatus';
 import { EmptyState } from '@/shared/components/EmptyState';
 import { ScreenContainer } from '@/shared/components/ScreenContainer';
 
@@ -34,6 +35,9 @@ export default function MerchantOrdersScreen() {
   const [statusFilter, setStatusFilter] = useState<OrderStatusFilter>('open');
   const user = useAuthStore((state) => state.user);
   const orders = useOrderStore((state) => state.orders);
+  const isLoading = useOrderStore((state) => state.isLoading);
+  const errorMessage = useOrderStore((state) => state.errorMessage);
+  const loadMerchantOrders = useOrderStore((state) => state.loadMerchantOrders);
   const merchantId = user?.merchantId;
   const merchantOrders = useMemo(
     () => (merchantId ? getMerchantOrders(orders, merchantId) : []),
@@ -58,6 +62,14 @@ export default function MerchantOrdersScreen() {
             Showing {filteredOrders.length} of {merchantOrders.length} orders
           </Text>
         </View>
+
+        <DataStatus
+          errorMessage={errorMessage}
+          errorTitle="Order queue unavailable"
+          isLoading={isLoading && !merchantOrders.length}
+          loadingLabel="Loading order queue"
+          onRetry={merchantId ? () => void loadMerchantOrders(merchantId) : undefined}
+        />
 
         <AppCard>
           <Text className="text-xs font-semibold uppercase text-muted">Visible order value</Text>

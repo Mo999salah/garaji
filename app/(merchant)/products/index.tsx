@@ -14,6 +14,7 @@ import { useProductStore } from '@/features/products/store/useProductStore';
 import { useAuthStore } from '@/features/auth/store/useAuthStore';
 import { AppButton } from '@/shared/components/AppButton';
 import { AppInput } from '@/shared/components/AppInput';
+import { DataStatus } from '@/shared/components/DataStatus';
 import { EmptyState } from '@/shared/components/EmptyState';
 import { ScreenContainer } from '@/shared/components/ScreenContainer';
 
@@ -26,6 +27,9 @@ export default function MerchantProductsScreen() {
   const [stockErrorMessage, setStockErrorMessage] = useState<string | null>(null);
   const user = useAuthStore((state) => state.user);
   const products = useProductStore((state) => state.products);
+  const isLoading = useProductStore((state) => state.isLoading);
+  const errorMessage = useProductStore((state) => state.errorMessage);
+  const loadMerchantCatalog = useProductStore((state) => state.loadMerchantCatalog);
   const toggleProductActive = useProductStore((state) => state.toggleProductActive);
   const updateProductStock = useProductStore((state) => state.updateProductStock);
   const merchantId = user?.merchantId;
@@ -76,6 +80,14 @@ export default function MerchantProductsScreen() {
             Add
           </AppButton>
         </View>
+
+        <DataStatus
+          errorMessage={errorMessage}
+          errorTitle="Inventory unavailable"
+          isLoading={isLoading && !merchantProducts.length}
+          loadingLabel="Loading inventory"
+          onRetry={merchantId ? () => void loadMerchantCatalog(merchantId) : undefined}
+        />
 
         <View className="gap-3 rounded-lg border border-line bg-white p-4">
           <AppInput

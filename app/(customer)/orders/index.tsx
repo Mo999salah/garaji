@@ -7,12 +7,16 @@ import { OrderCard } from '@/features/orders/components/OrderCard';
 import { getCustomerOrders } from '@/features/orders/selectors/orderSelectors';
 import { useOrderStore } from '@/features/orders/store/useOrderStore';
 import { AppButton } from '@/shared/components/AppButton';
+import { DataStatus } from '@/shared/components/DataStatus';
 import { EmptyState } from '@/shared/components/EmptyState';
 import { ScreenContainer } from '@/shared/components/ScreenContainer';
 
 export default function CustomerOrdersScreen() {
   const user = useAuthStore((state) => state.user);
   const orders = useOrderStore((state) => state.orders);
+  const isLoading = useOrderStore((state) => state.isLoading);
+  const errorMessage = useOrderStore((state) => state.errorMessage);
+  const loadCustomerOrders = useOrderStore((state) => state.loadCustomerOrders);
   const lastCreatedOrderId = useOrderStore((state) => state.lastCreatedOrderId);
   const clearLastCreatedOrder = useOrderStore((state) => state.clearLastCreatedOrder);
   const customerOrders = user ? getCustomerOrders(orders, user.id) : [];
@@ -27,6 +31,14 @@ export default function CustomerOrdersScreen() {
             Track submitted orders and merchant progress.
           </Text>
         </View>
+
+        <DataStatus
+          errorMessage={errorMessage}
+          errorTitle="Orders unavailable"
+          isLoading={isLoading && !customerOrders.length}
+          loadingLabel="Loading orders"
+          onRetry={user ? () => void loadCustomerOrders(user.id) : undefined}
+        />
 
         {lastCreatedOrderId ? (
           <View className="rounded-lg border border-brand-100 bg-brand-50 p-4">
