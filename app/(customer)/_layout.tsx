@@ -4,8 +4,10 @@ import { useEffect } from 'react';
 
 import { AuthBlockedState } from '@/features/auth/components/AuthBlockedState';
 import { getHomePathForRole, useAuthStore } from '@/features/auth/store/useAuthStore';
-import { useProductStore } from '@/features/products/store/useProductStore';
-import { useOrderStore } from '@/features/orders/store/useOrderStore';
+import { useBranchStore } from '@/features/branches/store/useBranchStore';
+import { useRequestStore } from '@/features/requests/store/useRequestStore';
+import { useServiceStore } from '@/features/services/store/useServiceStore';
+import { useVehicleStore } from '@/features/vehicles/store/useVehicleStore';
 import { LoadingSpinner } from '@/shared/components/LoadingSpinner';
 import { ScreenContainer } from '@/shared/components/ScreenContainer';
 
@@ -14,15 +16,17 @@ export default function CustomerLayout() {
 
   useEffect(() => {
     if (user?.role === 'customer') {
-      void useProductStore.getState().loadCatalog();
-      void useOrderStore.getState().loadCustomerOrders(user.id);
+      void useVehicleStore.getState().loadVehicles(user.id);
+      void useRequestStore.getState().loadCustomerRequests(user.id);
+      void useServiceStore.getState().loadActiveServices();
+      void useBranchStore.getState().loadActiveBranches();
     }
   }, [user?.id, user?.role]);
 
   if (!hasHydrated || status === 'idle' || status === 'loading') {
     return (
       <ScreenContainer scroll={false}>
-        <LoadingSpinner label="Checking access" />
+        <LoadingSpinner label="جارٍ التحقق..." />
       </ScreenContainer>
     );
   }
@@ -30,7 +34,7 @@ export default function CustomerLayout() {
   if (!user) {
     if (status === 'blocked') {
       return (
-        <AuthBlockedState message={errorMessage ?? 'Your customer profile is not ready yet.'} />
+        <AuthBlockedState message={errorMessage ?? 'ملفك الشخصي غير جاهز بعد.'} />
       );
     }
 

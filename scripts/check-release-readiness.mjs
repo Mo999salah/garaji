@@ -77,10 +77,10 @@ function assertMigrations() {
 
   const migrations = readdirSync(migrationsDir).filter((name) => name.endsWith('.sql')).sort();
 
-  if (migrations.length >= 7) {
+  if (migrations.length >= 3) {
     pass('supabase migrations are present');
   } else {
-    fail('supabase migrations are present', 'Expected the base schema plus phase migrations.');
+    fail('supabase migrations are present', 'Expected the base schema plus car-services migrations.');
   }
 
   const migrationText = migrations
@@ -88,15 +88,17 @@ function assertMigrations() {
     .join('\n');
 
   const requiredPatterns = [
-    [/alter table public\.profiles enable row level security/i, 'profiles RLS is enabled'],
-    [/alter table public\.products enable row level security/i, 'products RLS is enabled'],
-    [/alter table public\.orders enable row level security/i, 'orders RLS is enabled'],
-    [/create or replace function public\.create_order_with_items/i, 'order creation RPC exists'],
-    [/revoke insert on public\.orders from authenticated/i, 'direct order inserts are revoked'],
-    [/create or replace function public\.update_order_status/i, 'order status RPC exists'],
-    [/stock_quantity/i, 'tracked product stock exists'],
-    [/min_order_quantity/i, 'minimum order quantity exists'],
-    [/grant execute on function public\.update_order_status/i, 'status RPC execution is granted'],
+    [/alter table public\.profiles\s+enable row level security/i, 'profiles RLS is enabled'],
+    [/alter table public\.vehicles\s+enable row level security/i, 'vehicles RLS is enabled'],
+    [/alter table public\.service_requests\s+enable row level security/i, 'service_requests RLS is enabled'],
+    [/alter table public\.services\s+enable row level security/i, 'services RLS is enabled'],
+    [/alter table public\.branches\s+enable row level security/i, 'branches RLS is enabled'],
+    [/create or replace function public\.create_service_request/i, 'create_service_request RPC exists'],
+    [/create or replace function public\.update_service_request_status/i, 'update_service_request_status RPC exists'],
+    [/revoke insert on public\.service_requests from authenticated/i, 'direct service_request inserts are revoked'],
+    [/create or replace function public\.is_staff/i, 'is_staff helper function exists'],
+    [/grant execute on function public\.create_service_request/i, 'create_service_request execution is granted'],
+    [/grant execute on function public\.update_service_request_status/i, 'update_service_request_status execution is granted'],
   ];
 
   for (const [pattern, name] of requiredPatterns) {

@@ -9,8 +9,10 @@ import {
   type SignInCredentials,
   type SignUpCredentials,
 } from '@/features/auth/services/supabaseAuthService';
-import { useOrderStore } from '@/features/orders/store/useOrderStore';
-import { useProductStore } from '@/features/products/store/useProductStore';
+import { useBranchStore } from '@/features/branches/store/useBranchStore';
+import { useRequestStore } from '@/features/requests/store/useRequestStore';
+import { useServiceStore } from '@/features/services/store/useServiceStore';
+import { useVehicleStore } from '@/features/vehicles/store/useVehicleStore';
 import type { AuthUser, UserRole } from '@/shared/types/auth';
 import { resetSessionStores } from '@/shared/lib/sessionStores';
 
@@ -42,16 +44,19 @@ function getErrorMessage(error: unknown) {
 async function syncRoleData(user: AuthUser) {
   if (user.role === 'customer') {
     await Promise.all([
-      useProductStore.getState().loadCatalog(),
-      useOrderStore.getState().loadCustomerOrders(user.id),
+      useVehicleStore.getState().loadVehicles(user.id),
+      useRequestStore.getState().loadCustomerRequests(user.id),
+      useServiceStore.getState().loadActiveServices(),
+      useBranchStore.getState().loadActiveBranches(),
     ]);
     return;
   }
 
-  if (user.merchantId) {
+  if (user.role === 'merchant') {
     await Promise.all([
-      useProductStore.getState().loadMerchantCatalog(user.merchantId),
-      useOrderStore.getState().loadMerchantOrders(user.merchantId),
+      useRequestStore.getState().loadAllRequests(),
+      useServiceStore.getState().loadAllServices(),
+      useBranchStore.getState().loadAllBranches(),
     ]);
   }
 }

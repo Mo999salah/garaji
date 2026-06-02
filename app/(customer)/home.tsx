@@ -2,11 +2,10 @@ import { router } from 'expo-router';
 import { Text, View } from 'react-native';
 
 import { useAuthStore } from '@/features/auth/store/useAuthStore';
-import { formatCurrency, getCartItemCount, getCartSubtotal } from '@/features/cart/selectors/cartSelectors';
-import { useCartStore } from '@/features/cart/store/useCartStore';
-import { OrderCard } from '@/features/orders/components/OrderCard';
-import { getCustomerOrders } from '@/features/orders/selectors/orderSelectors';
-import { useOrderStore } from '@/features/orders/store/useOrderStore';
+import { RequestCard } from '@/features/requests/components/RequestCard';
+import { selectActiveRequests } from '@/features/requests/selectors/requestSelectors';
+import { useRequestStore } from '@/features/requests/store/useRequestStore';
+import { useVehicleStore } from '@/features/vehicles/store/useVehicleStore';
 import { AppButton } from '@/shared/components/AppButton';
 import { AppCard } from '@/shared/components/AppCard';
 import { EmptyState } from '@/shared/components/EmptyState';
@@ -14,19 +13,9 @@ import { ScreenContainer } from '@/shared/components/ScreenContainer';
 
 export default function CustomerHomeScreen() {
   const { signOut, user } = useAuthStore();
-  const cartItems = useCartStore((state) => state.items);
-  const cartCount = getCartItemCount(cartItems);
-  const cartSubtotal = getCartSubtotal(cartItems);
-  const orders = useOrderStore((state) => state.orders);
-  const recentOrders = user ? getCustomerOrders(orders, user.id).slice(0, 3) : [];
-  const activeOrderCount = user
-    ? getCustomerOrders(orders, user.id).filter(
-        (order) =>
-          order.status === 'pending' ||
-          order.status === 'processing' ||
-          order.status === 'on_the_way',
-      ).length
-    : 0;
+  const vehicles = useVehicleStore((s) => s.vehicles);
+  const requests = useRequestStore((s) => s.requests);
+  const activeRequests = selectActiveRequests(requests).slice(0, 3);
 
   const handleSignOut = async () => {
     await signOut();
@@ -38,65 +27,73 @@ export default function CustomerHomeScreen() {
       <View className="gap-5">
         <View className="flex-row items-start justify-between gap-4">
           <View className="flex-1">
-            <Text className="text-sm font-semibold text-brand-700">Customer portal</Text>
+            <Text className="text-sm font-semibold text-brand-700">بوابة العميل</Text>
             <Text className="mt-2 text-3xl font-bold text-ink">{user?.fullName}</Text>
-            <Text className="mt-1 text-base text-muted">Welcome back</Text>
+            <Text className="mt-1 text-base text-muted">أهلاً بعودتك</Text>
           </View>
           <AppButton onPress={handleSignOut} variant="ghost">
-            Sign out
+            تسجيل الخروج
           </AppButton>
         </View>
 
         <AppCard>
-          <Text className="text-lg font-semibold text-ink">Quick order</Text>
-          <Text className="mt-2 text-sm leading-5 text-muted">
-            Search inventory, build purchase orders, and track fulfillment from this workspace.
-          </Text>
-          <View className="mt-4">
-            <AppButton onPress={() => router.push('/(customer)/products')}>Browse catalog</AppButton>
-          </View>
-          <View className="mt-3">
-            <AppButton onPress={() => router.push('/(customer)/cart')} variant="secondary">
-              View cart{cartCount ? ` (${cartCount})` : ''}
+          <Text className="text-lg font-semibold text-ink">الإجراءات السريعة</Text>
+          <View className="mt-4 gap-3">
+            <AppButton onPress={() => router.push('/(customer)/book/branch')}>
+              حجز موعد صيانة في الفرع
             </AppButton>
-          </View>
-          <View className="mt-3">
-            <AppButton onPress={() => router.push('/(customer)/orders')} variant="secondary">
-              Order history
+            <AppButton
+              onPress={() => router.push('/(customer)/book/mobile')}
+              variant="secondary"
+            >
+              طلب تغيير الزيت بالموقع
             </AppButton>
           </View>
         </AppCard>
 
         <View className="flex-row gap-3">
           <AppCard className="flex-1">
-            <Text className="text-xs font-semibold uppercase text-muted">Cart</Text>
-            <Text className="mt-2 text-2xl font-bold text-ink">{cartCount}</Text>
-            <Text className="mt-1 text-xs text-muted">{formatCurrency(cartSubtotal)}</Text>
+            <Text className="text-xs font-semibold uppercase text-muted">سياراتي</Text>
+            <Text className="mt-2 text-2xl font-bold text-ink">{vehicles.length}</Text>
+            <View className="mt-2">
+              <AppButton onPress={() => router.push('/(customer)/vehicles')} variant="ghost">
+                إدارة السيارات
+              </AppButton>
+            </View>
           </AppCard>
           <AppCard className="flex-1">
-            <Text className="text-xs font-semibold uppercase text-muted">Active orders</Text>
-            <Text className="mt-2 text-2xl font-bold text-ink">{activeOrderCount}</Text>
-            <Text className="mt-1 text-xs text-muted">Awaiting merchant progress</Text>
+            <Text className="text-xs font-semibold uppercase text-muted">طلبات نشطة</Text>
+            <Text className="mt-2 text-2xl font-bold text-ink">{activeRequests.length}</Text>
+            <View className="mt-2">
+              <AppButton onPress={() => router.push('/(customer)/requests')} variant="ghost">
+                عرض الطلبات
+              </AppButton>
+            </View>
           </AppCard>
         </View>
 
-        {recentOrders.length ? (
-          <View className="gap-3">
-            <Text className="text-lg font-semibold text-ink">Recent orders</Text>
-            {recentOrders.map((order) => (
-              <OrderCard
-                key={order.id}
-                onPress={() => router.push(`/(customer)/orders/${order.id}`)}
-                order={order}
-              />
-            ))}
+        <View className="gap-3">
+          <View className="flex-row items-center justify-between">
+            <Text className="text-lg font-semibold text-ink">الطلبات النشطة</Text>
+            <AppButton onPress={() => router.push('/(customer)/requests')} variant="ghost">
+              عرض الكل
+            </AppButton>
           </View>
-        ) : (
-          <EmptyState
-            title="No active orders"
-            message="Submitted orders and merchant confirmations will appear here."
-          />
-        )}
+          {activeRequests.length ? (
+            activeRequests.map((req) => (
+              <RequestCard
+                key={req.id}
+                onPress={() => router.push(`/(customer)/requests/${req.id}`)}
+                request={req}
+              />
+            ))
+          ) : (
+            <EmptyState
+              message="لا توجد طلبات نشطة حالياً. ابدأ بحجز موعد صيانة."
+              title="لا يوجد طلبات نشطة"
+            />
+          )}
+        </View>
       </View>
     </ScreenContainer>
   );

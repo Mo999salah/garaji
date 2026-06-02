@@ -1,14 +1,14 @@
 import { router } from 'expo-router';
-import { useMemo } from 'react';
+import { useEffect } from 'react';
 import { Text, View } from 'react-native';
 
 import { useAuthStore } from '@/features/auth/store/useAuthStore';
-import { formatCurrency } from '@/features/cart/selectors/cartSelectors';
-import { OrderCard } from '@/features/orders/components/OrderCard';
-import { getMerchantOrders } from '@/features/orders/selectors/orderSelectors';
-import { useOrderStore } from '@/features/orders/store/useOrderStore';
-import { getMerchantProducts } from '@/features/products/selectors/productSelectors';
-import { useProductStore } from '@/features/products/store/useProductStore';
+import { RequestCard } from '@/features/requests/components/RequestCard';
+import {
+  selectActiveRequests,
+  selectByStatus,
+} from '@/features/requests/selectors/requestSelectors';
+import { useRequestStore } from '@/features/requests/store/useRequestStore';
 import { AppButton } from '@/shared/components/AppButton';
 import { AppCard } from '@/shared/components/AppCard';
 import { EmptyState } from '@/shared/components/EmptyState';
@@ -25,32 +25,17 @@ function MetricCard({ label, value }: { label: string; value: string }) {
 
 export default function MerchantHomeScreen() {
   const { signOut, user } = useAuthStore();
-  const products = useProductStore((state) => state.products);
-  const orders = useOrderStore((state) => state.orders);
-  const merchantId = user?.merchantId;
-  const merchantProducts = useMemo(
-    () => (merchantId ? getMerchantProducts(products, merchantId) : []),
-    [merchantId, products],
-  );
-  const merchantOrders = useMemo(
-    () => (merchantId ? getMerchantOrders(orders, merchantId) : []),
-    [merchantId, orders],
-  );
-  const activeProducts = merchantProducts.filter((product) => product.isActive).length;
-  const lowStockProducts = merchantProducts.filter(
-    (product) =>
-      typeof product.stockQuantity === 'number' &&
-      product.stockQuantity <= product.minOrderQuantity,
-  ).length;
-  const pendingOrders = merchantOrders.filter((order) => order.status === 'pending');
-  const openOrders = merchantOrders.filter(
-    (order) =>
-      order.status === 'pending' ||
-      order.status === 'processing' ||
-      order.status === 'on_the_way',
-  );
-  const openOrderValue = openOrders.reduce((total, order) => total + order.subtotal, 0);
-  const recentOrders = merchantOrders.slice(0, 3);
+  const { requests, loadAllRequests } = useRequestStore();
+
+  useEffect(() => {
+    void loadAllRequests();
+  }, [loadAllRequests]);
+
+  const active = selectActiveRequests(requests);
+  const pending = selectByStatus(requests, 'pending');
+  const confirmed = selectByStatus(requests, 'confirmed');
+  const inProgress = selectByStatus(requests, 'in_progress');
+  const recentActive = active.slice(0, 3);
 
   const handleSignOut = async () => {
     await signOut();
@@ -62,64 +47,68 @@ export default function MerchantHomeScreen() {
       <View className="gap-5">
         <View className="flex-row items-start justify-between gap-4">
           <View className="flex-1">
-            <Text className="text-sm font-semibold text-brand-700">Merchant portal</Text>
+            <Text className="text-sm font-semibold text-brand-700">بوابة الإدارة</Text>
             <Text className="mt-2 text-3xl font-bold text-ink">{user?.fullName}</Text>
-            <Text className="mt-1 text-base text-muted">
-              {user?.merchantName ?? 'Merchant workspace'}
-            </Text>
+            <Text className="mt-1 text-base text-muted">لوحة إدارة الخدمات</Text>
           </View>
           <AppButton onPress={handleSignOut} variant="ghost">
-            Sign out
+            تسجيل الخروج
           </AppButton>
         </View>
 
+        {/* مؤشرات الطلبات */}
         <View className="flex-row flex-wrap gap-3">
-          <MetricCard label="Open orders" value={String(openOrders.length)} />
-          <MetricCard label="Pending" value={String(pendingOrders.length)} />
-          <MetricCard label="Active products" value={String(activeProducts)} />
-          <MetricCard label="Low stock" value={String(lowStockProducts)} />
+          <MetricCard label="قيد الانتظار" value={String(pending.length)} />
+          <MetricCard label="مؤكدة" value={String(confirmed.length)} />
+          <MetricCard label="جارية" value={String(inProgress.length)} />
+          <MetricCard label="نشطة (إجمالي)" value={String(active.length)} />
         </View>
 
+        {/* الاختصارات */}
         <AppCard>
-          <Text className="text-xs font-semibold uppercase text-muted">Open order value</Text>
-          <Text className="mt-2 text-3xl font-bold text-brand-700">
-            {formatCurrency(openOrderValue)}
-          </Text>
-          <Text className="mt-2 text-sm text-muted">
-            Pending, processing, and on-the-way orders.
-          </Text>
+          <Text className="text-lg font-semibold text-ink">الإجراءات السريعة</Text>
+          <View className="mt-4 gap-3">
+            <AppButton onPress={() => router.push('/(merchant)/requests')}>
+              إدارة الطلبات
+            </AppButton>
+            <AppButton
+              onPress={() => router.push('/(merchant)/services')}
+              variant="secondary"
+            >
+              إدارة الخدمات
+            </AppButton>
+            <AppButton
+              onPress={() => router.push('/(merchant)/branches')}
+              variant="secondary"
+            >
+              إدارة الفروع
+            </AppButton>
+          </View>
         </AppCard>
 
-        <AppCard>
-          <Text className="text-lg font-semibold text-ink">Order desk</Text>
-          <Text className="mt-2 text-sm leading-5 text-muted">
-            Review customer demand, confirm availability, and prepare fulfillment updates.
-          </Text>
-          <View className="mt-4">
-            <AppButton onPress={() => router.push('/(merchant)/orders')}>Incoming orders</AppButton>
+        {/* أحدث الطلبات النشطة */}
+        <View className="gap-3">
+          <View className="flex-row items-center justify-between">
+            <Text className="text-lg font-semibold text-ink">الطلبات النشطة</Text>
+            <AppButton onPress={() => router.push('/(merchant)/requests')} variant="ghost">
+              عرض الكل
+            </AppButton>
           </View>
-          <View className="mt-3">
-            <AppButton onPress={() => router.push('/(merchant)/products')}>Manage products</AppButton>
-          </View>
-        </AppCard>
-
-        {recentOrders.length ? (
-          <View className="gap-3">
-            <Text className="text-lg font-semibold text-ink">Recent orders</Text>
-            {recentOrders.map((order) => (
-              <OrderCard
-                key={order.id}
-                onPress={() => router.push(`/(merchant)/orders/${order.id}`)}
-                order={order}
+          {recentActive.length ? (
+            recentActive.map((r) => (
+              <RequestCard
+                key={r.id}
+                onPress={() => router.push(`/(merchant)/requests/${r.id}`)}
+                request={r}
               />
-            ))}
-          </View>
-        ) : (
-          <EmptyState
-            title="No pending requests"
-            message="Customer order requests will appear here once submitted."
-          />
-        )}
+            ))
+          ) : (
+            <EmptyState
+              message="لا توجد طلبات نشطة حالياً. ستظهر هنا طلبات العملاء."
+              title="لا طلبات نشطة"
+            />
+          )}
+        </View>
       </View>
     </ScreenContainer>
   );

@@ -4,8 +4,9 @@ import { useEffect } from 'react';
 
 import { AuthBlockedState } from '@/features/auth/components/AuthBlockedState';
 import { getHomePathForRole, useAuthStore } from '@/features/auth/store/useAuthStore';
-import { useProductStore } from '@/features/products/store/useProductStore';
-import { useOrderStore } from '@/features/orders/store/useOrderStore';
+import { useBranchStore } from '@/features/branches/store/useBranchStore';
+import { useRequestStore } from '@/features/requests/store/useRequestStore';
+import { useServiceStore } from '@/features/services/store/useServiceStore';
 import { LoadingSpinner } from '@/shared/components/LoadingSpinner';
 import { ScreenContainer } from '@/shared/components/ScreenContainer';
 
@@ -13,16 +14,17 @@ export default function MerchantLayout() {
   const { errorMessage, hasHydrated, status, user } = useAuthStore();
 
   useEffect(() => {
-    if (user?.role === 'merchant' && user.merchantId) {
-      void useProductStore.getState().loadMerchantCatalog(user.merchantId);
-      void useOrderStore.getState().loadMerchantOrders(user.merchantId);
+    if (user?.role === 'merchant') {
+      void useRequestStore.getState().loadAllRequests();
+      void useServiceStore.getState().loadAllServices();
+      void useBranchStore.getState().loadAllBranches();
     }
-  }, [user?.id, user?.merchantId, user?.role]);
+  }, [user?.id, user?.role]);
 
   if (!hasHydrated || status === 'idle' || status === 'loading') {
     return (
       <ScreenContainer scroll={false}>
-        <LoadingSpinner label="Checking access" />
+        <LoadingSpinner label="جارٍ التحقق..." />
       </ScreenContainer>
     );
   }
@@ -30,7 +32,7 @@ export default function MerchantLayout() {
   if (!user) {
     if (status === 'blocked') {
       return (
-        <AuthBlockedState message={errorMessage ?? 'Your merchant account is not ready yet.'} />
+        <AuthBlockedState message={errorMessage ?? 'حسابك غير جاهز بعد.'} />
       );
     }
 
