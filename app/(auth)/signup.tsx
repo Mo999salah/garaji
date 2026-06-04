@@ -1,23 +1,29 @@
 import { zodResolver } from '@hookform/resolvers/zod';
 import type { Href } from 'expo-router';
 import { router } from 'expo-router';
+import { useMemo, useState } from 'react';
 import { Controller, useForm, useWatch } from 'react-hook-form';
 import { Text, View } from 'react-native';
 import { z } from 'zod';
 
+import {
+  AuthNotice,
+  AuthScreen,
+  AuthTextButton,
+  PasswordToggle,
+  RoleSelector,
+} from '@/features/auth/components/AuthScreen';
 import { getHomePathForRole, useAuthStore } from '@/features/auth/store/useAuthStore';
 import { AppButton } from '@/shared/components/AppButton';
-import { AppCard } from '@/shared/components/AppCard';
 import { AppInput } from '@/shared/components/AppInput';
-import { ScreenContainer } from '@/shared/components/ScreenContainer';
 import type { UserRole } from '@/shared/types/auth';
 
 const signupSchema = z
   .object({
-    fullName: z.string().trim().min(2, 'Enter your full name.'),
+    fullName: z.string().trim().min(2, 'أدخل الاسم الكامل.'),
     phone: z.string().trim().optional(),
-    email: z.string().trim().email('Enter a valid email.'),
-    password: z.string().min(8, 'Use at least 8 characters.'),
+    email: z.string().trim().email('أدخل بريداً إلكترونياً صحيحاً.'),
+    password: z.string().min(8, 'استخدم 8 أحرف على الأقل.'),
     role: z.enum(['customer', 'merchant']),
     merchantName: z.string().trim().optional(),
     region: z.string().trim().optional(),
@@ -26,7 +32,7 @@ const signupSchema = z
     if (value.role === 'merchant' && !value.merchantName) {
       context.addIssue({
         code: 'custom',
-        message: 'Enter your merchant name.',
+        message: 'أدخل اسم المنشأة.',
         path: ['merchantName'],
       });
     }
@@ -34,7 +40,19 @@ const signupSchema = z
 
 type SignupForm = z.infer<typeof signupSchema>;
 
+function getPasswordScore(password: string) {
+  let score = 0;
+
+  if (password.length >= 8) score += 1;
+  if (/[A-Z]/.test(password) && /[a-z]/.test(password)) score += 1;
+  if (/\d/.test(password)) score += 1;
+  if (/[^A-Za-z0-9]/.test(password)) score += 1;
+
+  return score;
+}
+
 export default function SignupScreen() {
+  const [passwordVisible, setPasswordVisible] = useState(false);
   const signUp = useAuthStore((state) => state.signUp);
   const errorMessage = useAuthStore((state) => state.errorMessage);
   const clearError = useAuthStore((state) => state.clearError);
@@ -56,6 +74,8 @@ export default function SignupScreen() {
     },
   });
   const selectedRole = useWatch({ control, name: 'role' });
+  const password = useWatch({ control, name: 'password' });
+  const passwordScore = useMemo(() => getPasswordScore(password ?? ''), [password]);
 
   const setRole = (role: UserRole) => {
     setValue('role', role, { shouldValidate: true });
@@ -79,143 +99,161 @@ export default function SignupScreen() {
   });
 
   return (
-    <ScreenContainer>
-      <View className="py-6">
-        <View className="mb-8">
-          <Text className="text-sm font-semibold uppercase tracking-wide text-brand-700">
-            Qitaa
-          </Text>
-          <Text className="mt-3 text-4xl font-bold leading-tight text-ink">Create account</Text>
-          <Text className="mt-4 text-base leading-6 text-muted">
-            Your profile is created by the database after Supabase signup.
-          </Text>
-        </View>
+    <AuthScreen
+      eyebrow="حساب جديد"
+      footer="يتم إنشاء الملف الشخصي تلقائياً بعد اكتمال التسجيل في Supabase."
+      subtitle="اختر نوع الحساب، ثم أكمل بياناتك الأساسية."
+      title="ابدأ مع قِطع"
+    >
+      <View className="gap-4">
+        <RoleSelector onChange={setRole} value={selectedRole} />
 
-        <AppCard className="gap-4">
-          <View className="flex-row gap-3">
-            <View className="flex-1">
-              <AppButton
-                onPress={() => setRole('customer')}
-                variant={selectedRole === 'customer' ? 'primary' : 'secondary'}
-              >
-                Customer
-              </AppButton>
-            </View>
-            <View className="flex-1">
-              <AppButton
-                onPress={() => setRole('merchant')}
-                variant={selectedRole === 'merchant' ? 'primary' : 'secondary'}
-              >
-                Merchant
-              </AppButton>
-            </View>
+        <Controller
+          control={control}
+          name="fullName"
+          render={({ field: { onBlur, onChange, value } }) => (
+            <AppInput
+              autoComplete="name"
+              error={errors.fullName?.message}
+              label="الاسم الكامل"
+              onBlur={onBlur}
+              onChangeText={onChange}
+              textAlign="right"
+              value={value}
+            />
+          )}
+        />
+
+        <Controller
+          control={control}
+          name="phone"
+          render={({ field: { onBlur, onChange, value } }) => (
+            <AppInput
+              autoComplete="tel"
+              error={errors.phone?.message}
+              inputMode="tel"
+              keyboardType="phone-pad"
+              label="رقم الجوال"
+              onBlur={onBlur}
+              onChangeText={onChange}
+              placeholder="+966 5X XXX XXXX"
+              textAlign="right"
+              value={value}
+            />
+          )}
+        />
+
+        <Controller
+          control={control}
+          name="email"
+          render={({ field: { onBlur, onChange, value } }) => (
+            <AppInput
+              autoCapitalize="none"
+              autoComplete="email"
+              error={errors.email?.message}
+              inputMode="email"
+              keyboardType="email-address"
+              label="البريد الإلكتروني"
+              onBlur={onBlur}
+              onChangeText={onChange}
+              placeholder="name@example.com"
+              textAlign="right"
+              value={value}
+            />
+          )}
+        />
+
+        <Controller
+          control={control}
+          name="password"
+          render={({ field: { onBlur, onChange, value } }) => (
+            <AppInput
+              autoCapitalize="none"
+              autoComplete="new-password"
+              error={errors.password?.message}
+              label="كلمة المرور"
+              onBlur={onBlur}
+              onChangeText={onChange}
+              secureTextEntry={!passwordVisible}
+              textAlign="right"
+              trailing={
+                <PasswordToggle
+                  onPress={() => setPasswordVisible((current) => !current)}
+                  visible={passwordVisible}
+                />
+              }
+              value={value}
+            />
+          )}
+        />
+
+        <PasswordMeter score={passwordScore} />
+
+        {selectedRole === 'merchant' ? (
+          <View className="gap-4 border-t border-line pt-4">
+            <Controller
+              control={control}
+              name="merchantName"
+              render={({ field: { onBlur, onChange, value } }) => (
+                <AppInput
+                  error={errors.merchantName?.message}
+                  label="اسم المنشأة"
+                  onBlur={onBlur}
+                  onChangeText={onChange}
+                  textAlign="right"
+                  value={value}
+                />
+              )}
+            />
+            <Controller
+              control={control}
+              name="region"
+              render={({ field: { onBlur, onChange, value } }) => (
+                <AppInput
+                  error={errors.region?.message}
+                  label="المنطقة"
+                  onBlur={onBlur}
+                  onChangeText={onChange}
+                  placeholder="مثال: الرياض"
+                  textAlign="right"
+                  value={value}
+                />
+              )}
+            />
           </View>
+        ) : null}
 
-          <Controller
-            control={control}
-            name="fullName"
-            render={({ field: { onBlur, onChange, value } }) => (
-              <AppInput
-                autoComplete="name"
-                error={errors.fullName?.message}
-                label="Full name"
-                onBlur={onBlur}
-                onChangeText={onChange}
-                value={value}
-              />
-            )}
-          />
-          <Controller
-            control={control}
-            name="phone"
-            render={({ field: { onBlur, onChange, value } }) => (
-              <AppInput
-                autoComplete="tel"
-                error={errors.phone?.message}
-                inputMode="tel"
-                keyboardType="phone-pad"
-                label="Phone"
-                onBlur={onBlur}
-                onChangeText={onChange}
-                value={value}
-              />
-            )}
-          />
-          <Controller
-            control={control}
-            name="email"
-            render={({ field: { onBlur, onChange, value } }) => (
-              <AppInput
-                autoCapitalize="none"
-                autoComplete="email"
-                error={errors.email?.message}
-                inputMode="email"
-                keyboardType="email-address"
-                label="Email"
-                onBlur={onBlur}
-                onChangeText={onChange}
-                value={value}
-              />
-            )}
-          />
-          <Controller
-            control={control}
-            name="password"
-            render={({ field: { onBlur, onChange, value } }) => (
-              <AppInput
-                autoCapitalize="none"
-                autoComplete="new-password"
-                error={errors.password?.message}
-                label="Password"
-                onBlur={onBlur}
-                onChangeText={onChange}
-                secureTextEntry
-                value={value}
-              />
-            )}
-          />
+        <AuthNotice message={errorMessage} tone="error" />
 
-          {selectedRole === 'merchant' ? (
-            <>
-              <Controller
-                control={control}
-                name="merchantName"
-                render={({ field: { onBlur, onChange, value } }) => (
-                  <AppInput
-                    error={errors.merchantName?.message}
-                    label="Merchant name"
-                    onBlur={onBlur}
-                    onChangeText={onChange}
-                    value={value}
-                  />
-                )}
-              />
-              <Controller
-                control={control}
-                name="region"
-                render={({ field: { onBlur, onChange, value } }) => (
-                  <AppInput
-                    error={errors.region?.message}
-                    label="Region"
-                    onBlur={onBlur}
-                    onChangeText={onChange}
-                    value={value}
-                  />
-                )}
-              />
-            </>
-          ) : null}
+        <AppButton loading={isSubmitting} onPress={() => void onSubmit()}>
+          إنشاء الحساب
+        </AppButton>
 
-          {errorMessage ? <Text className="text-sm text-red-600">{errorMessage}</Text> : null}
-
-          <AppButton loading={isSubmitting} onPress={() => void onSubmit()}>
-            Create account
-          </AppButton>
-          <AppButton onPress={() => router.replace('/(auth)/login' as Href)} variant="ghost">
-            Back to sign in
-          </AppButton>
-        </AppCard>
+        <View className="flex-row items-center justify-center gap-2">
+          <Text className="text-sm text-muted">لديك حساب؟</Text>
+          <AuthTextButton onPress={() => router.replace('/(auth)/login' as Href)}>
+            تسجيل الدخول
+          </AuthTextButton>
+        </View>
       </View>
-    </ScreenContainer>
+    </AuthScreen>
+  );
+}
+
+function PasswordMeter({ score }: { score: number }) {
+  const label = score >= 4 ? 'قوية' : score >= 2 ? 'متوسطة' : 'ضعيفة';
+
+  return (
+    <View className="gap-2">
+      <View className="flex-row gap-2">
+        {[1, 2, 3, 4].map((step) => (
+          <View
+            className={`h-1.5 flex-1 rounded-full ${step <= score ? 'bg-brand-600' : 'bg-line'}`}
+            key={step}
+          />
+        ))}
+      </View>
+      <Text className="text-right text-xs font-medium text-muted">قوة كلمة المرور: {label}</Text>
+    </View>
   );
 }

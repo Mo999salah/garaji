@@ -1,76 +1,139 @@
-# Qitaa
+# كراجي — منصة خدمات سيارات
 
-Production-oriented Expo React Native app for B2B ordering.
+تطبيق Expo React Native للحجوزات وخدمات السيارات (single-tenant MVP)، مُستوحى من تطبيق زيتي.
 
-## Structure
+## البنية
 
-- `app/` - Expo Router routes and protected role groups.
-- `app/(auth)/` - Supabase email/password auth, signup, and password reset.
-- `app/(customer)/` - customer-only screens guarded by role.
-- `app/(merchant)/` - merchant-only screens guarded by role.
-- `src/features/auth/` - auth service, session listener, and centralized Zustand store.
-- `src/features/products/` - catalog services, selectors, forms, and store.
-- `src/features/cart/` - persisted local cart with single-merchant enforcement.
-- `src/features/orders/` - order services, selectors, UI, and store.
-- `src/shared/components/` - reusable NativeWind UI primitives.
-- `src/shared/lib/` - Supabase client, query client, and session helpers.
-- `src/shared/types/` - typed auth, catalog, order, and database models.
-- `supabase/migrations/` - schema, RLS, profile bootstrap, and atomic order RPC.
+- `app/` - مسارات Expo Router ومجموعات الأدوار المحمية.
+- `app/(auth)/` - تسجيل الدخول وإنشاء الحساب وإعادة تعيين كلمة المرور عبر Supabase.
+- `app/(customer)/` - شاشات العملاء: الجراج، الحجوزات، سجل الطلبات.
+- `app/(merchant)/` - شاشات الإدارة/الطاقم: الطلبات، الفروع، الخدمات.
+- `src/features/auth/` - خدمة المصادقة، مستمع الجلسة، ومخزن Zustand المركزي.
+- `src/features/vehicles/` - خدمة مركبات العميل (جراج)، Zustand store، React Query hooks.
+- `src/features/branches/` - خدمة الفروع مع RLS، BranchCard، BranchForm.
+- `src/features/services/` - الخدمات المتاحة (فرع / موقع / كلاهما)، ServiceCard، ServiceForm.
+- `src/features/requests/` - خدمة الطلبات، سيلكتورات انتقال الحالة، RequestCard، RequestTimeline.
+- `src/shared/components/` - مكونات UI أساسية (AppButton, AppCard, AppInput, EmptyState…).
+- `src/shared/lib/` - عميل Supabase، React Query، ومساعدات الجلسة.
+- `src/shared/types/` - نماذج مكتوبة للمصادقة وقاعدة البيانات.
+- `supabase/migrations/` - schema، RLS، bootstrap الملفات الشخصية، وRPCs ذرية.
 
-## Auth
+## المصادقة
 
-Auth state lives in `useAuthStore` and syncs with Supabase Auth:
+مستخدمون من نوعين (الأدوار محفوظة في جدول `profiles`):
 
-- Sessions persist with `expo-secure-store` on native and AsyncStorage on web.
-- `useAuthSessionListener` keeps the store aligned with token refresh and sign-out events.
-- Sign-up metadata is trusted only by the database trigger in `20260520103000_auth_profile_bootstrap.sql`.
-- Sign-out clears cart, catalog cache, and order cache via `resetSessionStores`.
+| الدور | الوصول |
+|---|---|
+| `customer` | حجز خدمات، إدارة المركبات، متابعة الطلبات |
+| `merchant` | إدارة الطلبات والفروع والخدمات |
 
-Configure:
+## الخدمات والحجوزات
 
-```env
-EXPO_PUBLIC_SUPABASE_URL=
-EXPO_PUBLIC_SUPABASE_ANON_KEY=
+### أنواع الخدمات
+
+| النوع | الوصف |
+|---|---|
+| `branch` | الخدمة في الفرع فقط (مثل الصيانة الدورية) |
+| `mobile` | الخدمة بالموقع فقط (مثل تغيير الزيت في المنزل) |
+| `both` | متاحة بكلا الطريقتين |
+
+### حالات الطلب
+
+```
+pending → confirmed → in_progress → completed
+    ↘           ↘
+  cancelled  cancelled
 ```
 
-Apply migrations before testing signup:
+| الحالة | العرض |
+|---|---|
+| `pending` | بانتظار التأكيد |
+| `confirmed` | مؤكد |
+| `in_progress` | جارٍ التنفيذ |
+| `completed` | مكتمل |
+| `cancelled` | ملغى |
+
+## نموذج البيانات
+
+```
+profiles → vehicles          (جراج العميل)
+profiles → service_requests  (الحجوزات)
+vehicles → service_requests
+services → service_requests
+branches → service_requests  (اختياري للخدمات المنزلية)
+service_requests → service_request_events  (الخط الزمني)
+```
+
+## RLS والأمان
+
+- **vehicles**: العميل يقرأ/يكتب مركباته فقط؛ الطاقم يقرأ الجميع.
+- **services / branches**: قراءة لجميع المستخدمين المُسجَّلين؛ تعديل لدور `merchant` فقط.
+- **service_requests**: العميل ينشئ ويقرأ طلباته؛ الطاقم يقرأ ويحدّث حالة جميع الطلبات.
+- إدراج الطلبات مُلزَم عبر RPC `create_service_request` (التحقق من ملكية المركبة + نشاط الخدمة).
+- تغيير الحالة مُلزَم عبر RPC `update_service_request_status` (التحقق من التسلسل الصحيح).
+
+## شاشات العملاء
+
+| المسار | الوصف |
+|---|---|
+| `/home` | لوحة: ملخص المركبات، إجراءات سريعة، الطلبات النشطة |
+| `/vehicles` | قائمة جراج السيارات |
+| `/vehicles/new` | إضافة سيارة جديدة |
+| `/vehicles/[id]/edit` | تعديل بيانات السيارة |
+| `/services` | استعراض الخدمات المتاحة |
+| `/branches` | استعراض الفروع |
+| `/book/branch` | حجز موعد في فرع |
+| `/book/mobile` | طلب خدمة بالموقع |
+| `/requests` | سجل الطلبات (نشطة / مكتملة / ملغاة) |
+| `/requests/[id]` | تفاصيل الطلب والخط الزمني |
+
+## شاشات الإدارة (merchant)
+
+| المسار | الوصف |
+|---|---|
+| `/home` | لوحة الطلبات الواردة حسب الحالة |
+| `/requests` | جميع الطلبات مع فلاتر الحالة |
+| `/requests/[id]` | تفاصيل الطلب + تغيير الحالة |
+| `/services` | قائمة الخدمات |
+| `/services/new` | إضافة خدمة |
+| `/services/[id]/edit` | تعديل خدمة |
+| `/branches` | قائمة الفروع |
+| `/branches/new` | إضافة فرع |
+| `/branches/[id]/edit` | تعديل فرع |
+
+## إعداد البيئة
+
+انسخ `.env.example` إلى `.env.local` وأضف قيم مشروع Supabase:
 
 ```bash
-supabase db push
+EXPO_PUBLIC_SUPABASE_URL=https://your-project.supabase.co
+EXPO_PUBLIC_SUPABASE_ANON_KEY=your-anon-key
 ```
 
-## Catalog and orders
-
-When Supabase env vars are present:
-
-- Products and categories load from `products`, `categories`, and `merchants`.
-- Customer checkout calls `create_order_with_items` for atomic order creation.
-- Merchant and customer order lists load from `orders` + `order_items`.
-
-Without Supabase configuration, the app falls back to in-memory mock catalog and orders for local UI work.
-
-## Cart rules
-
-- Cart items persist locally between app restarts.
-- Only one merchant is allowed per cart; adding a product from another merchant is blocked at add time.
-- Checkout still validates mixed merchants as a final guard.
-
-## Database highlights
-
-- `orders.customer_name` stores a customer display snapshot for merchant order views.
-- `create_order_with_items` creates an order and its line items in one transaction.
-- Merchants can cancel orders while status is `pending`, `processing`, or `on_the_way`.
-
-## Scripts
+## الأوامر
 
 ```bash
-npm start
-npm run typecheck
-npm run doctor
+npm install          # تثبيت التبعيات
+npm start            # تشغيل خادم Metro
+npm run typecheck    # فحص أنواع TypeScript
+npm test             # تشغيل الاختبارات
+npm run release:check  # فحص جاهزية الإصدار (23 فحص)
+npm run quality:check  # بوابة الجودة الكاملة
 ```
 
-Optional Supabase type generation:
+## الاختبارات
 
 ```bash
-supabase gen types typescript --local > src/shared/types/supabase.generated.ts
+npm test
 ```
+
+الاختبارات تغطي:
+- انتقالات حالة الطلب (`requestSelectors`)
+- التحقق من نموذج المركبة (`vehicleSchema`)
+
+## الهجرات
+
+تسلسل هجرات Supabase:
+1. `initial_garaji_schema` — جداول profiles وmerchants.
+2. `auth_profile_bootstrap` — trigger إنشاء الملف الشخصي.
+3. `car_services_schema` — جداول vehicles/branches/services/service_requests/events مع RLS وRPCs.

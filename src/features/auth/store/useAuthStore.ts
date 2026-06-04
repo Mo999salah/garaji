@@ -9,8 +9,10 @@ import {
   type SignInCredentials,
   type SignUpCredentials,
 } from '@/features/auth/services/supabaseAuthService';
-import { useOrderStore } from '@/features/orders/store/useOrderStore';
-import { useProductStore } from '@/features/products/store/useProductStore';
+import { useBranchStore } from '@/features/branches/store/useBranchStore';
+import { useRequestStore } from '@/features/requests/store/useRequestStore';
+import { useServiceStore } from '@/features/services/store/useServiceStore';
+import { useVehicleStore } from '@/features/vehicles/store/useVehicleStore';
 import type { AuthUser, UserRole } from '@/shared/types/auth';
 import { resetSessionStores } from '@/shared/lib/sessionStores';
 
@@ -36,22 +38,25 @@ function getErrorMessage(error: unknown) {
     return error.message;
   }
 
-  return 'Something went wrong. Please try again.';
+  return 'حدث خطأ غير متوقع. حاول مرة أخرى.';
 }
 
 async function syncRoleData(user: AuthUser) {
   if (user.role === 'customer') {
     await Promise.all([
-      useProductStore.getState().loadCatalog(),
-      useOrderStore.getState().loadCustomerOrders(user.id),
+      useVehicleStore.getState().loadVehicles(user.id),
+      useRequestStore.getState().loadCustomerRequests(user.id),
+      useServiceStore.getState().loadActiveServices(),
+      useBranchStore.getState().loadActiveBranches(),
     ]);
     return;
   }
 
-  if (user.merchantId) {
+  if (user.role === 'merchant') {
     await Promise.all([
-      useProductStore.getState().loadMerchantCatalog(user.merchantId),
-      useOrderStore.getState().loadMerchantOrders(user.merchantId),
+      useRequestStore.getState().loadAllRequests(),
+      useServiceStore.getState().loadAllServices(),
+      useBranchStore.getState().loadAllBranches(),
     ]);
   }
 }
@@ -108,7 +113,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       const result = await signUpWithEmail(credentials);
 
       if (result.needsEmailConfirmation) {
-        const message = 'Check your email to confirm your account, then sign in.';
+        const message = 'تحقق من بريدك لتأكيد الحساب، ثم سجّل الدخول.';
         set({
           user: null,
           status: 'unauthenticated',
@@ -137,7 +142,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
         infoMessage: null,
       });
 
-      return { user: result.user, message: 'Account created.' };
+      return { user: result.user, message: 'تم إنشاء الحساب.' };
     } catch (error) {
       const message = getErrorMessage(error);
       set({ user: null, status: 'unauthenticated', hasHydrated: true, errorMessage: message });

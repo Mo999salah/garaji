@@ -41,7 +41,7 @@ export class AuthFlowError extends Error {
 
 function getSupabaseClient() {
   if (!isSupabaseConfigured || !supabase) {
-    throw new AuthFlowError('Authentication is not configured yet.');
+    throw new AuthFlowError('لم يتم إعداد المصادقة بعد.');
   }
 
   return supabase;
@@ -67,7 +67,7 @@ function logAuthError(context: string, error?: SupabaseAuthErrorDetails | null) 
 
 function getSafeAuthErrorMessage(error?: SupabaseAuthErrorDetails | null) {
   if (!error) {
-    return 'Sign up did not complete. Check your email and try again in a few minutes.';
+    return 'لم يكتمل إنشاء الحساب. تحقق من بريدك وحاول مرة أخرى بعد قليل.';
   }
 
   const normalized = error.message?.toLowerCase() ?? '';
@@ -78,11 +78,11 @@ function getSafeAuthErrorMessage(error?: SupabaseAuthErrorDetails | null) {
     normalized.includes('invalid login') ||
     normalized.includes('invalid credentials')
   ) {
-    return 'The email or password is incorrect.';
+    return 'البريد الإلكتروني أو كلمة المرور غير صحيحة.';
   }
 
   if (code === 'email_not_confirmed' || normalized.includes('email not confirmed')) {
-    return 'Please confirm your email before signing in.';
+    return 'يرجى تأكيد البريد الإلكتروني قبل تسجيل الدخول.';
   }
 
   if (
@@ -90,7 +90,7 @@ function getSafeAuthErrorMessage(error?: SupabaseAuthErrorDetails | null) {
     normalized.includes('user already registered') ||
     normalized.includes('already been registered')
   ) {
-    return 'An account already exists for this email. Try signing in instead.';
+    return 'يوجد حساب بهذا البريد. جرّب تسجيل الدخول بدلاً من ذلك.';
   }
 
   if (
@@ -100,7 +100,7 @@ function getSafeAuthErrorMessage(error?: SupabaseAuthErrorDetails | null) {
     normalized.includes('rate limit') ||
     normalized.includes('too many requests')
   ) {
-    return 'Too many signup attempts. Wait 15–60 minutes, or disable email confirmation in Supabase Auth settings while testing.';
+    return 'هناك محاولات كثيرة. انتظر من 15 إلى 60 دقيقة ثم حاول مرة أخرى.';
   }
 
   if (
@@ -109,7 +109,7 @@ function getSafeAuthErrorMessage(error?: SupabaseAuthErrorDetails | null) {
     normalized.includes('invalid format') ||
     normalized.includes('unable to validate email')
   ) {
-    return 'Enter a valid email address (for example name@example.com).';
+    return 'أدخل بريداً إلكترونياً صحيحاً مثل name@example.com.';
   }
 
   if (
@@ -117,7 +117,7 @@ function getSafeAuthErrorMessage(error?: SupabaseAuthErrorDetails | null) {
     normalized.includes('signups not allowed') ||
     normalized.includes('signups are disabled')
   ) {
-    return 'New signups are disabled on this Supabase project. Enable signups in Authentication settings.';
+    return 'إنشاء الحسابات متوقف حالياً في إعدادات Supabase.';
   }
 
   if (
@@ -125,27 +125,27 @@ function getSafeAuthErrorMessage(error?: SupabaseAuthErrorDetails | null) {
     normalized.includes('confirmation email') ||
     normalized.includes('smtp')
   ) {
-    return 'Could not send the confirmation email. Check Supabase Auth email settings or turn off “Confirm email” for local testing.';
+    return 'تعذّر إرسال رسالة التأكيد. تحقق من إعدادات البريد في Supabase.';
   }
 
   if (normalized.includes('invalid signup role') || normalized.includes('invalid role')) {
-    return 'Choose a valid account type and try again.';
+    return 'اختر نوع حساب صحيحاً ثم حاول مرة أخرى.';
   }
 
   if (normalized.includes('merchant_name is required')) {
-    return 'Enter your merchant name to create a merchant account.';
+    return 'أدخل اسم المنشأة لإنشاء حساب تاجر.';
   }
 
   if (normalized.includes('database error') || code === 'unexpected_failure') {
-    return 'Account setup failed on the server. Ensure Supabase migrations are applied, then try again.';
+    return 'تعذّر إعداد الحساب في الخادم. تأكد من تطبيق هجرات Supabase ثم حاول مرة أخرى.';
   }
 
   if (code === 'weak_password' || normalized.includes('password')) {
-    return 'Please choose a stronger password (at least 8 characters).';
+    return 'اختر كلمة مرور أقوى، 8 أحرف على الأقل.';
   }
 
   logAuthError('unmapped auth error', error);
-  return 'Authentication failed. Please try again.';
+  return 'تعذّرت المصادقة. حاول مرة أخرى.';
 }
 
 function isDuplicateSignupUser(user: { identities?: unknown[] | null } | null) {
@@ -163,7 +163,7 @@ async function loadProfileUserWithRetry(authUserId: string, attempts = 5): Promi
 
       if (
         error instanceof AuthFlowError &&
-        error.message === 'Your account profile is not ready yet.' &&
+        error.message === 'ملف الحساب غير جاهز بعد.' &&
         attempt < attempts - 1
       ) {
         await new Promise((resolve) => setTimeout(resolve, 400));
@@ -186,15 +186,15 @@ async function loadProfileUser(authUserId: string): Promise<AuthUser> {
     .maybeSingle<ProfileRow>();
 
   if (profileError) {
-    throw new AuthFlowError('We could not load your account profile.');
+    throw new AuthFlowError('تعذّر تحميل ملف الحساب.');
   }
 
   if (!profile) {
-    throw new AuthFlowError('Your account profile is not ready yet.');
+    throw new AuthFlowError('ملف الحساب غير جاهز بعد.');
   }
 
   if (profile.role !== 'customer' && profile.role !== 'merchant') {
-    throw new AuthFlowError('Your account role is not supported.');
+    throw new AuthFlowError('نوع الحساب غير مدعوم.');
   }
 
   let merchantId: string | undefined;
@@ -208,11 +208,11 @@ async function loadProfileUser(authUserId: string): Promise<AuthUser> {
       .maybeSingle<MerchantRow>();
 
     if (merchantError) {
-      throw new AuthFlowError('We could not load your merchant account.');
+      throw new AuthFlowError('تعذّر تحميل حساب التاجر.');
     }
 
     if (!merchant?.id) {
-      throw new AuthFlowError('Your merchant account is not ready yet.');
+      throw new AuthFlowError('حساب التاجر غير جاهز بعد.');
     }
 
     merchantId = merchant.id;
@@ -222,7 +222,7 @@ async function loadProfileUser(authUserId: string): Promise<AuthUser> {
   return {
     id: profile.id,
     role: profile.role,
-    fullName: profile.full_name ?? 'Qitaa user',
+    fullName: profile.full_name ?? 'مستخدم قِطع',
     phone: profile.phone ?? undefined,
     merchantId,
     merchantName,
@@ -243,11 +243,15 @@ export async function requestPasswordReset(email: string) {
 }
 
 export async function getCurrentAuthUser() {
+  if (!isSupabaseConfigured) {
+    return null;
+  }
+
   const client = getSupabaseClient();
   const { data, error } = await client.auth.getSession();
 
   if (error) {
-    throw new AuthFlowError('We could not restore your session.');
+    throw new AuthFlowError('تعذّرت استعادة الجلسة.');
   }
 
   if (!data.session?.user.id) {
@@ -299,7 +303,7 @@ export async function signUpWithEmail(credentials: SignUpCredentials): Promise<S
   }
 
   if (isDuplicateSignupUser(data.user)) {
-    throw new AuthFlowError('An account already exists for this email. Try signing in instead.');
+    throw new AuthFlowError('يوجد حساب بهذا البريد. جرّب تسجيل الدخول بدلاً من ذلك.');
   }
 
   if (!data.session) {
@@ -320,6 +324,6 @@ export async function signOutSupabase() {
   const { error } = await client.auth.signOut();
 
   if (error) {
-    throw new AuthFlowError('We could not sign you out. Please try again.');
+    throw new AuthFlowError('تعذّر تسجيل الخروج. حاول مرة أخرى.');
   }
 }

@@ -1,33 +1,146 @@
--- Optional local seed data for Qitaa.
--- Replace owner_id values after creating demo auth users/profiles.
+-- Car services platform seed data.
+-- Branches and services are safe to re-run (upsert by id).
+-- These fixed UUIDs allow reproducible local dev and tests.
 
-insert into public.categories (id, name, sort_order)
+-- ============================================================
+-- Branches
+-- ============================================================
+insert into public.branches (id, name, city, address, phone, working_hours, is_active)
 values
-  ('00000000-0000-0000-0000-000000000101', 'Brakes', 10),
-  ('00000000-0000-0000-0000-000000000102', 'Filters', 20),
-  ('00000000-0000-0000-0000-000000000103', 'Engine', 30),
-  ('00000000-0000-0000-0000-000000000104', 'Electrical', 40),
-  ('00000000-0000-0000-0000-000000000105', 'Suspension', 50)
-on conflict (id) do nothing;
+  (
+    '00000000-0000-0000-0001-000000000001',
+    'الرياض — الفرع الرئيسي',
+    'الرياض',
+    'طريق الملك فهد، حي العليا',
+    '+966-11-000-0001',
+    'السبت – الخميس: 8ص – 8م',
+    true
+  ),
+  (
+    '00000000-0000-0000-0001-000000000002',
+    'الرياض — الشرقية',
+    'الرياض',
+    'شارع الأمير محمد بن عبدالعزيز، حي الشرقية',
+    '+966-11-000-0002',
+    'السبت – الخميس: 8ص – 6م',
+    true
+  ),
+  (
+    '00000000-0000-0000-0001-000000000003',
+    'جدة — الفرع الرئيسي',
+    'جدة',
+    'شارع التحلية، حي الروضة',
+    '+966-12-000-0003',
+    'السبت – الخميس: 8ص – 8م',
+    true
+  ),
+  (
+    '00000000-0000-0000-0001-000000000004',
+    'الدمام — الفرع الرئيسي',
+    'الدمام',
+    'شارع الملك فيصل، حي الفيصلية',
+    '+966-13-000-0004',
+    'السبت – الخميس: 8ص – 6م',
+    true
+  )
+on conflict (id) do update set
+  name          = excluded.name,
+  city          = excluded.city,
+  address       = excluded.address,
+  phone         = excluded.phone,
+  working_hours = excluded.working_hours,
+  is_active     = excluded.is_active;
 
--- Example product seed. This is commented out because it requires a real merchant row.
--- insert into public.products (
---   merchant_id,
---   category_id,
---   name,
---   brand,
---   description,
---   price,
---   unit,
---   is_active
--- )
--- values (
---   '<merchant-id>',
---   '00000000-0000-0000-0000-000000000101',
---   'Ceramic Brake Pad Set',
---   'Akebono',
---   'Low-dust front axle brake pads for high-mileage fleet vehicles.',
---   42.50,
---   'set',
---   true
--- );
+-- ============================================================
+-- Services
+-- ============================================================
+insert into public.services (id, name, description, service_type, estimated_price, duration_minutes, is_active, sort_order)
+values
+  (
+    '00000000-0000-0000-0002-000000000001',
+    'تغيير الزيت والفلتر',
+    'تغيير زيت المحرك وفلتر الزيت مع فحص شامل للسوائل.',
+    'both',
+    150.00,
+    45,
+    true,
+    10
+  ),
+  (
+    '00000000-0000-0000-0002-000000000002',
+    'الصيانة الدورية (5,000 كم)',
+    'صيانة شاملة كل 5,000 كم: زيت، فلاتر، إطارات، فرامل.',
+    'branch',
+    350.00,
+    90,
+    true,
+    20
+  ),
+  (
+    '00000000-0000-0000-0002-000000000003',
+    'الصيانة الدورية (10,000 كم)',
+    'صيانة كاملة كل 10,000 كم مع التحقق من جميع أنظمة السيارة.',
+    'branch',
+    550.00,
+    120,
+    true,
+    30
+  ),
+  (
+    '00000000-0000-0000-0002-000000000004',
+    'فحص شامل',
+    'فحص 100 نقطة لجميع أنظمة السيارة مع تقرير مفصل.',
+    'branch',
+    200.00,
+    60,
+    true,
+    40
+  ),
+  (
+    '00000000-0000-0000-0002-000000000005',
+    'تغيير الزيت بالموقع',
+    'نأتي إليك: تغيير زيت المحرك وفلتر الزيت في موقعك.',
+    'mobile',
+    180.00,
+    60,
+    true,
+    50
+  ),
+  (
+    '00000000-0000-0000-0002-000000000006',
+    'فحص وتبديل الفرامل',
+    'فحص نظام الفرامل وتبديل التيل والأقراص عند الحاجة.',
+    'branch',
+    null,
+    90,
+    true,
+    60
+  ),
+  (
+    '00000000-0000-0000-0002-000000000007',
+    'ضخ الهواء وتدوير الإطارات',
+    'فحص الضغط وتدوير الإطارات لتوزيع التآكل بالتساوي.',
+    'both',
+    80.00,
+    30,
+    true,
+    70
+  ),
+  (
+    '00000000-0000-0000-0002-000000000008',
+    'تنظيف المحرك بالبخار',
+    'تنظيف عميق لحجرة المحرك بالبخار.',
+    'branch',
+    120.00,
+    45,
+    true,
+    80
+  )
+on conflict (id) do update set
+  name              = excluded.name,
+  description       = excluded.description,
+  service_type      = excluded.service_type,
+  estimated_price   = excluded.estimated_price,
+  duration_minutes  = excluded.duration_minutes,
+  is_active         = excluded.is_active,
+  sort_order        = excluded.sort_order;
