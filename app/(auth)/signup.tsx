@@ -3,9 +3,10 @@ import type { Href } from 'expo-router';
 import { router } from 'expo-router';
 import { useMemo, useState } from 'react';
 import { Controller, useForm, useWatch } from 'react-hook-form';
-import { Text, View } from 'react-native';
+import { View } from 'react-native';
 import { z } from 'zod';
 
+import { AppText as Text } from '@/shared/components/AppText';
 import {
   AuthNotice,
   AuthScreen,
@@ -230,7 +231,7 @@ export default function SignupScreen() {
         </AppButton>
 
         <View className="flex-row items-center justify-center gap-2">
-          <Text className="text-sm text-muted">لديك حساب؟</Text>
+          <Text className="font-sans text-sm text-muted">لديك حساب؟</Text>
           <AuthTextButton onPress={() => router.replace('/(auth)/login' as Href)}>
             تسجيل الدخول
           </AuthTextButton>
@@ -253,7 +254,7 @@ function PasswordMeter({ score }: { score: number }) {
           />
         ))}
       </View>
-      <Text className="text-right text-xs font-medium text-muted">قوة كلمة المرور: {label}</Text>
+      <Text className="font-sans text-right text-xs font-medium text-muted">قوة كلمة المرور: {label}</Text>
     </View>
   );
 }

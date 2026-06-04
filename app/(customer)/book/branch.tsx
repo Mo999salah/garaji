@@ -1,10 +1,11 @@
 import { zodResolver } from '@hookform/resolvers/zod';
 import { router } from 'expo-router';
 import { Controller, useForm } from 'react-hook-form';
-import { Alert, ScrollView, Text, TouchableOpacity, View } from 'react-native';
+import { Alert, ScrollView, TouchableOpacity, View } from 'react-native';
 
 import { BranchCard } from '@/features/branches/components/BranchCard';
 import { useBranchStore } from '@/features/branches/store/useBranchStore';
+import { AppText as Text } from '@/shared/components/AppText';
 import {
   branchBookingSchema,
   type BranchBookingValues,
@@ -17,6 +18,7 @@ import { useVehicleStore } from '@/features/vehicles/store/useVehicleStore';
 import { AppButton } from '@/shared/components/AppButton';
 import { AppInput } from '@/shared/components/AppInput';
 import { EmptyState } from '@/shared/components/EmptyState';
+import { CommandHeader, SectionHeader, StepIndicator } from '@/shared/components/OperationalUI';
 import { ScreenContainer } from '@/shared/components/ScreenContainer';
 
 const TIME_SLOTS = ['08:00', '10:00', '12:00', '14:00', '16:00', '18:00'];
@@ -64,6 +66,10 @@ export default function BookBranchScreen() {
   const selectedBranchId = watch('branchId');
   const selectedDate = watch('date');
   const selectedTime = watch('time');
+  const currentStep = selectedVehicleId && selectedServiceId && selectedBranchId && selectedTime ? 4
+    : selectedVehicleId && selectedServiceId && selectedBranchId ? 3
+      : selectedVehicleId && selectedServiceId ? 2
+        : 1;
 
   const onSubmit = async (values: BranchBookingValues & { date: string; time: string }) => {
     if (!values.date || !values.time) {
@@ -104,12 +110,16 @@ export default function BookBranchScreen() {
 
   return (
     <ScreenContainer scroll={false}>
-      <ScrollView contentContainerClassName="gap-5 p-4">
-        <Text className="text-2xl font-bold text-ink">حجز موعد في الفرع</Text>
+      <ScrollView contentContainerClassName="gap-5 px-5 py-5">
+        <CommandHeader
+          eyebrow="حجز فرع"
+          subtitle="اختر السيارة والخدمة والفرع، ثم ثبّت الموعد."
+          title="موعد صيانة"
+        />
+        <StepIndicator current={currentStep} steps={['السيارة', 'الخدمة', 'الفرع', 'التأكيد']} />
 
-        {/* اختيار السيارة */}
         <View className="gap-2">
-          <Text className="text-sm font-semibold text-ink">اختر السيارة</Text>
+          <SectionHeader title="اختر السيارة" />
           {vehicles.map((v) => (
             <VehicleCard
               key={v.id}
@@ -119,13 +129,12 @@ export default function BookBranchScreen() {
             />
           ))}
           {errors.vehicleId ? (
-            <Text className="text-sm text-red-600">{errors.vehicleId.message}</Text>
+            <Text className="font-sans text-sm text-red-600">{errors.vehicleId.message}</Text>
           ) : null}
         </View>
 
-        {/* اختيار الخدمة */}
         <View className="gap-2">
-          <Text className="text-sm font-semibold text-ink">اختر الخدمة</Text>
+          <SectionHeader title="اختر الخدمة" />
           {services.map((sv) => (
             <ServiceCard
               key={sv.id}
@@ -135,13 +144,12 @@ export default function BookBranchScreen() {
             />
           ))}
           {errors.serviceId ? (
-            <Text className="text-sm text-red-600">{errors.serviceId.message}</Text>
+            <Text className="font-sans text-sm text-red-600">{errors.serviceId.message}</Text>
           ) : null}
         </View>
 
-        {/* اختيار الفرع */}
         <View className="gap-2">
-          <Text className="text-sm font-semibold text-ink">اختر الفرع</Text>
+          <SectionHeader title="اختر الفرع" />
           {branches.map((b) => (
             <BranchCard
               key={b.id}
@@ -151,11 +159,11 @@ export default function BookBranchScreen() {
             />
           ))}
           {errors.branchId ? (
-            <Text className="text-sm text-red-600">{errors.branchId.message}</Text>
+            <Text className="font-sans text-sm text-red-600">{errors.branchId.message}</Text>
           ) : null}
         </View>
 
-        {/* اختيار اليوم */}
+        <SectionHeader subtitle="اختر تاريخًا ووقتًا يناسبك." title="موعد الخدمة" />
         <Controller
           control={control as any}
           name={'date' as any}
@@ -171,9 +179,8 @@ export default function BookBranchScreen() {
           )}
         />
 
-        {/* اختيار الوقت */}
         <View className="gap-2">
-          <Text className="text-sm font-semibold text-ink">الوقت المفضّل</Text>
+          <Text className="font-sans text-sm font-semibold text-ink">الوقت المفضّل</Text>
           <View className="flex-row flex-wrap gap-2">
             {TIME_SLOTS.map((slot) => (
               <TouchableOpacity
@@ -188,7 +195,7 @@ export default function BookBranchScreen() {
                 onPress={() => setValue('time' as any, slot)}
               >
                 <Text
-                  className={`text-sm font-semibold ${
+                  className={`font-sans text-sm font-semibold ${
                     selectedTime === slot ? 'text-brand-700' : 'text-ink'
                   }`}
                 >

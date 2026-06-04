@@ -1,6 +1,6 @@
 import { router } from 'expo-router';
 import { useEffect, useState } from 'react';
-import { ScrollView, Text, TouchableOpacity, View } from 'react-native';
+import { ScrollView, View } from 'react-native';
 
 import { RequestCard } from '@/features/requests/components/RequestCard';
 import {
@@ -11,6 +11,7 @@ import { useRequestStore } from '@/features/requests/store/useRequestStore';
 import { useAuthStore } from '@/features/auth/store/useAuthStore';
 import { EmptyState } from '@/shared/components/EmptyState';
 import { LoadingSpinner } from '@/shared/components/LoadingSpinner';
+import { CommandHeader, FilterTabs } from '@/shared/components/OperationalUI';
 import { ScreenContainer } from '@/shared/components/ScreenContainer';
 
 type Tab = 'active' | 'history';
@@ -27,36 +28,26 @@ export default function RequestsIndexScreen() {
   const active = selectActiveRequests(requests);
   const history = selectCompletedRequests(requests);
   const displayed = activeTab === 'active' ? active : history;
+  const tabs = [
+    { id: 'active' as const, label: 'نشطة', count: active.length },
+    { id: 'history' as const, label: 'السجل', count: history.length },
+  ];
 
   return (
     <ScreenContainer scroll={false}>
-      {/* Tabs */}
-      <View className="flex-row border-b border-line">
-        {(['active', 'history'] as Tab[]).map((tab) => {
-          const label = tab === 'active' ? 'الطلبات النشطة' : 'السجل';
-          const isSelected = activeTab === tab;
-          return (
-            <TouchableOpacity
-              className={`flex-1 py-3 ${isSelected ? 'border-b-2 border-brand-600' : ''}`}
-              key={tab}
-              onPress={() => setActiveTab(tab)}
-            >
-              <Text
-                className={`text-center text-sm font-semibold ${
-                  isSelected ? 'text-brand-700' : 'text-muted'
-                }`}
-              >
-                {label}
-              </Text>
-            </TouchableOpacity>
-          );
-        })}
+      <View className="gap-4 px-5 py-5">
+        <CommandHeader
+          eyebrow="طلباتك"
+          subtitle="تابع الطلبات النشطة، وارجع للسجل عند الحاجة."
+          title="متابعة الصيانة"
+        />
+        <FilterTabs<Tab> active={activeTab} onChange={setActiveTab} tabs={tabs} />
       </View>
 
       {isLoading ? (
         <LoadingSpinner />
       ) : (
-        <ScrollView contentContainerClassName="gap-3 p-4">
+        <ScrollView contentContainerClassName="gap-3 px-5 pb-5">
           {displayed.length === 0 ? (
             <EmptyState
               message={

@@ -1,4 +1,4 @@
-import { Text, View } from 'react-native';
+import { View } from 'react-native';
 
 import { BranchCard } from '@/features/branches/components/BranchCard';
 import { useBranchStore } from '@/features/branches/store/useBranchStore';
@@ -6,6 +6,7 @@ import { EmptyState } from '@/shared/components/EmptyState';
 import { LoadingSpinner } from '@/shared/components/LoadingSpinner';
 import { ScreenContainer } from '@/shared/components/ScreenContainer';
 
+import { AppText as Text } from '@/shared/components/AppText';
 export default function BranchesIndexScreen() {
   const { branches, error, isLoading } = useBranchStore();
   const activeBranches = branches.filter((b) => b.isActive);
@@ -13,7 +14,7 @@ export default function BranchesIndexScreen() {
   return (
     <ScreenContainer>
       <View className="gap-5">
-        <Text className="text-2xl font-bold text-ink">فروعنا</Text>
+        <Text className="font-sans text-2xl font-bold text-ink">فروعنا</Text>
 
         {isLoading ? (
           <LoadingSpinner label="جارٍ تحميل الفروع..." />

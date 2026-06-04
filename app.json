@@ -29,7 +29,48 @@
     },
     "plugins": [
       "expo-router",
-      "expo-secure-store"
+      "expo-secure-store",
+      [
+        "expo-font",
+        {
+          "fonts": [
+            "./assets/fonts/Tajawal-Regular.ttf",
+            "./assets/fonts/Tajawal-Medium.ttf",
+            "./assets/fonts/Tajawal-Bold.ttf",
+            "./assets/fonts/Tajawal-ExtraBold.ttf",
+            "./assets/fonts/Tajawal-Black.ttf"
+          ],
+          "android": {
+            "fonts": [
+              {
+                "fontFamily": "Tajawal",
+                "fontDefinitions": [
+                  {
+                    "path": "./assets/fonts/Tajawal-Regular.ttf",
+                    "weight": 400
+                  },
+                  {
+                    "path": "./assets/fonts/Tajawal-Medium.ttf",
+                    "weight": 500
+                  },
+                  {
+                    "path": "./assets/fonts/Tajawal-Bold.ttf",
+                    "weight": 700
+                  },
+                  {
+                    "path": "./assets/fonts/Tajawal-ExtraBold.ttf",
+                    "weight": 800
+                  },
+                  {
+                    "path": "./assets/fonts/Tajawal-Black.ttf",
+                    "weight": 900
+                  }
+                ]
+              }
+            ]
+          }
+        }
+      ]
     ]
   }
 }

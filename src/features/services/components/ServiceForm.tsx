@@ -1,5 +1,5 @@
 import { Controller, useForm } from 'react-hook-form';
-import { ScrollView, Text, TouchableOpacity, View } from 'react-native';
+import { ScrollView, TouchableOpacity, View } from 'react-native';
 import { zodResolver } from '@hookform/resolvers/zod';
 
 import { serviceSchema, type ServiceFormValues } from '@/features/services/schemas/serviceSchema';
@@ -7,6 +7,7 @@ import { AppButton } from '@/shared/components/AppButton';
 import { AppInput } from '@/shared/components/AppInput';
 import type { ServiceType } from '@/features/services/types';
 
+import { AppText as Text } from '@/shared/components/AppText';
 interface ServiceFormProps {
   initialValues?: Partial<ServiceFormValues>;
   onSubmit: (values: ServiceFormValues) => Promise<void>;
@@ -85,7 +86,7 @@ export function ServiceForm({
         name="serviceType"
         render={({ field: { onChange, value } }) => (
           <View className="gap-2">
-            <Text className="text-sm font-semibold text-ink">نوع الخدمة</Text>
+            <Text className="font-sans text-sm font-semibold text-ink">نوع الخدمة</Text>
             <View className="flex-row gap-2">
               {SERVICE_TYPE_OPTIONS.map((opt) => (
                 <TouchableOpacity
@@ -98,7 +99,7 @@ export function ServiceForm({
                   onPress={() => onChange(opt.value)}
                 >
                   <Text
-                    className={`text-center text-xs font-semibold ${
+                    className={`font-sans text-center text-xs font-semibold ${
                       value === opt.value ? 'text-brand-700' : 'text-ink'
                     }`}
                   >
@@ -108,7 +109,7 @@ export function ServiceForm({
               ))}
             </View>
             {errors.serviceType ? (
-              <Text className="text-sm text-red-600">{errors.serviceType.message}</Text>
+              <Text className="font-sans text-sm text-red-600">{errors.serviceType.message}</Text>
             ) : null}
           </View>
         )}

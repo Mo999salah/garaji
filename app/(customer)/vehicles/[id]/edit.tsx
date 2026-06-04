@@ -1,5 +1,5 @@
 import { router, useLocalSearchParams } from 'expo-router';
-import { Text } from 'react-native';
+
 
 import { VehicleForm } from '@/features/vehicles/components/VehicleForm';
 import { useVehicleStore } from '@/features/vehicles/store/useVehicleStore';
@@ -7,6 +7,7 @@ import { EmptyState } from '@/shared/components/EmptyState';
 import { ScreenContainer } from '@/shared/components/ScreenContainer';
 import type { VehicleFormValues } from '@/features/vehicles/schemas/vehicleSchema';
 
+import { AppText as Text } from '@/shared/components/AppText';
 export default function EditVehicleScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const { updateVehicle, isLoading, vehicles } = useVehicleStore();
@@ -27,7 +28,7 @@ export default function EditVehicleScreen() {
 
   return (
     <ScreenContainer scroll={false}>
-      <Text className="mb-4 px-4 text-2xl font-bold text-ink">تعديل بيانات السيارة</Text>
+      <Text className="font-sans mb-4 px-4 text-2xl font-bold text-ink">تعديل بيانات السيارة</Text>
       <VehicleForm
         initialValues={{
           make: vehicle.make,

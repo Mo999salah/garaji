@@ -3,9 +3,10 @@ import type { Href } from 'expo-router';
 import { router } from 'expo-router';
 import { useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
-import { Text, View } from 'react-native';
+import { View } from 'react-native';
 import { z } from 'zod';
 
+import { AppText as Text } from '@/shared/components/AppText';
 import {
   AuthNotice,
   AuthScreen,
@@ -57,10 +58,11 @@ export default function LoginScreen() {
     <AuthScreen
       eyebrow="تسجيل الدخول"
       footer="تتم حماية الجلسة وبيانات الحساب عبر Supabase وسياسات الوصول."
-      subtitle="ادخل إلى مساحة العميل أو التاجر من مكان واحد."
+      subtitle="ادخل إلى جراجك الرقمي وتابع مواعيد الصيانة وطلبات الموقع من مكان واحد."
       title="مرحباً بعودتك"
+      variant="login"
     >
-      <View className="gap-4">
+      <View className="gap-5">
         <Controller
           control={control}
           name="email"
@@ -105,21 +107,27 @@ export default function LoginScreen() {
           )}
         />
 
-        <View className="items-end">
-          <AuthTextButton onPress={() => router.push('/(auth)/forgot-password' as Href)}>
-            نسيت كلمة المرور؟
-          </AuthTextButton>
-        </View>
-
         <AuthNotice message={infoMessage} tone="success" />
         <AuthNotice message={errorMessage} tone="error" />
 
-        <AppButton loading={isSubmitting} onPress={() => void onSubmit()}>
-          تسجيل الدخول
-        </AppButton>
+        <View className="gap-3">
+          <View className="items-end">
+            <AuthTextButton onPress={() => router.push('/(auth)/forgot-password' as Href)}>
+              نسيت كلمة المرور؟
+            </AuthTextButton>
+          </View>
 
-        <View className="flex-row items-center justify-center gap-2">
-          <Text className="text-sm text-muted">ليس لديك حساب؟</Text>
+          <AppButton
+            loading={isSubmitting}
+            onPress={() => void onSubmit()}
+            className="min-h-14 border-gold-500 bg-gold-500 shadow-md shadow-gold-700/20 dark:border-gold-500 dark:bg-gold-500"
+          >
+            تسجيل الدخول
+          </AppButton>
+        </View>
+
+        <View className="flex-row-reverse items-center justify-center gap-2 border-t border-line pt-4 dark:border-dark-line">
+          <Text className="font-sans text-sm text-muted">ليس لديك حساب؟</Text>
           <AuthTextButton onPress={() => router.push('/(auth)/signup' as Href)}>
             إنشاء حساب
           </AuthTextButton>

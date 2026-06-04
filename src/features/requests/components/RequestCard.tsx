@@ -1,8 +1,10 @@
-import { Pressable, Text, View } from 'react-native';
+import { View } from 'react-native';
 
 import { RequestStatusBadge } from '@/features/requests/components/RequestStatusBadge';
 import type { ServiceRequest, ServiceRequestType } from '@/features/requests/types';
+import { AnimatedPressable } from '@/shared/components/AnimatedPressable';
 
+import { AppText as Text } from '@/shared/components/AppText';
 interface RequestCardProps {
   request: ServiceRequest;
   onPress?: () => void;
@@ -28,40 +30,45 @@ function formatDate(iso: string): string {
 
 export function RequestCard({ onPress, request, serviceName, vehicleName }: RequestCardProps) {
   return (
-    <Pressable
+    <AnimatedPressable
       accessibilityLabel={`طلب ${REQUEST_TYPE_LABELS[request.requestType]}`}
       accessibilityRole="button"
-      className="rounded-lg border border-line bg-white p-4 shadow-sm active:opacity-80"
+      className="rounded-lg border border-line bg-card p-4 dark:border-dark-line dark:bg-dark-card"
       onPress={onPress}
     >
-      <View className="flex-row items-start justify-between gap-3">
-        <View className="flex-1">
-          {serviceName ? (
-            <Text className="text-base font-bold text-ink">{serviceName}</Text>
-          ) : null}
-          <Text className="mt-0.5 text-xs text-muted">
-            {REQUEST_TYPE_LABELS[request.requestType]}
-          </Text>
+      <View className="gap-3">
+        <View className="flex-row-reverse items-start justify-between gap-3">
+          <View className="flex-1 items-end">
+            <Text className="font-sans text-right text-base font-bold text-ink dark:text-dark-ink">
+              {serviceName ?? REQUEST_TYPE_LABELS[request.requestType]}
+            </Text>
+            <Text className="font-sans mt-0.5 text-right text-xs text-muted dark:text-dark-muted">
+              {REQUEST_TYPE_LABELS[request.requestType]}
+            </Text>
+          </View>
+          <View className="items-start gap-2">
+            <RequestStatusBadge status={request.status} />
+            {request.estimatedPrice !== undefined ? (
+              <Text className="font-sans text-base font-bold text-gold-600 dark:text-dark-gold-500">
+                {(request.finalPrice ?? request.estimatedPrice).toLocaleString('ar-SA')} ر.س
+              </Text>
+            ) : null}
+          </View>
+        </View>
+
+        <View className="items-end border-t border-line pt-3 dark:border-dark-line">
           {vehicleName ? (
-            <Text className="mt-1 text-sm text-muted">🚗 {vehicleName}</Text>
+            <Text className="font-sans text-right text-sm text-muted dark:text-dark-muted">المركبة: {vehicleName}</Text>
           ) : null}
-          <Text className="mt-1 text-sm text-muted">📅 {formatDate(request.scheduledAt)}</Text>
+          <Text className="font-sans mt-1 text-right text-sm text-muted dark:text-dark-muted">الموعد: {formatDate(request.scheduledAt)}</Text>
           {request.branchId && request.requestType === 'branch_appointment' ? (
-            <Text className="mt-0.5 text-xs text-muted">📍 فرع محدد</Text>
+            <Text className="font-sans mt-1 text-right text-xs text-muted dark:text-dark-muted">فرع محدد</Text>
           ) : null}
           {request.locationAddress ? (
-            <Text className="mt-0.5 text-xs text-muted">📍 {request.locationAddress}</Text>
-          ) : null}
-        </View>
-        <View className="items-end gap-2">
-          <RequestStatusBadge status={request.status} />
-          {request.estimatedPrice !== undefined ? (
-            <Text className="text-base font-bold text-brand-700">
-              {(request.finalPrice ?? request.estimatedPrice).toLocaleString('ar-SA')} ر.س
-            </Text>
+            <Text className="font-sans mt-1 text-right text-xs text-muted dark:text-dark-muted">{request.locationAddress}</Text>
           ) : null}
         </View>
       </View>
-    </Pressable>
+    </AnimatedPressable>
   );
 }

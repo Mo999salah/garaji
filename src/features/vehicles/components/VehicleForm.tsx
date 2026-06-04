@@ -1,11 +1,12 @@
 import { Controller, useForm } from 'react-hook-form';
-import { ScrollView, Text, View } from 'react-native';
+import { ScrollView, View } from 'react-native';
 import { zodResolver } from '@hookform/resolvers/zod';
 
 import { vehicleSchema, type VehicleFormValues } from '@/features/vehicles/schemas/vehicleSchema';
 import { AppButton } from '@/shared/components/AppButton';
 import { AppInput } from '@/shared/components/AppInput';
 
+import { AppText as Text } from '@/shared/components/AppText';
 interface VehicleFormProps {
   initialValues?: Partial<VehicleFormValues>;
   onSubmit: (values: VehicleFormValues) => Promise<void>;
@@ -139,7 +140,7 @@ export function VehicleForm({
 
       {Object.keys(errors).length > 0 && (
         <View className="rounded-lg border border-red-200 bg-red-50 p-3">
-          <Text className="text-sm text-red-700">يرجى تصحيح الأخطاء أعلاه.</Text>
+          <Text className="font-sans text-sm text-red-700">يرجى تصحيح الأخطاء أعلاه.</Text>
         </View>
       )}
 

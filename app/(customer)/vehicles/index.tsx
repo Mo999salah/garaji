@@ -1,5 +1,5 @@
 import { router } from 'expo-router';
-import { Text, View } from 'react-native';
+import { View } from 'react-native';
 
 import { VehicleCard } from '@/features/vehicles/components/VehicleCard';
 import { useVehicleStore } from '@/features/vehicles/store/useVehicleStore';
@@ -8,6 +8,7 @@ import { EmptyState } from '@/shared/components/EmptyState';
 import { LoadingSpinner } from '@/shared/components/LoadingSpinner';
 import { ScreenContainer } from '@/shared/components/ScreenContainer';
 
+import { AppText as Text } from '@/shared/components/AppText';
 export default function VehiclesIndexScreen() {
   const { errorMessage, isLoading, vehicles } = useVehicleStore();
 
@@ -15,7 +16,7 @@ export default function VehiclesIndexScreen() {
     <ScreenContainer>
       <View className="gap-5">
         <View className="flex-row items-center justify-between gap-3">
-          <Text className="text-2xl font-bold text-ink">جراج سياراتي</Text>
+          <Text className="font-sans text-2xl font-bold text-ink">جراج سياراتي</Text>
           <AppButton onPress={() => router.push('/(customer)/vehicles/new')}>+ إضافة</AppButton>
         </View>
 

@@ -1,11 +1,12 @@
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Controller, useForm } from 'react-hook-form';
-import { ScrollView, Switch, Text, View } from 'react-native';
+import { ScrollView, Switch, View } from 'react-native';
 
 import { branchSchema, type BranchFormValues } from '@/features/branches/schemas/branchSchema';
 import { AppButton } from '@/shared/components/AppButton';
 import { AppInput } from '@/shared/components/AppInput';
 
+import { AppText as Text } from '@/shared/components/AppText';
 interface BranchFormProps {
   initialValues?: Partial<BranchFormValues>;
   onSubmit: (values: BranchFormValues) => Promise<void> | void;
@@ -125,7 +126,7 @@ export function BranchForm({
         name="isActive"
         render={({ field: { onChange, value } }) => (
           <View className="flex-row items-center justify-between">
-            <Text className="text-sm font-medium text-ink">الفرع نشط</Text>
+            <Text className="font-sans text-sm font-medium text-ink">الفرع نشط</Text>
             <Switch onValueChange={onChange} value={value} />
           </View>
         )}

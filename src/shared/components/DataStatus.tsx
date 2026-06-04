@@ -1,8 +1,9 @@
-import { Text, View } from 'react-native';
+import { View } from 'react-native';
 
 import { AppButton } from '@/shared/components/AppButton';
 import { LoadingSpinner } from '@/shared/components/LoadingSpinner';
 
+import { AppText as Text } from '@/shared/components/AppText';
 interface DataStatusProps {
   errorMessage?: string | null;
   errorTitle?: string;
@@ -20,22 +21,22 @@ export function DataStatus({
 }: DataStatusProps) {
   if (isLoading) {
     return (
-      <View className="rounded-lg border border-line bg-white p-5">
+      <View className="rounded-lg border border-line bg-card p-5 dark:border-dark-line dark:bg-dark-card">
         <LoadingSpinner label={loadingLabel} />
-        <Text className="mt-2 text-center text-sm font-semibold text-muted">{loadingLabel}</Text>
+        <Text className="font-sans mt-2 text-center text-sm font-semibold text-muted dark:text-dark-muted">{loadingLabel}</Text>
       </View>
     );
   }
 
   if (errorMessage) {
     return (
-      <View className="rounded-lg border border-red-100 bg-red-50 p-4">
-        <Text className="text-base font-bold text-red-700">{errorTitle}</Text>
-        <Text className="mt-1 text-sm leading-5 text-red-700">{errorMessage}</Text>
+      <View className="rounded-lg border border-red-200 bg-red-50 p-5 dark:border-red-800 dark:bg-red-950/40">
+        <Text className="font-sans text-base font-bold text-red-800 dark:text-red-300">{errorTitle}</Text>
+        <Text className="font-sans mt-1 text-sm leading-5 text-red-600 dark:text-red-400">{errorMessage}</Text>
         {onRetry ? (
-          <View className="mt-3">
+          <View className="mt-4">
             <AppButton onPress={onRetry} variant="secondary">
-              Retry
+              إعادة المحاولة
             </AppButton>
           </View>
         ) : null}

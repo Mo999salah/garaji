@@ -1,10 +1,11 @@
 import type { ErrorInfo, ReactNode } from 'react';
 import { Component } from 'react';
-import { Text, View } from 'react-native';
+import { View } from 'react-native';
 
 import { AppButton } from '@/shared/components/AppButton';
 import { ScreenContainer } from '@/shared/components/ScreenContainer';
 
+import { AppText as Text } from '@/shared/components/AppText';
 interface ErrorBoundaryProps {
   children: ReactNode;
 }
@@ -33,11 +34,11 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
       return (
         <ScreenContainer scroll={false}>
           <View className="gap-4 py-8">
-            <Text className="text-2xl font-bold text-ink">Something went wrong</Text>
-            <Text className="text-base leading-6 text-muted">
-              {this.state.error.message || 'An unexpected error occurred.'}
+            <Text className="font-sans text-2xl font-bold text-ink dark:text-dark-ink">حدث خطأ غير متوقع</Text>
+            <Text className="font-sans text-base leading-6 text-muted dark:text-dark-muted">
+              {this.state.error.message || 'حدث خطأ غير متوقع. يرجى المحاولة مرة أخرى.'}
             </Text>
-            <AppButton onPress={this.handleRetry}>Try again</AppButton>
+            <AppButton onPress={this.handleRetry}>إعادة المحاولة</AppButton>
           </View>
         </ScreenContainer>
       );

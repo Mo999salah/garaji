@@ -1,6 +1,6 @@
 import { router } from 'expo-router';
 import { useEffect } from 'react';
-import { Text, View } from 'react-native';
+import { View } from 'react-native';
 
 import { useAuthStore } from '@/features/auth/store/useAuthStore';
 import { RequestCard } from '@/features/requests/components/RequestCard';
@@ -12,16 +12,9 @@ import { useRequestStore } from '@/features/requests/store/useRequestStore';
 import { AppButton } from '@/shared/components/AppButton';
 import { AppCard } from '@/shared/components/AppCard';
 import { EmptyState } from '@/shared/components/EmptyState';
+import { CommandHeader, MetricTile, SectionHeader } from '@/shared/components/OperationalUI';
 import { ScreenContainer } from '@/shared/components/ScreenContainer';
-
-function MetricCard({ label, value }: { label: string; value: string }) {
-  return (
-    <View className="min-w-[47%] flex-1 rounded-lg border border-line bg-white p-4">
-      <Text className="text-xs font-semibold uppercase text-muted">{label}</Text>
-      <Text className="mt-2 text-2xl font-bold text-ink">{value}</Text>
-    </View>
-  );
-}
+import { ThemeToggle } from '@/shared/components/ThemeToggle';
 
 export default function MerchantHomeScreen() {
   const { signOut, user } = useAuthStore();
@@ -36,6 +29,7 @@ export default function MerchantHomeScreen() {
   const confirmed = selectByStatus(requests, 'confirmed');
   const inProgress = selectByStatus(requests, 'in_progress');
   const recentActive = active.slice(0, 3);
+  const needsAction = pending.length + confirmed.length;
 
   const handleSignOut = async () => {
     await signOut();
@@ -45,32 +39,37 @@ export default function MerchantHomeScreen() {
   return (
     <ScreenContainer>
       <View className="gap-5">
-        <View className="flex-row items-start justify-between gap-4">
-          <View className="flex-1">
-            <Text className="text-sm font-semibold text-brand-700">بوابة الإدارة</Text>
-            <Text className="mt-2 text-3xl font-bold text-ink">{user?.fullName}</Text>
-            <Text className="mt-1 text-base text-muted">لوحة إدارة الخدمات</Text>
-          </View>
-          <AppButton onPress={handleSignOut} variant="ghost">
-            تسجيل الخروج
-          </AppButton>
-        </View>
-
-        {/* مؤشرات الطلبات */}
-        <View className="flex-row flex-wrap gap-3">
-          <MetricCard label="قيد الانتظار" value={String(pending.length)} />
-          <MetricCard label="مؤكدة" value={String(confirmed.length)} />
-          <MetricCard label="جارية" value={String(inProgress.length)} />
-          <MetricCard label="نشطة (إجمالي)" value={String(active.length)} />
-        </View>
-
-        {/* الاختصارات */}
-        <AppCard>
-          <Text className="text-lg font-semibold text-ink">الإجراءات السريعة</Text>
-          <View className="mt-4 gap-3">
-            <AppButton onPress={() => router.push('/(merchant)/requests')}>
-              إدارة الطلبات
+        <CommandHeader
+          eyebrow="مركز الإدارة"
+          subtitle="ابدأ بالطلبات التي تحتاج قراراً، ثم تابع التنفيذ والخدمات."
+          title={user?.fullName ?? 'لوحة التاجر'}
+        >
+          <View className="flex-row-reverse gap-2">
+            <View className="flex-1">
+              <AppButton onPress={() => router.push('/(merchant)/requests')} className="border-gold-500 bg-gold-500">
+                مراجعة الطلبات
+              </AppButton>
+            </View>
+            <ThemeToggle />
+            <AppButton onPress={handleSignOut} variant="secondary" className="min-h-12 px-3">
+              خروج
             </AppButton>
+          </View>
+        </CommandHeader>
+
+        <View className="flex-row-reverse flex-wrap gap-3">
+          <MetricTile label="تحتاج إجراء" value={String(needsAction)} tone="gold" />
+          <MetricTile label="قيد التنفيذ" value={String(inProgress.length)} />
+          <MetricTile label="قيد الانتظار" value={String(pending.length)} tone="muted" />
+          <MetricTile label="نشطة" value={String(active.length)} />
+        </View>
+
+        <AppCard tone="quiet">
+          <SectionHeader
+            subtitle="إدارة عناصر التشغيل اليومية بدون ازدحام."
+            title="اختصارات التشغيل"
+          />
+          <View className="mt-4 gap-3">
             <AppButton
               onPress={() => router.push('/(merchant)/services')}
               variant="secondary"
@@ -86,22 +85,26 @@ export default function MerchantHomeScreen() {
           </View>
         </AppCard>
 
-        {/* أحدث الطلبات النشطة */}
-        <View className="gap-3">
-          <View className="flex-row items-center justify-between">
-            <Text className="text-lg font-semibold text-ink">الطلبات النشطة</Text>
-            <AppButton onPress={() => router.push('/(merchant)/requests')} variant="ghost">
-              عرض الكل
-            </AppButton>
-          </View>
+        <View className="gap-4">
+          <SectionHeader
+            action={(
+              <AppButton onPress={() => router.push('/(merchant)/requests')} variant="ghost" className="min-h-9 px-3">
+                عرض الكل
+              </AppButton>
+            )}
+            subtitle="أحدث الطلبات التي ما زالت ضمن العمل."
+            title="قائمة العمل"
+          />
           {recentActive.length ? (
-            recentActive.map((r) => (
-              <RequestCard
-                key={r.id}
-                onPress={() => router.push(`/(merchant)/requests/${r.id}`)}
-                request={r}
-              />
-            ))
+            <View className="gap-3">
+              {recentActive.map((r) => (
+                <RequestCard
+                  key={r.id}
+                  onPress={() => router.push(`/(merchant)/requests/${r.id}`)}
+                  request={r}
+                />
+              ))}
+            </View>
           ) : (
             <EmptyState
               message="لا توجد طلبات نشطة حالياً. ستظهر هنا طلبات العملاء."

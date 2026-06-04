@@ -1,11 +1,12 @@
 import { router } from 'expo-router';
-import { Text, View } from 'react-native';
+import { View } from 'react-native';
 
 import { useAuthStore } from '@/features/auth/store/useAuthStore';
 import { AppButton } from '@/shared/components/AppButton';
 import { EmptyState } from '@/shared/components/EmptyState';
 import { ScreenContainer } from '@/shared/components/ScreenContainer';
 
+import { AppText as Text } from '@/shared/components/AppText';
 interface AuthBlockedStateProps {
   message?: string | null;
 }
@@ -28,17 +29,17 @@ export function AuthBlockedState({ message }: AuthBlockedStateProps) {
     <ScreenContainer>
       <View className="gap-4">
         <EmptyState
-          title="Account setup incomplete"
-          message={message ?? 'Your account is missing required profile information.'}
+          title="إعداد الحساب غير مكتمل"
+          message={message ?? 'حسابك يفتقر إلى بعض المعلومات المطلوبة.'}
         />
-        <Text className="text-center text-sm leading-5 text-muted">
-          Contact support if this continues after signing in again.
+        <Text className="font-sans text-center text-sm leading-5 text-muted dark:text-dark-muted">
+          تواصل مع الدعم إذا استمرت المشكلة بعد تسجيل الدخول مرة أخرى.
         </Text>
         <AppButton loading={status === 'loading'} onPress={() => void handleRetry()}>
-          Try again
+          إعادة المحاولة
         </AppButton>
         <AppButton onPress={handleSignOut} variant="secondary">
-          Sign out
+          تسجيل الخروج
         </AppButton>
       </View>
     </ScreenContainer>

@@ -1,8 +1,9 @@
 import { zodResolver } from '@hookform/resolvers/zod';
 import { router } from 'expo-router';
 import { Controller, useForm } from 'react-hook-form';
-import { Alert, ScrollView, Text, TouchableOpacity, View } from 'react-native';
+import { Alert, ScrollView, TouchableOpacity, View } from 'react-native';
 
+import { AppText as Text } from '@/shared/components/AppText';
 import {
   mobileBookingSchema,
   type MobileBookingValues,
@@ -15,6 +16,7 @@ import { useVehicleStore } from '@/features/vehicles/store/useVehicleStore';
 import { AppButton } from '@/shared/components/AppButton';
 import { AppInput } from '@/shared/components/AppInput';
 import { EmptyState } from '@/shared/components/EmptyState';
+import { CommandHeader, SectionHeader, StepIndicator } from '@/shared/components/OperationalUI';
 import { ScreenContainer } from '@/shared/components/ScreenContainer';
 
 const TIME_SLOTS = ['08:00', '10:00', '12:00', '14:00', '16:00', '18:00'];
@@ -56,6 +58,11 @@ export default function BookMobileScreen() {
   const selectedVehicleId = watch('vehicleId');
   const selectedServiceId = watch('serviceId');
   const selectedTime = watch('time');
+  const locationCity = watch('locationCity');
+  const currentStep = selectedVehicleId && selectedServiceId && locationCity && selectedTime ? 4
+    : selectedVehicleId && selectedServiceId && locationCity ? 3
+      : selectedVehicleId && selectedServiceId ? 2
+        : 1;
 
   const onSubmit = async (values: FormValues) => {
     const validationResult = mobileBookingSchema.safeParse({
@@ -107,12 +114,16 @@ export default function BookMobileScreen() {
 
   return (
     <ScreenContainer scroll={false}>
-      <ScrollView contentContainerClassName="gap-5 p-4">
-        <Text className="text-2xl font-bold text-ink">طلب خدمة بالموقع</Text>
+      <ScrollView contentContainerClassName="gap-5 px-5 py-5">
+        <CommandHeader
+          eyebrow="خدمة بالموقع"
+          subtitle="اختر السيارة والخدمة، وحدد الموقع والوقت."
+          title="طلب صيانة"
+        />
+        <StepIndicator current={currentStep} steps={['السيارة', 'الخدمة', 'الموقع', 'التأكيد']} />
 
-        {/* اختيار السيارة */}
         <View className="gap-2">
-          <Text className="text-sm font-semibold text-ink">اختر السيارة</Text>
+          <SectionHeader title="اختر السيارة" />
           {vehicles.map((v) => (
             <VehicleCard
               key={v.id}
@@ -122,13 +133,12 @@ export default function BookMobileScreen() {
             />
           ))}
           {errors.vehicleId ? (
-            <Text className="text-sm text-red-600">{errors.vehicleId.message}</Text>
+            <Text className="font-sans text-sm text-red-600">{errors.vehicleId.message}</Text>
           ) : null}
         </View>
 
-        {/* اختيار الخدمة */}
         <View className="gap-2">
-          <Text className="text-sm font-semibold text-ink">اختر الخدمة</Text>
+          <SectionHeader title="اختر الخدمة" />
           {services.map((sv) => (
             <ServiceCard
               key={sv.id}
@@ -138,11 +148,11 @@ export default function BookMobileScreen() {
             />
           ))}
           {errors.serviceId ? (
-            <Text className="text-sm text-red-600">{errors.serviceId.message}</Text>
+            <Text className="font-sans text-sm text-red-600">{errors.serviceId.message}</Text>
           ) : null}
         </View>
 
-        {/* الموقع */}
+        <SectionHeader subtitle="اكتب المدينة والعنوان بشكل يساعد الفني على الوصول." title="موقع الخدمة" />
         <Controller
           control={control}
           name="locationCity"
@@ -177,7 +187,7 @@ export default function BookMobileScreen() {
           )}
         />
 
-        {/* اليوم */}
+        <SectionHeader subtitle="اختر تاريخًا ووقتًا يناسبك." title="موعد الخدمة" />
         <Controller
           control={control}
           name={'date' as any}
@@ -193,9 +203,8 @@ export default function BookMobileScreen() {
           )}
         />
 
-        {/* الوقت */}
         <View className="gap-2">
-          <Text className="text-sm font-semibold text-ink">الوقت المفضّل</Text>
+          <Text className="font-sans text-sm font-semibold text-ink">الوقت المفضّل</Text>
           <View className="flex-row flex-wrap gap-2">
             {TIME_SLOTS.map((slot) => (
               <TouchableOpacity
@@ -210,7 +219,7 @@ export default function BookMobileScreen() {
                 onPress={() => setValue('time' as any, slot)}
               >
                 <Text
-                  className={`text-sm font-semibold ${
+                  className={`font-sans text-sm font-semibold ${
                     selectedTime === slot ? 'text-brand-700' : 'text-ink'
                   }`}
                 >
