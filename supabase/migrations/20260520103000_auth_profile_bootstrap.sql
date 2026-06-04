@@ -1,4 +1,4 @@
--- Bootstrap Qitaa app identity records from Supabase Auth signup metadata.
+-- Bootstrap Garaji app identity records from Supabase Auth signup metadata.
 -- Client apps should pass role/profile metadata to auth.signUp; this trigger owns
 -- the trusted database inserts and keeps role assignment out of client-updatable tables.
 

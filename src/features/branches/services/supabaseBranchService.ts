@@ -37,9 +37,6 @@ function mapBranch(row: DbBranchRow): Branch {
   };
 }
 
-export function isBranchBackendReady() {
-  return isSupabaseConfigured;
-}
 
 export async function fetchActiveBranches(): Promise<Branch[]> {
   const client = getClient();

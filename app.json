@@ -1,11 +1,11 @@
 {
   "expo": {
-    "name": "Qitaa",
-    "slug": "qitaa",
+    "name": "Garaji",
+    "slug": "garaji",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
-    "scheme": "qitaa",
+    "scheme": "garaji",
     "userInterfaceStyle": "light",
     "newArchEnabled": true,
     "splash": {

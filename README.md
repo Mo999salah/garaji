@@ -1,4 +1,4 @@
-# Qitaa — منصة خدمات سيارات
+# كراجي — منصة خدمات سيارات
 
 تطبيق Expo React Native للحجوزات وخدمات السيارات (single-tenant MVP)، مُستوحى من تطبيق زيتي.
 
@@ -134,6 +134,6 @@ npm test
 ## الهجرات
 
 تسلسل هجرات Supabase:
-1. `initial_qitaa_schema` — جداول profiles وmerchants.
+1. `initial_garaji_schema` — جداول profiles وmerchants.
 2. `auth_profile_bootstrap` — trigger إنشاء الملف الشخصي.
 3. `car_services_schema` — جداول vehicles/branches/services/service_requests/events مع RLS وRPCs.

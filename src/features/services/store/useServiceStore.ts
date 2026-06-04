@@ -4,10 +4,8 @@ import {
   fetchActiveServices,
   fetchAllServices,
   insertService,
-  isServiceBackendReady,
   updateServiceRecord,
 } from '@/features/services/services/supabaseServiceService';
-import { mockServices } from '@/features/services/data/mockServices';
 import type { ServiceFormValues } from '@/features/services/schemas/serviceSchema';
 import type { Service } from '@/features/services/types';
 
@@ -38,16 +36,11 @@ export const useServiceStore = create<ServiceState>((set, get) => ({
 
     set({ isLoading: true, error: null });
     try {
-      if (!isServiceBackendReady()) {
-        set({ services: mockServices.filter((s) => s.isActive) });
-        return;
-      }
-
       const services = await fetchActiveServices();
       set({ services });
     } catch (err) {
       const message = err instanceof Error ? err.message : 'حدث خطأ غير متوقع';
-      set({ error: message, services: mockServices.filter((s) => s.isActive) });
+      set({ error: message });
     } finally {
       set({ isLoading: false, lastFetchedAt: Date.now() });
     }
@@ -59,16 +52,11 @@ export const useServiceStore = create<ServiceState>((set, get) => ({
 
     set({ isLoading: true, error: null });
     try {
-      if (!isServiceBackendReady()) {
-        set({ services: mockServices });
-        return;
-      }
-
       const services = await fetchAllServices();
       set({ services });
     } catch (err) {
       const message = err instanceof Error ? err.message : 'حدث خطأ غير متوقع';
-      set({ error: message, services: mockServices });
+      set({ error: message });
     } finally {
       set({ isLoading: false, lastFetchedAt: Date.now() });
     }

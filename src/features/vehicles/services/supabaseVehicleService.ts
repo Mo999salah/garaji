@@ -36,9 +36,6 @@ function mapVehicle(row: DbVehicleRow): Vehicle {
   };
 }
 
-export function isVehicleBackendReady() {
-  return isSupabaseConfigured;
-}
 
 export async function fetchCustomerVehicles(ownerId: string): Promise<Vehicle[]> {
   const client = getClient();

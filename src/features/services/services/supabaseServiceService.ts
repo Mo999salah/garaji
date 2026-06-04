@@ -36,9 +36,6 @@ function mapService(row: DbServiceRow): Service {
   };
 }
 
-export function isServiceBackendReady() {
-  return isSupabaseConfigured;
-}
 
 export async function fetchActiveServices(): Promise<Service[]> {
   const client = getClient();

@@ -20,7 +20,7 @@ begin
   from public.profiles p
   where p.id = new.customer_id;
 
-  new.customer_name = coalesce(nullif(btrim(profile_name), ''), 'Qitaa customer');
+  new.customer_name = coalesce(nullif(btrim(profile_name), ''), 'Garaji customer');
   return new;
 end;
 $$;

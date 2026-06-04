@@ -38,7 +38,7 @@ function getErrorMessage(error: unknown) {
     return error.message;
   }
 
-  return 'Something went wrong. Please try again.';
+  return 'حدث خطأ غير متوقع. حاول مرة أخرى.';
 }
 
 async function syncRoleData(user: AuthUser) {
@@ -113,7 +113,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       const result = await signUpWithEmail(credentials);
 
       if (result.needsEmailConfirmation) {
-        const message = 'Check your email to confirm your account, then sign in.';
+        const message = 'تحقق من بريدك لتأكيد الحساب، ثم سجّل الدخول.';
         set({
           user: null,
           status: 'unauthenticated',
@@ -142,7 +142,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
         infoMessage: null,
       });
 
-      return { user: result.user, message: 'Account created.' };
+      return { user: result.user, message: 'تم إنشاء الحساب.' };
     } catch (error) {
       const message = getErrorMessage(error);
       set({ user: null, status: 'unauthenticated', hasHydrated: true, errorMessage: message });

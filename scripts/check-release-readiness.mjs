@@ -99,6 +99,12 @@ function assertMigrations() {
     [/create or replace function public\.is_staff/i, 'is_staff helper function exists'],
     [/grant execute on function public\.create_service_request/i, 'create_service_request execution is granted'],
     [/grant execute on function public\.update_service_request_status/i, 'update_service_request_status execution is granted'],
+    [/revoke update on public\.service_requests from authenticated/i, 'direct service_request updates are revoked'],
+    [/v_service\.service_type not in \('branch', 'both'\)/i, 'branch bookings validate service delivery type'],
+    [/v_service\.service_type not in \('mobile', 'both'\)/i, 'mobile bookings validate service delivery type'],
+    [/estimated_price\s*\)\s*values[\s\S]*v_service\.estimated_price/i, 'bookings snapshot service estimated price'],
+    [/insert into public\.branches/i, 'base branches are seeded by migration'],
+    [/insert into public\.services/i, 'base services are seeded by migration'],
   ];
 
   for (const [pattern, name] of requiredPatterns) {
@@ -115,13 +121,50 @@ function assertExpoConfig() {
     return;
   }
 
-  assertContains('app.json', /"scheme":\s*"qitaa"/, 'deep link scheme is configured');
+  assertContains('app.json', /"scheme":\s*"garaji"/, 'deep link scheme is configured');
   assertContains('app.json', /"expo-router"/, 'expo-router plugin is configured');
   assertContains('app.json', /"expo-secure-store"/, 'secure-store plugin is configured');
 }
 
+function assertSupabaseRpcContract() {
+  const requestService = readText('src/features/requests/services/supabaseRequestService.ts');
+  const migrationText = readdirSync(join(root, 'supabase', 'migrations'))
+    .filter((name) => name.endsWith('.sql'))
+    .sort()
+    .map((name) => readText(join('supabase', 'migrations', name)))
+    .join('\n');
+
+  if (/p_next_status\s*:/.test(requestService)) {
+    pass('client sends update_service_request_status p_next_status');
+  } else {
+    fail(
+      'client sends update_service_request_status p_next_status',
+      'The RPC argument must match the database function parameter.',
+    );
+  }
+
+  if (/p_new_status\s*:/.test(requestService)) {
+    fail(
+      'client does not send stale p_new_status argument',
+      'Use p_next_status; p_new_status is not a database parameter.',
+    );
+  } else {
+    pass('client does not send stale p_new_status argument');
+  }
+
+  if (/update_service_request_status[\s\S]*p_next_status text/i.test(migrationText)) {
+    pass('database update_service_request_status accepts p_next_status');
+  } else {
+    fail(
+      'database update_service_request_status accepts p_next_status',
+      'Expected p_next_status text in the RPC signature.',
+    );
+  }
+}
+
 assertEnvExample();
 assertMigrations();
+assertSupabaseRpcContract();
 assertExpoConfig();
 assertPackageScript('typecheck');
 assertPackageScript('test');

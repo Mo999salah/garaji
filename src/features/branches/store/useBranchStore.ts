@@ -4,10 +4,8 @@ import {
   fetchActiveBranches,
   fetchAllBranches,
   insertBranch,
-  isBranchBackendReady,
   updateBranchRecord,
 } from '@/features/branches/services/supabaseBranchService';
-import { mockBranches } from '@/features/branches/data/mockBranches';
 import type { BranchFormValues } from '@/features/branches/schemas/branchSchema';
 import type { Branch } from '@/features/branches/types';
 
@@ -38,16 +36,11 @@ export const useBranchStore = create<BranchState>((set, get) => ({
 
     set({ isLoading: true, error: null });
     try {
-      if (!isBranchBackendReady()) {
-        set({ branches: mockBranches.filter((b) => b.isActive) });
-        return;
-      }
-
       const branches = await fetchActiveBranches();
       set({ branches });
     } catch (err) {
       const message = err instanceof Error ? err.message : 'حدث خطأ غير متوقع';
-      set({ error: message, branches: mockBranches.filter((b) => b.isActive) });
+      set({ error: message });
     } finally {
       set({ isLoading: false, lastFetchedAt: Date.now() });
     }
@@ -59,16 +52,11 @@ export const useBranchStore = create<BranchState>((set, get) => ({
 
     set({ isLoading: true, error: null });
     try {
-      if (!isBranchBackendReady()) {
-        set({ branches: mockBranches });
-        return;
-      }
-
       const branches = await fetchAllBranches();
       set({ branches });
     } catch (err) {
       const message = err instanceof Error ? err.message : 'حدث خطأ غير متوقع';
-      set({ error: message, branches: mockBranches });
+      set({ error: message });
     } finally {
       set({ isLoading: false, lastFetchedAt: Date.now() });
     }

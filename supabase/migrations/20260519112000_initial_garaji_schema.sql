@@ -1,4 +1,4 @@
--- Qitaa initial schema.
+-- Garaji initial schema.
 -- This migration is database design only; the mobile app still uses local mock stores.
 
 create extension if not exists pgcrypto;

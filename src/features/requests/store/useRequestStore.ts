@@ -6,10 +6,8 @@ import {
   fetchAllRequests,
   fetchCustomerRequests,
   fetchRequestById,
-  isRequestBackendReady,
   updateRequestStatus,
 } from '@/features/requests/services/supabaseRequestService';
-import { mockRequests } from '@/features/requests/data/mockRequests';
 import type { BranchBookingValues, MobileBookingValues } from '@/features/requests/schemas/requestSchema';
 import type { ServiceRequest, ServiceRequestStatus } from '@/features/requests/types';
 
@@ -41,25 +39,24 @@ export const useRequestStore = create<RequestState>((set, get) => ({
   lastFetchedAt: null,
 
   loadCustomerRequests: async (customerId) => {
+    if (!customerId) {
+      set({ requests: [], error: null });
+      return;
+    }
+
     set({ isLoading: true, error: null });
     try {
-      if (!isRequestBackendReady() || !customerId) {
-        set({ requests: mockRequests });
-        return;
-      }
-
       const requests = await fetchCustomerRequests(customerId);
       set({ requests });
     } catch (err) {
       const message = err instanceof Error ? err.message : 'حدث خطأ غير متوقع';
-      set({ error: message, requests: mockRequests });
+      set({ error: message });
     } finally {
       set({ isLoading: false, lastFetchedAt: Date.now() });
     }
   },
 
   loadRequestById: async (requestId) => {
-    // First try to find in existing requests to avoid an extra network call
     const existing = get().requests.find((r) => r.id === requestId);
     if (existing) {
       set({ selectedRequest: existing });
@@ -67,12 +64,6 @@ export const useRequestStore = create<RequestState>((set, get) => ({
 
     set({ isLoading: true, error: null });
     try {
-      if (!isRequestBackendReady()) {
-        const mock = mockRequests.find((r) => r.id === requestId) ?? null;
-        set({ selectedRequest: mock });
-        return;
-      }
-
       const request = await fetchRequestById(requestId);
       set({ selectedRequest: request });
     } catch (err) {
@@ -86,16 +77,11 @@ export const useRequestStore = create<RequestState>((set, get) => ({
   loadAllRequests: async () => {
     set({ isLoading: true, error: null });
     try {
-      if (!isRequestBackendReady()) {
-        set({ requests: mockRequests });
-        return;
-      }
-
       const requests = await fetchAllRequests();
       set({ requests });
     } catch (err) {
       const message = err instanceof Error ? err.message : 'حدث خطأ غير متوقع';
-      set({ error: message, requests: mockRequests });
+      set({ error: message });
     } finally {
       set({ isLoading: false, lastFetchedAt: Date.now() });
     }
@@ -138,6 +124,7 @@ export const useRequestStore = create<RequestState>((set, get) => ({
       if (updated) {
         set((s) => ({
           requests: s.requests.map((r) => (r.id === requestId ? updated : r)),
+          selectedRequest: s.selectedRequest?.id === requestId ? updated : s.selectedRequest,
         }));
       }
     } catch (err) {

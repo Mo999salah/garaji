@@ -3,17 +3,16 @@ import type { Href } from 'expo-router';
 import { router } from 'expo-router';
 import { useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
-import { Text, View } from 'react-native';
+import { View } from 'react-native';
 import { z } from 'zod';
 
 import { requestPasswordReset } from '@/features/auth/services/supabaseAuthService';
+import { AuthNotice, AuthScreen, AuthTextButton } from '@/features/auth/components/AuthScreen';
 import { AppButton } from '@/shared/components/AppButton';
-import { AppCard } from '@/shared/components/AppCard';
 import { AppInput } from '@/shared/components/AppInput';
-import { ScreenContainer } from '@/shared/components/ScreenContainer';
 
 const forgotPasswordSchema = z.object({
-  email: z.string().trim().email('Enter a valid email.'),
+  email: z.string().trim().email('أدخل بريداً إلكترونياً صحيحاً.'),
 });
 
 type ForgotPasswordForm = z.infer<typeof forgotPasswordSchema>;
@@ -36,55 +35,52 @@ export default function ForgotPasswordScreen() {
 
     try {
       await requestPasswordReset(values.email);
-      setSuccessMessage('If an account exists for this email, a reset link has been sent.');
+      setSuccessMessage('إذا كان البريد مسجلاً، ستصلك رسالة إعادة التعيين خلال لحظات.');
     } catch (error) {
-      setErrorMessage(error instanceof Error ? error.message : 'Could not send reset email.');
+      setErrorMessage(error instanceof Error ? error.message : 'تعذّر إرسال رابط إعادة التعيين.');
     }
   });
 
   return (
-    <ScreenContainer>
-      <View className="py-6">
-        <View className="mb-8">
-          <Text className="text-sm font-semibold uppercase tracking-wide text-brand-700">
-            Qitaa
-          </Text>
-          <Text className="mt-3 text-4xl font-bold leading-tight text-ink">Reset password</Text>
-          <Text className="mt-4 text-base leading-6 text-muted">
-            We will email you a secure link to choose a new password.
-          </Text>
+    <AuthScreen
+      eyebrow="استعادة الحساب"
+      footer="بعد فتح الرابط من البريد، اختر كلمة مرور جديدة ثم عد إلى تسجيل الدخول."
+      subtitle="أدخل بريد الحساب وسنرسل رابطاً آمناً لإعادة التعيين."
+      title="إعادة تعيين كلمة المرور"
+    >
+      <View className="gap-4">
+        <Controller
+          control={control}
+          name="email"
+          render={({ field: { onBlur, onChange, value } }) => (
+            <AppInput
+              autoCapitalize="none"
+              autoComplete="email"
+              error={errors.email?.message}
+              inputMode="email"
+              keyboardType="email-address"
+              label="البريد الإلكتروني"
+              onBlur={onBlur}
+              onChangeText={onChange}
+              placeholder="name@example.com"
+              textAlign="right"
+              value={value}
+            />
+          )}
+        />
+
+        <AuthNotice message={successMessage} tone="success" />
+        <AuthNotice message={errorMessage} tone="error" />
+
+        <AppButton loading={isSubmitting} onPress={() => void onSubmit()}>
+          إرسال رابط إعادة التعيين
+        </AppButton>
+        <View className="items-center">
+          <AuthTextButton onPress={() => router.replace('/(auth)/login' as Href)}>
+            العودة لتسجيل الدخول
+          </AuthTextButton>
         </View>
-
-        <AppCard className="gap-4">
-          <Controller
-            control={control}
-            name="email"
-            render={({ field: { onBlur, onChange, value } }) => (
-              <AppInput
-                autoCapitalize="none"
-                autoComplete="email"
-                error={errors.email?.message}
-                inputMode="email"
-                keyboardType="email-address"
-                label="Email"
-                onBlur={onBlur}
-                onChangeText={onChange}
-                value={value}
-              />
-            )}
-          />
-
-          {successMessage ? <Text className="text-sm text-brand-700">{successMessage}</Text> : null}
-          {errorMessage ? <Text className="text-sm text-red-600">{errorMessage}</Text> : null}
-
-          <AppButton loading={isSubmitting} onPress={() => void onSubmit()}>
-            Send reset link
-          </AppButton>
-          <AppButton onPress={() => router.replace('/(auth)/login' as Href)} variant="ghost">
-            Back to sign in
-          </AppButton>
-        </AppCard>
       </View>
-    </ScreenContainer>
+    </AuthScreen>
   );
 }

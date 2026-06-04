@@ -72,9 +72,6 @@ const requestSelect = `
   service_request_events (id, request_id, status, note, created_at)
 `;
 
-export function isRequestBackendReady() {
-  return isSupabaseConfigured;
-}
 
 export async function fetchCustomerRequests(customerId: string): Promise<ServiceRequest[]> {
   const client = getClient();
@@ -186,7 +183,7 @@ export async function updateRequestStatus(
   const client = getClient();
   const { error } = await (client.rpc as Function)('update_service_request_status', {
     p_request_id: requestId,
-    p_new_status: newStatus as DbServiceRequestStatus,
+    p_next_status: newStatus as DbServiceRequestStatus,
     p_note: note ?? null,
   });
 
