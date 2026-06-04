@@ -2,6 +2,7 @@
   "expo": {
     "name": "Garaji",
     "slug": "garaji",
+    "owner": "mo999salah",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
@@ -14,13 +15,29 @@
       "backgroundColor": "#ffffff"
     },
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "com.mo999salah.garaji",
+      "infoPlist": {
+        "NSCameraUsageDescription": "نحتاج الوصول إلى الكاميرا لتصوير استمارة المركبة أو موقع الخدمة.",
+        "NSLocationWhenInUseUsageDescription": "نستخدم موقعك لمساعدتك على اختيار أقرب فرع وتحديد موقع خدمة الصيانة المتنقلة.",
+        "NSPhotoLibraryUsageDescription": "نحتاج الوصول إلى الصور لإرفاق صورة استمارة المركبة أو صورة المركبة.",
+        "NSUserNotificationsUsageDescription": "نرسل لك تنبيهات عند تحديث حالة طلب الصيانة."
+      }
     },
     "android": {
+      "package": "com.mo999salah.garaji",
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
       },
+      "permissions": [
+        "CAMERA",
+        "ACCESS_COARSE_LOCATION",
+        "ACCESS_FINE_LOCATION",
+        "READ_MEDIA_IMAGES",
+        "READ_EXTERNAL_STORAGE",
+        "POST_NOTIFICATIONS"
+      ],
       "edgeToEdgeEnabled": true,
       "predictiveBackGestureEnabled": false
     },
@@ -78,6 +95,11 @@
           }
         }
       ]
-    ]
+    ],
+    "extra": {
+      "eas": {
+        "projectId": "00000000-0000-0000-0000-000000000000"
+      }
+    }
   }
 }

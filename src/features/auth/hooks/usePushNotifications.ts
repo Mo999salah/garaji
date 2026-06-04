@@ -1,5 +1,6 @@
 import Constants from 'expo-constants';
 import * as Notifications from 'expo-notifications';
+import { router, type Href } from 'expo-router';
 import { useEffect, useRef, useState } from 'react';
 import { Platform } from 'react-native';
 
@@ -27,6 +28,30 @@ function getExpoProjectId(): string | undefined {
     Constants.expoConfig?.extra?.eas?.projectId ??
     Constants.expoConfig?.extra?.expoClient?.extra?.eas?.projectId
   );
+}
+
+function getRequestIdFromNotificationResponse(
+  response: Notifications.NotificationResponse,
+): string | null {
+  const requestId = response.notification.request.content.data?.requestId;
+
+  if (typeof requestId === 'string' && requestId.trim()) {
+    return requestId.trim();
+  }
+
+  if (typeof requestId === 'number' && Number.isFinite(requestId)) {
+    return String(requestId);
+  }
+
+  return null;
+}
+
+function getRequestRouteForUser(user: AuthUser, requestId: string): Href {
+  if (user.role === 'merchant') {
+    return `/(merchant)/requests/${requestId}` as Href;
+  }
+
+  return `/(customer)/requests/${requestId}` as Href;
 }
 
 async function configureAndroidNotificationChannel() {
@@ -84,6 +109,8 @@ export function usePushNotifications(user: AuthUser | null | undefined) {
   const [lastResponse, setLastResponse] =
     useState<Notifications.NotificationResponse | null>(null);
   const registeredUserIdRef = useRef<string | null>(null);
+  const handledResponseIdRef = useRef<string | null>(null);
+  const navigationTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
     if (!user?.id || registeredUserIdRef.current === user.id) {
@@ -119,22 +146,66 @@ export function usePushNotifications(user: AuthUser | null | undefined) {
       return;
     }
 
+    const handleNotificationResponse = (response: Notifications.NotificationResponse) => {
+      setLastResponse(response);
+
+      const responseId = response.notification.request.identifier;
+
+      if (handledResponseIdRef.current === responseId) {
+        return;
+      }
+
+      const requestId = getRequestIdFromNotificationResponse(response);
+
+      if (!requestId) {
+        logPushNotificationIssue('notification response missing requestId');
+        return;
+      }
+
+      handledResponseIdRef.current = responseId;
+
+      if (navigationTimeoutRef.current) {
+        clearTimeout(navigationTimeoutRef.current);
+      }
+
+      navigationTimeoutRef.current = setTimeout(() => {
+        try {
+          router.push(getRequestRouteForUser(user, requestId));
+        } catch (error) {
+          logPushNotificationIssue('notification route failed', error);
+        }
+      }, 250);
+    };
+
     const notificationSubscription = Notifications.addNotificationReceivedListener(
       (incomingNotification) => {
         setNotification(incomingNotification);
       },
     );
     const responseSubscription = Notifications.addNotificationResponseReceivedListener(
-      (response) => {
-        setLastResponse(response);
-      },
+      handleNotificationResponse,
     );
 
+    void Notifications.getLastNotificationResponseAsync()
+      .then((response) => {
+        if (response) {
+          handleNotificationResponse(response);
+        }
+      })
+      .catch((error) => {
+        logPushNotificationIssue('loading last notification response failed', error);
+      });
+
     return () => {
+      if (navigationTimeoutRef.current) {
+        clearTimeout(navigationTimeoutRef.current);
+        navigationTimeoutRef.current = null;
+      }
+
       notificationSubscription.remove();
       responseSubscription.remove();
     };
-  }, [user?.id]);
+  }, [user]);
 
   return {
     lastResponse,
