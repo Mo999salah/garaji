@@ -13,6 +13,7 @@ export const vehicleSchema = z.object({
   plateNumber: z.string().min(1, 'رقم اللوحة مطلوب').max(20),
   color: z.string().max(30).optional(),
   mileage: z.number().int().min(0).optional(),
+  documentUrl: z.string().url().optional(),
 });
 
 export type VehicleFormValues = z.infer<typeof vehicleSchema>;

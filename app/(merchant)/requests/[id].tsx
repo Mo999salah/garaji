@@ -1,22 +1,24 @@
 import { router, useLocalSearchParams } from 'expo-router';
-import { useEffect } from 'react';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { Alert, ScrollView, View } from 'react-native';
 
+import { useAllBranchesQuery } from '@/features/branches/hooks/useBranchesQuery';
 import { RequestStatusBadge } from '@/features/requests/components/RequestStatusBadge';
 import { RequestTimeline } from '@/features/requests/components/RequestTimeline';
-import { useRequestStore } from '@/features/requests/store/useRequestStore';
-import { AppText as Text } from '@/shared/components/AppText';
+import { useRequestByIdQuery } from '@/features/requests/hooks/useRequestsQuery';
+import { useRequestRealtimeListener } from '@/features/requests/hooks/useRequestRealtimeListener';
 import {
   getNextStatuses,
   isTerminal,
   STATUS_LABELS,
 } from '@/features/requests/selectors/requestSelectors';
+import { useRequestStore } from '@/features/requests/store/useRequestStore';
 import type { ServiceRequestStatus } from '@/features/requests/types';
-import { useBranchStore } from '@/features/branches/store/useBranchStore';
-import { useServiceStore } from '@/features/services/store/useServiceStore';
-import { useVehicleStore } from '@/features/vehicles/store/useVehicleStore';
+import { useAllServicesQuery } from '@/features/services/hooks/useServicesQuery';
+import { useCustomerVehiclesQuery } from '@/features/vehicles/hooks/useVehiclesQuery';
 import { AppButton } from '@/shared/components/AppButton';
 import { AppCard } from '@/shared/components/AppCard';
+import { AppText as Text } from '@/shared/components/AppText';
 import { EmptyState } from '@/shared/components/EmptyState';
 import { LoadingSpinner } from '@/shared/components/LoadingSpinner';
 import { SectionHeader } from '@/shared/components/OperationalUI';
@@ -24,19 +26,35 @@ import { ScreenContainer } from '@/shared/components/ScreenContainer';
 
 export default function MerchantRequestDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
-  const { selectedRequest, loadRequestById, changeRequestStatus, isLoading } = useRequestStore();
+  const requestId = typeof id === 'string' ? id : undefined;
+  const queryClient = useQueryClient();
+  const changeRequestStatus = useRequestStore((s) => s.changeRequestStatus);
 
-  const vehicles = useVehicleStore((s) => s.vehicles);
-  const services = useServiceStore((s) => s.services);
-  const branches = useBranchStore((s) => s.branches);
+  const { data: request, isLoading: isRequestLoading } = useRequestByIdQuery(requestId);
+  const { data: vehicles = [], isLoading: isVehiclesLoading } = useCustomerVehiclesQuery(
+    request?.customerId,
+  );
+  const { data: services = [], isLoading: isServicesLoading } = useAllServicesQuery();
+  const { data: branches = [], isLoading: isBranchesLoading } = useAllBranchesQuery();
 
-  useEffect(() => {
-    if (id) void loadRequestById(id);
-  }, [id, loadRequestById]);
+  useRequestRealtimeListener({ requestId });
 
-  if (isLoading && !selectedRequest) return <LoadingSpinner />;
+  const statusMutation = useMutation({
+    mutationFn: (newStatus: ServiceRequestStatus) => {
+      if (!requestId) {
+        throw new Error('Missing request id.');
+      }
 
-  if (!selectedRequest) {
+      return changeRequestStatus(requestId, newStatus);
+    },
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: ['requests'] });
+    },
+  });
+
+  if (isRequestLoading && !request) return <LoadingSpinner />;
+
+  if (!request) {
     return (
       <ScreenContainer>
         <EmptyState message="تعذّر إيجاد هذا الطلب." title="الطلب غير موجود" />
@@ -47,7 +65,7 @@ export default function MerchantRequestDetailScreen() {
     );
   }
 
-  const r = selectedRequest;
+  const r = request;
 
   const vehicle = vehicles.find((v) => v.id === r.vehicleId);
   const service = services.find((sv) => sv.id === r.serviceId);
@@ -55,9 +73,11 @@ export default function MerchantRequestDetailScreen() {
 
   const vehicleName = vehicle
     ? `${vehicle.make} ${vehicle.model} ${vehicle.year}`
-    : undefined;
-  const serviceName = service?.name;
-  const branchName = branch?.name;
+    : isVehiclesLoading
+      ? 'جارٍ تحميل بيانات السيارة...'
+      : 'غير متوفر';
+  const serviceName = service?.name ?? (isServicesLoading ? 'جارٍ تحميل بيانات الخدمة...' : 'غير متوفر');
+  const branchName = branch?.name ?? (isBranchesLoading ? 'جارٍ تحميل بيانات الفرع...' : 'غير متوفر');
 
   const typeLabel = r.requestType === 'branch_appointment' ? 'حجز فرع' : 'خدمة بالموقع';
   const scheduledDate = new Date(r.scheduledAt).toLocaleString('ar-SA', {
@@ -83,7 +103,7 @@ export default function MerchantRequestDetailScreen() {
           text: 'تأكيد',
           onPress: async () => {
             try {
-              await changeRequestStatus(r.id, newStatus);
+              await statusMutation.mutateAsync(newStatus);
             } catch {
               Alert.alert('خطأ', 'تعذّر تغيير حالة الطلب. يرجى المحاولة مجدداً.');
             }
@@ -129,7 +149,7 @@ export default function MerchantRequestDetailScreen() {
               {nextStatuses.map((status) => (
                 <AppButton
                   key={status}
-                  loading={isLoading}
+                  loading={statusMutation.isPending}
                   onPress={() => handleStatusChange(status)}
                   variant={status === 'cancelled' ? 'ghost' : 'primary'}
                 >
@@ -144,9 +164,11 @@ export default function MerchantRequestDetailScreen() {
           <SectionHeader subtitle="كل البيانات اللازمة للتواصل والتنفيذ." title="تفاصيل الطلب" />
           <View className="mt-4 gap-3">
             <DetailRow label="موعد الخدمة" value={scheduledDate} />
-            {vehicleName ? <DetailRow label="السيارة" value={vehicleName} /> : null}
-            {serviceName ? <DetailRow label="الخدمة" value={serviceName} /> : null}
-            {branchName ? <DetailRow label="الفرع" value={branchName} /> : null}
+            <DetailRow label="السيارة" value={vehicleName} />
+            <DetailRow label="الخدمة" value={serviceName} />
+            {r.requestType === 'branch_appointment' ? (
+              <DetailRow label="الفرع" value={branchName} />
+            ) : null}
             {r.locationCity ? (
               <DetailRow
                 label="الموقع"

@@ -8,6 +8,7 @@ export interface DbProfileRow {
   full_name: string | null;
   phone: string | null;
   role: 'customer' | 'merchant';
+  push_token?: string | null;
   created_at: string;
 }
 
@@ -29,6 +30,7 @@ export interface DbVehicleRow {
   plate_number: string;
   color: string | null;
   mileage: number | null;
+  document_url: string | null;
   created_at: string;
   updated_at: string;
 }

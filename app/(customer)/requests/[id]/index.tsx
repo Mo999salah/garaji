@@ -1,10 +1,10 @@
 import { router, useLocalSearchParams } from 'expo-router';
-import { useEffect } from 'react';
 import { ScrollView, View } from 'react-native';
 
 import { RequestStatusBadge } from '@/features/requests/components/RequestStatusBadge';
 import { RequestTimeline } from '@/features/requests/components/RequestTimeline';
-import { useRequestStore } from '@/features/requests/store/useRequestStore';
+import { useRequestByIdQuery } from '@/features/requests/hooks/useRequestsQuery';
+import { useRequestRealtimeListener } from '@/features/requests/hooks/useRequestRealtimeListener';
 import { useBranchStore } from '@/features/branches/store/useBranchStore';
 import { useServiceStore } from '@/features/services/store/useServiceStore';
 import { useVehicleStore } from '@/features/vehicles/store/useVehicleStore';
@@ -18,19 +18,18 @@ import { ScreenContainer } from '@/shared/components/ScreenContainer';
 import { AppText as Text } from '@/shared/components/AppText';
 export default function RequestDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
-  const { selectedRequest, loadRequestById, isLoading } = useRequestStore();
+  const requestId = typeof id === 'string' ? id : undefined;
+  const { data: request, isLoading } = useRequestByIdQuery(requestId);
 
   const vehicles = useVehicleStore((s) => s.vehicles);
   const services = useServiceStore((s) => s.services);
   const branches = useBranchStore((s) => s.branches);
 
-  useEffect(() => {
-    if (id) void loadRequestById(id);
-  }, [id, loadRequestById]);
+  useRequestRealtimeListener({ requestId });
 
-  if (isLoading && !selectedRequest) return <LoadingSpinner />;
+  if (isLoading && !request) return <LoadingSpinner />;
 
-  if (!selectedRequest) {
+  if (!request) {
     return (
       <ScreenContainer>
         <EmptyState message="تعذّر إيجاد هذا الطلب." title="الطلب غير موجود" />
@@ -41,7 +40,7 @@ export default function RequestDetailScreen() {
     );
   }
 
-  const r = selectedRequest;
+  const r = request;
 
   const vehicle = vehicles.find((v) => v.id === r.vehicleId);
   const service = services.find((sv) => sv.id === r.serviceId);

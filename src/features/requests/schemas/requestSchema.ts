@@ -13,6 +13,8 @@ export const mobileBookingSchema = z.object({
   serviceId: z.string().min(1, 'اختر خدمة'),
   locationCity: z.string().min(1, 'المدينة مطلوبة').max(50),
   locationAddress: z.string().min(1, 'العنوان مطلوب').max(200),
+  locationLat: z.number().optional(),
+  locationLng: z.number().optional(),
   scheduledAt: z.string().min(1, 'حدد موعدًا'),
   notes: z.string().max(500).optional(),
 });

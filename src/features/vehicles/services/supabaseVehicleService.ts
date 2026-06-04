@@ -3,8 +3,16 @@ import type { DbVehicleRow } from '@/shared/types/database';
 import type { VehicleFormValues } from '@/features/vehicles/schemas/vehicleSchema';
 import type { Vehicle } from '@/features/vehicles/types';
 
+const VEHICLE_DOCUMENTS_BUCKET = 'vehicle-documents';
+
 const vehicleSelect =
-  'id, owner_id, make, model, year, plate_number, color, mileage, created_at, updated_at';
+  'id, owner_id, make, model, year, plate_number, color, mileage, document_url, created_at, updated_at';
+
+interface VehicleDocumentUpload {
+  uri: string;
+  fileName?: string | null;
+  mimeType?: string | null;
+}
 
 export class VehicleServiceError extends Error {
   constructor(message: string) {
@@ -31,11 +39,83 @@ function mapVehicle(row: DbVehicleRow): Vehicle {
     plateNumber: row.plate_number,
     color: row.color ?? undefined,
     mileage: row.mileage ?? undefined,
+    documentUrl: row.document_url ?? undefined,
     createdAt: row.created_at,
     updatedAt: row.updated_at,
   };
 }
 
+function getFileExtension(fileName?: string | null, mimeType?: string | null): string {
+  const extensionFromName = fileName?.includes('.')
+    ? fileName.split('.').pop()?.toLowerCase()
+    : undefined;
+
+  if (extensionFromName) {
+    return extensionFromName;
+  }
+
+  if (mimeType?.includes('png')) return 'png';
+  if (mimeType?.includes('webp')) return 'webp';
+  if (mimeType?.includes('heic')) return 'heic';
+  if (mimeType?.includes('heif')) return 'heif';
+
+  return 'jpg';
+}
+
+function sanitizeFileName(value: string): string {
+  return value.replace(/[^a-zA-Z0-9._-]/g, '-').replace(/-+/g, '-');
+}
+
+export async function uploadVehicleDocument({
+  fileName,
+  mimeType,
+  uri,
+}: VehicleDocumentUpload): Promise<string> {
+  const client = getClient();
+  const { data: userData, error: userError } = await client.auth.getUser();
+
+  if (userError || !userData.user) {
+    throw new VehicleServiceError('يجب تسجيل الدخول قبل رفع الصورة.');
+  }
+
+  const response = await fetch(uri);
+
+  if (!response.ok) {
+    throw new VehicleServiceError('تعذّر قراءة الصورة المختارة.');
+  }
+
+  const blob = await response.blob();
+  const extension = getFileExtension(fileName, mimeType);
+  const hasExtension = Boolean(fileName?.toLowerCase().endsWith(`.${extension}`));
+  const safeFileName = sanitizeFileName(
+    fileName
+      ? `${fileName}${hasExtension ? '' : `.${extension}`}`
+      : `vehicle-document-${Date.now()}.${extension}`,
+  );
+  const storagePath = `${userData.user.id}/${Date.now()}-${safeFileName}`;
+
+  const { error: uploadError } = await client.storage
+    .from(VEHICLE_DOCUMENTS_BUCKET)
+    .upload(storagePath, blob, {
+      cacheControl: '3600',
+      contentType: mimeType || blob.type || `image/${extension}`,
+      upsert: false,
+    });
+
+  if (uploadError) {
+    throw new VehicleServiceError(uploadError.message || 'تعذّر رفع الصورة.');
+  }
+
+  const { data } = client.storage
+    .from(VEHICLE_DOCUMENTS_BUCKET)
+    .getPublicUrl(storagePath);
+
+  if (!data.publicUrl) {
+    throw new VehicleServiceError('تعذّر إنشاء رابط الصورة.');
+  }
+
+  return data.publicUrl;
+}
 
 export async function fetchCustomerVehicles(ownerId: string): Promise<Vehicle[]> {
   const client = getClient();
@@ -78,6 +158,7 @@ export async function insertVehicle(ownerId: string, values: VehicleFormValues):
       plate_number: values.plateNumber.trim(),
       color: values.color?.trim() || null,
       mileage: values.mileage ?? null,
+      document_url: values.documentUrl?.trim() || null,
     })
     .select(vehicleSelect)
     .single<DbVehicleRow>();
@@ -104,6 +185,7 @@ export async function updateVehicleRecord(
       plate_number: values.plateNumber.trim(),
       color: values.color?.trim() || null,
       mileage: values.mileage ?? null,
+      document_url: values.documentUrl?.trim() || null,
     })
     .eq('id', vehicleId)
     .eq('owner_id', ownerId)

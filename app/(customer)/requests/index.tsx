@@ -10,11 +10,13 @@ import {
 import { useRequestStore } from '@/features/requests/store/useRequestStore';
 import { useAuthStore } from '@/features/auth/store/useAuthStore';
 import { EmptyState } from '@/shared/components/EmptyState';
-import { LoadingSpinner } from '@/shared/components/LoadingSpinner';
 import { CommandHeader, FilterTabs } from '@/shared/components/OperationalUI';
 import { ScreenContainer } from '@/shared/components/ScreenContainer';
+import { SkeletonCard } from '@/shared/components/SkeletonCard';
 
 type Tab = 'active' | 'history';
+
+const SKELETON_ITEMS = ['request-skeleton-1', 'request-skeleton-2', 'request-skeleton-3'];
 
 export default function RequestsIndexScreen() {
   const user = useAuthStore((s) => s.user);
@@ -44,30 +46,28 @@ export default function RequestsIndexScreen() {
         <FilterTabs<Tab> active={activeTab} onChange={setActiveTab} tabs={tabs} />
       </View>
 
-      {isLoading ? (
-        <LoadingSpinner />
-      ) : (
-        <ScrollView contentContainerClassName="gap-3 px-5 pb-5">
-          {displayed.length === 0 ? (
-            <EmptyState
-              message={
-                activeTab === 'active'
-                  ? 'ليس لديك طلبات نشطة حالياً.'
-                  : 'لا يوجد سجل طلبات بعد.'
-              }
-              title={activeTab === 'active' ? 'لا طلبات نشطة' : 'السجل فارغ'}
+      <ScrollView contentContainerClassName="gap-3 px-5 pb-5">
+        {isLoading ? (
+          SKELETON_ITEMS.map((item) => <SkeletonCard key={item} />)
+        ) : displayed.length === 0 ? (
+          <EmptyState
+            message={
+              activeTab === 'active'
+                ? 'ليس لديك طلبات نشطة حالياً.'
+                : 'لا يوجد سجل طلبات بعد.'
+            }
+            title={activeTab === 'active' ? 'لا طلبات نشطة' : 'السجل فارغ'}
+          />
+        ) : (
+          displayed.map((r) => (
+            <RequestCard
+              key={r.id}
+              onPress={() => router.push(`/(customer)/requests/${r.id}`)}
+              request={r}
             />
-          ) : (
-            displayed.map((r) => (
-              <RequestCard
-                key={r.id}
-                onPress={() => router.push(`/(customer)/requests/${r.id}`)}
-                request={r}
-              />
-            ))
-          )}
-        </ScrollView>
-      )}
+          ))
+        )}
+      </ScrollView>
     </ScreenContainer>
   );
 }

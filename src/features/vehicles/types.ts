@@ -7,6 +7,7 @@ export interface Vehicle {
   plateNumber: string;
   color?: string;
   mileage?: number;
+  documentUrl?: string;
   createdAt: string;
   updatedAt: string;
 }

@@ -136,6 +136,8 @@ export async function createBranchRequest(values: BranchBookingValues): Promise<
     p_branch_id: values.branchId,
     p_location_city: null,
     p_location_address: null,
+    p_location_lat: null,
+    p_location_lng: null,
     p_scheduled_at: values.scheduledAt,
     p_notes: values.notes ?? null,
   });
@@ -160,6 +162,8 @@ export async function createMobileRequest(values: MobileBookingValues): Promise<
     p_branch_id: null,
     p_location_city: values.locationCity,
     p_location_address: values.locationAddress,
+    p_location_lat: values.locationLat ?? null,
+    p_location_lng: values.locationLng ?? null,
     p_scheduled_at: values.scheduledAt,
     p_notes: values.notes ?? null,
   });

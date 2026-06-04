@@ -37,6 +37,7 @@ export default function EditVehicleScreen() {
           plateNumber: vehicle.plateNumber,
           color: vehicle.color,
           mileage: vehicle.mileage,
+          documentUrl: vehicle.documentUrl,
         }}
         isLoading={isLoading}
         onSubmit={handleSubmit}

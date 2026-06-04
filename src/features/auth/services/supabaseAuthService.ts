@@ -327,3 +327,19 @@ export async function signOutSupabase() {
     throw new AuthFlowError('تعذّر تسجيل الخروج. حاول مرة أخرى.');
   }
 }
+
+export async function saveProfilePushToken(userId: string, pushToken: string): Promise<void> {
+  const client = getSupabaseClient();
+  const { error } = await client
+    .from('profiles')
+    .update({
+      push_token: pushToken,
+      updated_at: new Date().toISOString(),
+    })
+    .eq('id', userId);
+
+  if (error) {
+    logAuthError('save push token', error);
+    throw new AuthFlowError('تعذّر حفظ رمز التنبيهات.');
+  }
+}
