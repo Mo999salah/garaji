@@ -33,39 +33,39 @@ export function RequestCard({ onPress, request, serviceName, vehicleName }: Requ
     <AnimatedPressable
       accessibilityLabel={`طلب ${REQUEST_TYPE_LABELS[request.requestType]}`}
       accessibilityRole="button"
-      className="rounded-lg border border-line bg-card p-4 dark:border-dark-line dark:bg-dark-card"
+      className="rounded-md border border-[#E5E5E5] bg-white p-4 dark:border-dark-line dark:bg-dark-card"
       onPress={onPress}
     >
       <View className="gap-3">
         <View className="flex-row-reverse items-start justify-between gap-3">
           <View className="flex-1 items-end">
-            <Text className="font-sans text-right text-base font-bold text-ink dark:text-dark-ink">
+            <Text className="font-sans text-right text-base font-bold text-[#111111] dark:text-dark-ink">
               {serviceName ?? REQUEST_TYPE_LABELS[request.requestType]}
             </Text>
-            <Text className="font-sans mt-0.5 text-right text-xs text-muted dark:text-dark-muted">
+            <Text className="font-sans mt-0.5 text-right text-xs text-[#8A8A8A] dark:text-dark-muted">
               {REQUEST_TYPE_LABELS[request.requestType]}
             </Text>
           </View>
           <View className="items-start gap-2">
             <RequestStatusBadge status={request.status} />
             {request.estimatedPrice !== undefined ? (
-              <Text className="font-sans text-base font-bold text-gold-600 dark:text-dark-gold-500">
+              <Text className="font-sans text-base font-black text-[#111111] dark:text-dark-ink">
                 {(request.finalPrice ?? request.estimatedPrice).toLocaleString('ar-SA')} ر.س
               </Text>
             ) : null}
           </View>
         </View>
 
-        <View className="items-end border-t border-line pt-3 dark:border-dark-line">
+        <View className="items-end border-t border-[#E5E5E5] pt-3 dark:border-dark-line">
           {vehicleName ? (
-            <Text className="font-sans text-right text-sm text-muted dark:text-dark-muted">المركبة: {vehicleName}</Text>
+            <Text className="font-sans text-right text-sm text-[#8A8A8A] dark:text-dark-muted">المركبة: {vehicleName}</Text>
           ) : null}
-          <Text className="font-sans mt-1 text-right text-sm text-muted dark:text-dark-muted">الموعد: {formatDate(request.scheduledAt)}</Text>
+          <Text className="font-sans mt-1 text-right text-sm text-[#8A8A8A] dark:text-dark-muted">الموعد: {formatDate(request.scheduledAt)}</Text>
           {request.branchId && request.requestType === 'branch_appointment' ? (
-            <Text className="font-sans mt-1 text-right text-xs text-muted dark:text-dark-muted">فرع محدد</Text>
+            <Text className="font-sans mt-1 text-right text-xs text-[#8A8A8A] dark:text-dark-muted">فرع محدد</Text>
           ) : null}
           {request.locationAddress ? (
-            <Text className="font-sans mt-1 text-right text-xs text-muted dark:text-dark-muted">{request.locationAddress}</Text>
+            <Text className="font-sans mt-1 text-right text-xs text-[#8A8A8A] dark:text-dark-muted">{request.locationAddress}</Text>
           ) : null}
         </View>
       </View>

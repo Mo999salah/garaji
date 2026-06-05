@@ -3,7 +3,7 @@ import type { Href } from 'expo-router';
 import { router } from 'expo-router';
 import { useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
-import { View } from 'react-native';
+import { ActivityIndicator, Pressable, TextInput, View } from 'react-native';
 import { z } from 'zod';
 
 import { AppText as Text } from '@/shared/components/AppText';
@@ -14,8 +14,6 @@ import {
   PasswordToggle,
 } from '@/features/auth/components/AuthScreen';
 import { getHomePathForRole, useAuthStore } from '@/features/auth/store/useAuthStore';
-import { AppButton } from '@/shared/components/AppButton';
-import { AppInput } from '@/shared/components/AppInput';
 
 const loginSchema = z.object({
   email: z.string().trim().email('أدخل بريداً إلكترونياً صحيحاً.'),
@@ -26,6 +24,8 @@ type LoginForm = z.infer<typeof loginSchema>;
 
 export default function LoginScreen() {
   const [passwordVisible, setPasswordVisible] = useState(false);
+  const [emailFocused, setEmailFocused] = useState(false);
+  const [passwordFocused, setPasswordFocused] = useState(false);
   const signIn = useAuthStore((state) => state.signIn);
   const errorMessage = useAuthStore((state) => state.errorMessage);
   const infoMessage = useAuthStore((state) => state.infoMessage);
@@ -56,78 +56,129 @@ export default function LoginScreen() {
 
   return (
     <AuthScreen
-      eyebrow="تسجيل الدخول"
       footer="تتم حماية الجلسة وبيانات الحساب عبر Supabase وسياسات الوصول."
       subtitle="ادخل إلى جراجك الرقمي وتابع مواعيد الصيانة وطلبات الموقع من مكان واحد."
-      title="مرحباً بعودتك"
+      title={'أهلاً بك.\nفي كراجي.'}
       variant="login"
     >
-      <View className="gap-5">
+      <View className="gap-6">
+        {/* ── Email Architectural Line ── */}
         <Controller
           control={control}
           name="email"
           render={({ field: { onBlur, onChange, value } }) => (
-            <AppInput
-              autoCapitalize="none"
-              autoComplete="email"
-              error={errors.email?.message}
-              inputMode="email"
-              keyboardType="email-address"
-              label="البريد الإلكتروني"
-              onBlur={onBlur}
-              onChangeText={onChange}
-              placeholder="name@example.com"
-              textAlign="right"
-              value={value}
-            />
+            <View className="gap-1.5">
+              <Text className="font-sans text-right text-xs font-semibold text-[#8A8A8A] dark:text-[#A0A0A0]">
+                البريد الإلكتروني
+              </Text>
+              <TextInput
+                autoCapitalize="none"
+                autoComplete="email"
+                inputMode="email"
+                keyboardType="email-address"
+                className={`font-sans min-h-12 border-b text-base text-[#111111] dark:text-[#F5F5F5] ${
+                  errors.email
+                    ? 'border-red-400'
+                    : emailFocused
+                      ? 'border-[#111111] dark:border-[#E0E0E0]'
+                      : 'border-black/10 dark:border-white/10'
+                }`}
+                onBlur={(e) => {
+                  setEmailFocused(false);
+                  onBlur();
+                }}
+                onFocus={() => setEmailFocused(true)}
+                onChangeText={onChange}
+                placeholder="name@example.com"
+                placeholderTextColor="#C0C0C0"
+                style={{ fontFamily: 'Tajawal_400Regular' }}
+                textAlign="right"
+                value={value}
+              />
+              {errors.email?.message ? (
+                <Text className="font-sans text-right text-xs text-red-500">{errors.email.message}</Text>
+              ) : null}
+            </View>
           )}
         />
 
+        {/* ── Password Architectural Line ── */}
         <Controller
           control={control}
           name="password"
           render={({ field: { onBlur, onChange, value } }) => (
-            <AppInput
-              autoCapitalize="none"
-              autoComplete="password"
-              error={errors.password?.message}
-              label="كلمة المرور"
-              onBlur={onBlur}
-              onChangeText={onChange}
-              secureTextEntry={!passwordVisible}
-              textAlign="right"
-              trailing={
-                <PasswordToggle
-                  onPress={() => setPasswordVisible((current) => !current)}
-                  visible={passwordVisible}
+            <View className="gap-1.5">
+              <Text className="font-sans text-right text-xs font-semibold text-[#8A8A8A] dark:text-[#A0A0A0]">
+                كلمة المرور
+              </Text>
+              <View className="relative">
+                <TextInput
+                  autoCapitalize="none"
+                  autoComplete="password"
+                  secureTextEntry={!passwordVisible}
+                  className={`font-sans min-h-12 border-b pl-20 text-base text-[#111111] dark:text-[#F5F5F5] ${
+                    errors.password
+                      ? 'border-red-400'
+                      : passwordFocused
+                        ? 'border-[#111111] dark:border-[#E0E0E0]'
+                        : 'border-black/10 dark:border-white/10'
+                  }`}
+                  onBlur={() => {
+                    setPasswordFocused(false);
+                    onBlur();
+                  }}
+                  onFocus={() => setPasswordFocused(true)}
+                  onChangeText={onChange}
+                  placeholderTextColor="#C0C0C0"
+                  style={{ fontFamily: 'Tajawal_400Regular' }}
+                  textAlign="right"
+                  value={value}
                 />
-              }
-              value={value}
-            />
+                <View className="absolute bottom-0 left-1 top-0 justify-center">
+                  <PasswordToggle
+                    onPress={() => setPasswordVisible((current) => !current)}
+                    visible={passwordVisible}
+                  />
+                </View>
+              </View>
+              {errors.password?.message ? (
+                <Text className="font-sans text-right text-xs text-red-500">{errors.password.message}</Text>
+              ) : null}
+            </View>
           )}
         />
 
         <AuthNotice message={infoMessage} tone="success" />
         <AuthNotice message={errorMessage} tone="error" />
 
-        <View className="gap-3">
-          <View className="items-end">
-            <AuthTextButton onPress={() => router.push('/(auth)/forgot-password' as Href)}>
-              نسيت كلمة المرور؟
-            </AuthTextButton>
-          </View>
-
-          <AppButton
-            loading={isSubmitting}
-            onPress={() => void onSubmit()}
-            className="min-h-14 border-gold-500 bg-gold-500 shadow-md shadow-gold-700/20 dark:border-gold-500 dark:bg-gold-500"
-          >
-            تسجيل الدخول
-          </AppButton>
+        {/* ── Forgot Password Link ── */}
+        <View className="items-end">
+          <AuthTextButton onPress={() => router.push('/(auth)/forgot-password' as Href)}>
+            نسيت كلمة المرور؟
+          </AuthTextButton>
         </View>
 
-        <View className="flex-row-reverse items-center justify-center gap-2 border-t border-line pt-4 dark:border-dark-line">
-          <Text className="font-sans text-sm text-muted">ليس لديك حساب؟</Text>
+        {/* ── Monochrome Block CTA ── */}
+        <Pressable
+          accessibilityLabel="تسجيل الدخول"
+          accessibilityRole="button"
+          className="mt-2 h-14 w-full items-center justify-center rounded-md bg-[#111111] active:opacity-90 dark:bg-[#E0E0E0]"
+          disabled={isSubmitting}
+          onPress={() => void onSubmit()}
+          style={isSubmitting ? { opacity: 0.5 } : undefined}
+        >
+          {isSubmitting ? (
+            <ActivityIndicator color="#FFFFFF" />
+          ) : (
+            <Text className="font-sans text-base font-bold text-white dark:text-[#111111]">
+              تسجيل الدخول
+            </Text>
+          )}
+        </Pressable>
+
+        {/* ── Kinetic Staggered Link ── */}
+        <View className="mt-4 flex-row-reverse items-center justify-center gap-2">
+          <Text className="font-sans text-sm text-[#C0C0C0] dark:text-[#555555]">ليس لديك حساب؟</Text>
           <AuthTextButton onPress={() => router.push('/(auth)/signup' as Href)}>
             إنشاء حساب
           </AuthTextButton>

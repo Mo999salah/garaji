@@ -1,9 +1,17 @@
+import { useEffect } from 'react';
 import { View } from 'react-native';
+import Animated, {
+  FadeIn,
+  useAnimatedStyle,
+  useSharedValue,
+  withTiming,
+} from 'react-native-reanimated';
 
 import { STATUS_LABELS } from '@/features/requests/selectors/requestSelectors';
 import type { ServiceRequestEvent, ServiceRequestStatus } from '@/features/requests/types';
 
 import { AppText as Text } from '@/shared/components/AppText';
+
 interface RequestTimelineProps {
   events?: ServiceRequestEvent[];
   currentStatus: ServiceRequestStatus;
@@ -16,12 +24,28 @@ const ORDERED_STATUSES: ServiceRequestStatus[] = [
   'completed',
 ];
 
-const STATUS_COLORS: Record<ServiceRequestStatus, { dot: string; text: string }> = {
-  pending: { dot: 'bg-amber-400', text: 'text-amber-700 dark:text-amber-300' },
-  confirmed: { dot: 'bg-sky-500', text: 'text-sky-700 dark:text-sky-300' },
-  in_progress: { dot: 'bg-indigo-500', text: 'text-indigo-700 dark:text-indigo-300' },
-  completed: { dot: 'bg-emerald-600', text: 'text-emerald-700 dark:text-emerald-300' },
-  cancelled: { dot: 'bg-red-500', text: 'text-red-700 dark:text-red-300' },
+const STATUS_DOT_COLORS: Record<ServiceRequestStatus, string> = {
+  pending: 'bg-amber-400',
+  confirmed: 'bg-sky-500',
+  in_progress: 'bg-[#111111] dark:bg-[#E0E0E0]',
+  completed: 'bg-emerald-500',
+  cancelled: 'bg-red-400',
+};
+
+const STATUS_TEXT_COLORS: Record<ServiceRequestStatus, string> = {
+  pending: 'text-amber-700 dark:text-amber-300',
+  confirmed: 'text-sky-700 dark:text-sky-300',
+  in_progress: 'text-[#111111] dark:text-[#F5F5F5]',
+  completed: 'text-emerald-700 dark:text-emerald-300',
+  cancelled: 'text-red-600 dark:text-red-400',
+};
+
+const STATUS_ICONS: Record<ServiceRequestStatus, string> = {
+  pending: '◷',
+  confirmed: '✓',
+  in_progress: '⚡',
+  completed: '●',
+  cancelled: '✕',
 };
 
 function formatEventDate(iso: string): string {
@@ -35,16 +59,41 @@ function formatEventDate(iso: string): string {
   });
 }
 
+/* ── Animated progress bar for the active step ── */
+function ActivePulse() {
+  const width = useSharedValue(0);
+
+  useEffect(() => {
+    width.value = withTiming(100, { duration: 600 });
+  }, [width]);
+
+  const animStyle = useAnimatedStyle(() => ({
+    width: `${width.value}%`,
+    height: 2,
+    backgroundColor: '#111111',
+    borderRadius: 1,
+    marginTop: 4,
+  }));
+
+  return <Animated.View style={animStyle} />;
+}
+
 export function RequestTimeline({ currentStatus, events }: RequestTimelineProps) {
   if (currentStatus === 'cancelled') {
     const cancelEvent = events?.find((e) => e.status === 'cancelled');
     return (
-      <View className="rounded-lg border border-red-100 bg-red-50 p-4 dark:border-red-800 dark:bg-red-950/40">
-        <Text className="font-sans text-sm font-semibold text-red-700 dark:text-red-300">الطلب ملغى</Text>
+      <Animated.View
+        entering={FadeIn.duration(300)}
+        className="rounded-md border border-red-200/60 bg-red-50/40 p-4 dark:border-red-800/30 dark:bg-red-950/20"
+      >
+        <View className="flex-row-reverse items-center gap-2">
+          <Text className="font-sans text-sm">✕</Text>
+          <Text className="font-sans text-sm font-semibold text-red-700 dark:text-red-300">الطلب ملغى</Text>
+        </View>
         {cancelEvent?.note ? (
-          <Text className="font-sans mt-1 text-xs text-red-600 dark:text-red-400">{cancelEvent.note}</Text>
+          <Text className="font-sans mt-1 text-xs text-red-500 dark:text-red-400">{cancelEvent.note}</Text>
         ) : null}
-      </View>
+      </Animated.View>
     );
   }
 
@@ -56,24 +105,33 @@ export function RequestTimeline({ currentStatus, events }: RequestTimelineProps)
     return (
       <View className="gap-1">
         {sorted.map((event, idx) => {
-          const colors = STATUS_COLORS[event.status] ?? STATUS_COLORS.pending;
           const isLast = idx === sorted.length - 1;
+          const dotColor = STATUS_DOT_COLORS[event.status] ?? STATUS_DOT_COLORS.pending;
+          const textColor = STATUS_TEXT_COLORS[event.status] ?? STATUS_TEXT_COLORS.pending;
           return (
-            <View className="flex-row gap-3" key={event.id}>
+            <Animated.View
+              entering={FadeIn.delay(idx * 100).duration(300)}
+              className="flex-row gap-3"
+              key={event.id}
+            >
               <View className="items-center">
-                <View className={`mt-1 h-3 w-3 rounded-full ${colors.dot}`} />
-                {!isLast && <View className="mt-0.5 flex-1 w-0.5 bg-neutral-200 dark:bg-dark-line" />}
+                <View className={`mt-1 h-3 w-3 rounded-full ${dotColor}`} />
+                {!isLast && <View className="mt-0.5 flex-1 w-0.5 bg-[#E5E5E5] dark:bg-dark-line" />}
               </View>
               <View className="flex-1 pb-3">
-                <Text className={`font-sans text-sm font-semibold ${colors.text}`}>
-                  {STATUS_LABELS[event.status]}
-                </Text>
+                <View className="flex-row-reverse items-center gap-1.5">
+                  <Text className={`font-sans text-xs ${textColor}`}>{STATUS_ICONS[event.status]}</Text>
+                  <Text className={`font-sans text-sm font-semibold ${textColor}`}>
+                    {STATUS_LABELS[event.status]}
+                  </Text>
+                </View>
                 {event.note ? (
-                  <Text className="font-sans mt-0.5 text-xs text-muted dark:text-dark-muted">{event.note}</Text>
+                  <Text className="font-sans mt-0.5 text-xs text-[#8A8A8A] dark:text-dark-muted">{event.note}</Text>
                 ) : null}
-                <Text className="font-sans mt-0.5 text-xs text-muted dark:text-dark-muted">{formatEventDate(event.createdAt)}</Text>
+                <Text className="font-sans mt-0.5 text-xs text-[#8A8A8A] dark:text-dark-muted">{formatEventDate(event.createdAt)}</Text>
+                {isLast && <ActivePulse />}
               </View>
-            </View>
+            </Animated.View>
           );
         })}
       </View>
@@ -86,16 +144,26 @@ export function RequestTimeline({ currentStatus, events }: RequestTimelineProps)
     <View className="gap-3">
       {ORDERED_STATUSES.map((step, index) => {
         const isComplete = index <= currentIndex;
-        const colors = STATUS_COLORS[step];
+        const isCurrent = index === currentIndex;
+        const dotColor = isComplete ? STATUS_DOT_COLORS[step] : 'bg-[#E5E5E5] dark:bg-dark-line';
+        const textColor = isComplete ? STATUS_TEXT_COLORS[step] : 'text-[#8A8A8A] dark:text-dark-muted';
         return (
-          <View className="flex-row items-center gap-3" key={step}>
-            <View
-              className={`h-4 w-4 rounded-full ${isComplete ? colors.dot : 'bg-neutral-200 dark:bg-dark-line'}`}
-            />
-            <Text className={`font-sans text-sm font-semibold ${isComplete ? colors.text : 'text-muted dark:text-dark-muted'}`}>
-              {STATUS_LABELS[step]}
-            </Text>
-          </View>
+          <Animated.View
+            entering={FadeIn.delay(index * 80).duration(250)}
+            className="flex-row items-center gap-3"
+            key={step}
+          >
+            <View className={`h-3.5 w-3.5 rounded-full ${dotColor}`} />
+            <View className="flex-1">
+              <View className="flex-row-reverse items-center gap-1.5">
+                {isComplete && <Text className={`font-sans text-xs ${textColor}`}>{STATUS_ICONS[step]}</Text>}
+                <Text className={`font-sans text-sm font-semibold ${textColor}`}>
+                  {STATUS_LABELS[step]}
+                </Text>
+              </View>
+              {isCurrent && <ActivePulse />}
+            </View>
+          </Animated.View>
         );
       })}
     </View>

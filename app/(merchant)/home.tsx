@@ -46,7 +46,7 @@ export default function MerchantHomeScreen() {
         >
           <View className="flex-row-reverse gap-2">
             <View className="flex-1">
-              <AppButton onPress={() => router.push('/(merchant)/requests')} className="border-gold-500 bg-gold-500">
+              <AppButton onPress={() => router.push('/(merchant)/requests')}>
                 مراجعة الطلبات
               </AppButton>
             </View>

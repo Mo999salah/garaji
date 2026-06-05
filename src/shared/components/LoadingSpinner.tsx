@@ -15,7 +15,7 @@ export function LoadingSpinner({ label }: LoadingSpinnerProps) {
       accessibilityRole="progressbar"
       className="items-center justify-center py-4"
     >
-      <ActivityIndicator color={resolved === 'dark' ? '#D7B45E' : '#111111'} size="large" />
+      <ActivityIndicator color={resolved === 'dark' ? '#E0E0E0' : '#111111'} size="large" />
     </View>
   );
 }

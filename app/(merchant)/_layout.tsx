@@ -46,5 +46,21 @@ export default function MerchantLayout() {
     return <Redirect href={getHomePathForRole(user.role) as Href} />;
   }
 
-  return <Stack screenOptions={{ headerShown: false }} />;
+  return (
+    <Stack
+      screenOptions={{
+        headerShown: false,
+        headerStyle: {
+          backgroundColor: '#FFFFFF',
+        },
+        headerShadowVisible: false,
+        headerTitleStyle: {
+          fontFamily: 'Tajawal_700Bold',
+          fontSize: 18,
+          color: '#111111',
+        },
+        contentStyle: { backgroundColor: '#FFFFFF' },
+      }}
+    />
+  );
 }

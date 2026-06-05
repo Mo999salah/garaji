@@ -2,6 +2,11 @@
 @tailwind components;
 @tailwind utilities;
 
+/* — Pure Flat 2.0 Canvas Reset — */
+* {
+  box-shadow: none !important;
+}
+
 @font-face {
   font-family: 'Tajawal';
   src: url('../../assets/fonts/Tajawal-Regular.ttf') format('truetype');

@@ -27,19 +27,19 @@ export function AppInput({
 
   return (
     <View className={`gap-2 ${containerClassName}`}>
-      <Text className="font-sans text-sm font-semibold text-ink text-right dark:text-dark-ink">{label}</Text>
+      <Text className="font-sans text-sm font-semibold text-[#111111] text-right dark:text-dark-ink">{label}</Text>
       <View className="relative">
         <TextInput
-          className={`font-sans min-h-12 rounded-lg border px-4 text-base text-ink dark:text-dark-ink transition-all duration-150 ${
+          className={`font-sans min-h-12 rounded-md border px-4 text-base text-[#111111] dark:text-dark-ink ${
             trailing ? 'pl-20' : ''
           } ${
             error 
               ? 'border-red-400 bg-red-50/70 dark:border-red-500 dark:bg-red-950/30' 
               : isFocused 
-                ? 'border-brand-500 bg-card shadow-sm shadow-brand-700/10 dark:border-dark-brand-500 dark:bg-dark-card' 
-                : 'border-line bg-card dark:border-dark-line dark:bg-dark-card'
+                ? 'border-[#111111] bg-white dark:border-[#E0E0E0] dark:bg-dark-card' 
+                : 'border-[#E5E5E5] bg-white dark:border-dark-line dark:bg-dark-card'
           } ${inputClassName}`}
-          placeholderTextColor="#8A958F"
+          placeholderTextColor="#8A8A8A"
           style={[style, { fontFamily: 'Tajawal_400Regular' }]}
           textAlign={props.textAlign || 'right'}
           onFocus={(e) => {

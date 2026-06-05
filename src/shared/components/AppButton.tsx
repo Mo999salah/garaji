@@ -14,15 +14,15 @@ interface AppButtonProps extends PropsWithChildren {
 }
 
 const variants = {
-  primary: 'bg-brand-500 border-brand-500 shadow-sm shadow-brand-700/20 dark:bg-brand-500 dark:border-brand-500',
-  secondary: 'bg-card border-line dark:bg-dark-card dark:border-dark-line',
+  primary: 'bg-[#111111] border-[#111111] dark:bg-[#E0E0E0] dark:border-[#E0E0E0]',
+  secondary: 'bg-[#F3F4F6] border-[#E5E5E5] dark:bg-dark-card dark:border-dark-line',
   ghost: 'bg-transparent border-transparent',
 };
 
 const textVariants = {
-  primary: 'text-white font-bold dark:text-white',
-  secondary: 'text-ink font-semibold dark:text-dark-ink',
-  ghost: 'text-brand-500 font-bold dark:text-dark-brand-500',
+  primary: 'text-white font-bold dark:text-[#111111]',
+  secondary: 'text-[#111111] font-semibold dark:text-dark-ink',
+  ghost: 'text-[#111111] font-bold dark:text-dark-ink',
 };
 
 export function AppButton({
@@ -36,7 +36,7 @@ export function AppButton({
 }: AppButtonProps) {
   return (
     <View
-      className={`overflow-hidden rounded-lg border ${variants[variant]} ${
+      className={`overflow-hidden rounded-md border ${variants[variant]} ${
         disabled || loading ? 'opacity-50' : ''
       } ${className}`}
     >
@@ -49,7 +49,7 @@ export function AppButton({
         className="min-h-12 items-center justify-center px-5"
       >
         {loading ? (
-          <ActivityIndicator color={variant === 'primary' ? '#FFFFFF' : '#C89B3C'} />
+          <ActivityIndicator color={variant === 'primary' ? '#FFFFFF' : '#111111'} />
         ) : (
           <Text className={`font-sans text-base font-semibold ${textVariants[variant]}`}>{children}</Text>
         )}

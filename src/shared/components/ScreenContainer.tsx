@@ -12,18 +12,14 @@ export function ScreenContainer({ children, padded = true, scroll = true }: Scre
 
   if (!scroll) {
     return (
-      <SafeAreaView className="flex-1 bg-surface dark:bg-dark-surface">
-        <View className="absolute inset-x-0 top-0 h-48 bg-surface-soft dark:bg-dark-card/40" />
-        <View className="absolute inset-x-0 bottom-0 h-32 bg-gold-50/40 dark:bg-dark-gold-50/20" />
+      <SafeAreaView className="flex-1 bg-[#FFFFFF] dark:bg-[#0A0A0A]">
         <View className={`flex-1 ${contentClassName}`}>{children}</View>
       </SafeAreaView>
     );
   }
 
   return (
-    <SafeAreaView className="flex-1 bg-surface dark:bg-dark-surface">
-      <View className="absolute inset-x-0 top-0 h-48 bg-surface-soft dark:bg-dark-card/40" />
-      <View className="absolute inset-x-0 bottom-0 h-32 bg-gold-50/40 dark:bg-dark-gold-50/20" />
+    <SafeAreaView className="flex-1 bg-[#FFFFFF] dark:bg-[#0A0A0A]">
       <ScrollView
         className="flex-1"
         contentContainerClassName="grow"
