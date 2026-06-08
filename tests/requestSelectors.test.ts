@@ -5,6 +5,7 @@ import {
   ALLOWED_TRANSITIONS,
   STATUS_LABELS,
   TERMINAL_STATUSES,
+  canCustomerCancel,
   canTransitionTo,
   getNextStatuses,
   isTerminal,
@@ -94,6 +95,19 @@ describe('canTransitionTo', () => {
     for (const terminal of TERMINAL_STATUSES) {
       assert.deepStrictEqual(ALLOWED_TRANSITIONS[terminal], []);
     }
+  });
+});
+
+describe('canCustomerCancel', () => {
+  it('allows cancel while pending or confirmed', () => {
+    assert.ok(canCustomerCancel('pending'));
+    assert.ok(canCustomerCancel('confirmed'));
+  });
+
+  it('blocks cancel once work has started or the request is terminal', () => {
+    assert.ok(!canCustomerCancel('in_progress'));
+    assert.ok(!canCustomerCancel('completed'));
+    assert.ok(!canCustomerCancel('cancelled'));
   });
 });
 

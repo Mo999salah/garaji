@@ -11,6 +11,7 @@ import { RequestTimeline } from '@/features/requests/components/RequestTimeline'
 import { useRequestByIdQuery } from '@/features/requests/hooks/useRequestsQuery';
 import { useRequestRealtimeListener } from '@/features/requests/hooks/useRequestRealtimeListener';
 import {
+  canCustomerCancel,
   getNextStatuses,
   isTerminal,
   STATUS_LABELS,
@@ -35,6 +36,7 @@ function OrderDetailsScreen() {
   const isMerchant = user?.role === 'merchant';
   const queryClient = useQueryClient();
   const changeRequestStatus = useRequestStore((s) => s.changeRequestStatus);
+  const cancelCustomerRequest = useRequestStore((s) => s.cancelCustomerRequest);
 
   const { data: request, isLoading: isRequestLoading } = useRequestByIdQuery(requestId);
   const { data: vehicles = [], isLoading: isVehiclesLoading } = useCustomerVehiclesQuery(
@@ -51,6 +53,18 @@ function OrderDetailsScreen() {
         throw new Error('Missing request id.');
       }
       return changeRequestStatus(requestId, newStatus);
+    },
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: ['requests'] });
+    },
+  });
+
+  const cancelMutation = useMutation({
+    mutationFn: () => {
+      if (!requestId) {
+        throw new Error('Missing request id.');
+      }
+      return cancelCustomerRequest(requestId);
     },
     onSuccess: async () => {
       await queryClient.invalidateQueries({ queryKey: ['requests'] });
@@ -102,6 +116,8 @@ function OrderDetailsScreen() {
       : 'غير محدد';
 
   const nextStatuses = getNextStatuses(request.status);
+  const isCustomerOwner = user?.role === 'customer' && request.customerId === user.id;
+  const showCustomerCancel = isCustomerOwner && canCustomerCancel(request.status);
 
   const handleStatusChange = (newStatus: ServiceRequestStatus) => {
     const label = STATUS_LABELS[newStatus];
@@ -115,6 +131,23 @@ function OrderDetailsScreen() {
             await statusMutation.mutateAsync(newStatus);
           } catch {
             Alert.alert('خطأ', 'تعذّر تغيير حالة الطلب. يرجى المحاولة مجدداً.');
+          }
+        },
+      },
+    ]);
+  };
+
+  const handleCustomerCancel = () => {
+    Alert.alert('إلغاء الطلب', 'هل تريد إلغاء هذا الطلب؟ لا يمكن التراجع بعد الإلغاء.', [
+      { style: 'cancel', text: 'رجوع' },
+      {
+        style: 'destructive',
+        text: 'إلغاء الطلب',
+        onPress: async () => {
+          try {
+            await cancelMutation.mutateAsync();
+          } catch {
+            Alert.alert('خطأ', 'تعذّر إلغاء الطلب. يرجى المحاولة مجدداً.');
           }
         },
       },
@@ -171,6 +204,24 @@ function OrderDetailsScreen() {
                   {STATUS_LABELS[status]}
                 </AppButton>
               ))}
+            </View>
+          </AppCard>
+        ) : null}
+
+        {showCustomerCancel ? (
+          <AppCard tone="elevated">
+            <SectionHeader
+              subtitle="يمكنك إلغاء الطلب قبل بدء التنفيذ."
+              title="إلغاء الطلب"
+            />
+            <View className="mt-4">
+              <AppButton
+                loading={cancelMutation.isPending}
+                onPress={handleCustomerCancel}
+                variant="ghost"
+              >
+                إلغاء الطلب
+              </AppButton>
             </View>
           </AppCard>
         ) : null}

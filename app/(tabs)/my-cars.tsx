@@ -1,8 +1,11 @@
 import { router } from 'expo-router';
-import { View } from 'react-native';
+import { useState } from 'react';
+import { Alert, View } from 'react-native';
 
 import { useAuthStore } from '@/features/auth/store/useAuthStore';
 import { VehicleCard } from '@/features/vehicles/components/VehicleCard';
+import { useVehicleStore } from '@/features/vehicles/store/useVehicleStore';
+import type { Vehicle } from '@/features/vehicles/types';
 import { useCustomerVehiclesQuery } from '@/features/vehicles/hooks/useVehiclesQuery';
 import { AppButton } from '@/shared/components/AppButton';
 import { EmptyState } from '@/shared/components/EmptyState';
@@ -13,9 +16,39 @@ import { useScreenRefresh } from '@/shared/hooks/useScreenRefresh';
 
 export default function CustomerVehiclesScreen() {
   const user = useAuthStore((s) => s.user);
+  const deleteVehicle = useVehicleStore((s) => s.deleteVehicle);
+  const [deletingVehicleId, setDeletingVehicleId] = useState<string | null>(null);
   const vehiclesQuery = useCustomerVehiclesQuery(user?.id);
   const { data: vehicles = [], error, isLoading } = vehiclesQuery;
   const refreshControl = useScreenRefresh(vehiclesQuery.refetch);
+
+  const handleDeleteVehicle = (vehicle: Vehicle) => {
+    if (!user?.id) {
+      return;
+    }
+
+    Alert.alert(
+      'حذف المركبة',
+      `هل تريد حذف ${vehicle.make} ${vehicle.model}؟ لا يمكن التراجع.`,
+      [
+        { style: 'cancel', text: 'إلغاء' },
+        {
+          style: 'destructive',
+          text: 'حذف',
+          onPress: async () => {
+            setDeletingVehicleId(vehicle.id);
+            try {
+              await deleteVehicle(vehicle.id, user.id);
+            } catch {
+              Alert.alert('خطأ', 'تعذّر حذف المركبة. قد تكون مرتبطة بطلب نشط.');
+            } finally {
+              setDeletingVehicleId(null);
+            }
+          },
+        },
+      ],
+    );
+  };
 
   return (
     <ScreenContainer refreshControl={refreshControl}>
@@ -40,6 +73,8 @@ export default function CustomerVehiclesScreen() {
             {vehicles.map((vehicle) => (
               <VehicleCard
                 key={vehicle.id}
+                deleteLoading={deletingVehicleId === vehicle.id}
+                onDelete={() => handleDeleteVehicle(vehicle)}
                 onEdit={() => router.push(`/edit-vehicle?id=${vehicle.id}`)}
                 vehicle={vehicle}
               />

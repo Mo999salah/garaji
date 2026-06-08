@@ -9,10 +9,19 @@ interface VehicleCardProps {
   vehicle: Vehicle;
   onPress?: () => void;
   onEdit?: () => void;
+  onDelete?: () => void;
+  deleteLoading?: boolean;
   selected?: boolean;
 }
 
-export function VehicleCard({ onEdit, onPress, selected, vehicle }: VehicleCardProps) {
+export function VehicleCard({
+  deleteLoading,
+  onDelete,
+  onEdit,
+  onPress,
+  selected,
+  vehicle,
+}: VehicleCardProps) {
   const containerCls = [
     'rounded-lg border p-5 shadow-sm shadow-brand-700/10 bg-card dark:bg-dark-card dark:shadow-none',
     selected
@@ -54,15 +63,35 @@ export function VehicleCard({ onEdit, onPress, selected, vehicle }: VehicleCardP
             </Text>
           )}
         </View>
-        {onEdit && (
-          <Pressable
-            accessibilityLabel="تعديل المركبة"
-            accessibilityRole="button"
-            className="rounded-lg border border-line bg-surface-soft px-3 py-1.5 active:opacity-80 dark:border-dark-line dark:bg-dark-surface/50"
-            onPress={onEdit}
-          >
-            <Text className="font-sans text-xs font-medium text-ink dark:text-dark-ink">تعديل</Text>
-          </Pressable>
+        {(onEdit || onDelete) && (
+          <View className="items-end gap-2">
+            {onEdit ? (
+              <Pressable
+                accessibilityLabel="تعديل المركبة"
+                accessibilityRole="button"
+                className="rounded-lg border border-line bg-surface-soft px-3 py-1.5 active:opacity-80 dark:border-dark-line dark:bg-dark-surface/50"
+                onPress={onEdit}
+              >
+                <Text className="font-sans text-xs font-medium text-ink dark:text-dark-ink">
+                  تعديل
+                </Text>
+              </Pressable>
+            ) : null}
+            {onDelete ? (
+              <Pressable
+                accessibilityLabel="حذف المركبة"
+                accessibilityRole="button"
+                accessibilityState={{ busy: deleteLoading }}
+                className="rounded-lg border border-error/30 bg-error-container px-3 py-1.5 active:opacity-80"
+                disabled={deleteLoading}
+                onPress={onDelete}
+              >
+                <Text className="font-sans text-xs font-medium text-error">
+                  {deleteLoading ? 'جارٍ الحذف...' : 'حذف'}
+                </Text>
+              </Pressable>
+            ) : null}
+          </View>
         )}
       </View>
     </AnimatedPressable>

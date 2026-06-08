@@ -180,6 +180,23 @@ export async function createMobileRequest(values: MobileBookingValues): Promise<
   return created;
 }
 
+export async function cancelCustomerRequest(
+  requestId: string,
+  note?: string,
+): Promise<ServiceRequest | null> {
+  const client = getClient();
+  const { error } = await (client.rpc as Function)('cancel_service_request', {
+    p_request_id: requestId,
+    p_note: note ?? null,
+  });
+
+  if (error) {
+    throw new RequestServiceError(error.message ?? 'تعذّر إلغاء الطلب.');
+  }
+
+  return fetchRequestById(requestId);
+}
+
 export async function updateRequestStatus(
   requestId: string,
   newStatus: ServiceRequestStatus,

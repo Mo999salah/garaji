@@ -33,6 +33,11 @@ export function getNextStatuses(current: ServiceRequestStatus): ServiceRequestSt
   return ALLOWED_TRANSITIONS[current] ?? [];
 }
 
+/** Statuses where the owning customer may cancel via cancel_service_request RPC. */
+export function canCustomerCancel(status: ServiceRequestStatus): boolean {
+  return canTransitionTo(status, 'cancelled') && (status === 'pending' || status === 'confirmed');
+}
+
 export function selectActiveRequests(requests: ServiceRequest[]): ServiceRequest[] {
   return requests.filter((r) => !isTerminal(r.status));
 }

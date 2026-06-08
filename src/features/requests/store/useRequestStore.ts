@@ -1,6 +1,7 @@
 import create from 'zustand';
 
 import {
+  cancelCustomerRequest as cancelCustomerRequestRecord,
   createBranchRequest,
   createMobileRequest,
   fetchAllRequests,
@@ -29,6 +30,7 @@ interface RequestState {
     newStatus: ServiceRequestStatus,
     note?: string,
   ) => Promise<void>;
+  cancelCustomerRequest: (requestId: string, note?: string) => Promise<void>;
   reset: () => void;
 }
 
@@ -124,6 +126,26 @@ export const useRequestStore = create<RequestState>((set, get) => ({
     set({ isLoading: true, error: null });
     try {
       const updated = await updateRequestStatus(requestId, newStatus, note);
+      if (updated) {
+        set((s) => ({
+          requests: s.requests.map((r) => (r.id === requestId ? updated : r)),
+          selectedRequest: s.selectedRequest?.id === requestId ? updated : s.selectedRequest,
+        }));
+        await invalidateRequestQueries();
+      }
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'حدث خطأ غير متوقع';
+      set({ error: message });
+      throw err;
+    } finally {
+      set({ isLoading: false });
+    }
+  },
+
+  cancelCustomerRequest: async (requestId, note) => {
+    set({ isLoading: true, error: null });
+    try {
+      const updated = await cancelCustomerRequestRecord(requestId, note);
       if (updated) {
         set((s) => ({
           requests: s.requests.map((r) => (r.id === requestId ? updated : r)),
