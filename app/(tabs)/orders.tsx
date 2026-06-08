@@ -4,6 +4,7 @@ import { ScrollView, View } from 'react-native';
 
 import { useAuthStore } from '@/features/auth/store/useAuthStore';
 import { RequestCard } from '@/features/requests/components/RequestCard';
+import { useRequestRealtimeListener } from '@/features/requests/hooks/useRequestRealtimeListener';
 import { useCustomerRequestsQuery } from '@/features/requests/hooks/useRequestsQuery';
 import {
   selectActiveRequests,
@@ -22,6 +23,7 @@ const SKELETON_ITEMS = ['orders-skeleton-1', 'orders-skeleton-2', 'orders-skelet
 
 export default function CustomerOrdersScreen() {
   const user = useAuthStore((s) => s.user);
+  useRequestRealtimeListener({ customerId: user?.id, enabled: Boolean(user?.id) });
   const requestsQuery = useCustomerRequestsQuery(user?.id);
   const requests = requestsQuery.data ?? [];
   const isLoading = requestsQuery.isLoading;

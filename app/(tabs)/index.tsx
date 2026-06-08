@@ -3,6 +3,7 @@ import { View } from 'react-native';
 
 import { useAuthStore } from '@/features/auth/store/useAuthStore';
 import { RequestCard } from '@/features/requests/components/RequestCard';
+import { useRequestRealtimeListener } from '@/features/requests/hooks/useRequestRealtimeListener';
 import { useCustomerRequestsQuery } from '@/features/requests/hooks/useRequestsQuery';
 import { selectActiveRequests } from '@/features/requests/selectors/requestSelectors';
 import { useCustomerVehiclesQuery } from '@/features/vehicles/hooks/useVehiclesQuery';
@@ -21,6 +22,7 @@ import { useScreenRefresh } from '@/shared/hooks/useScreenRefresh';
 
 export default function CustomerHomeScreen() {
   const { signOut, user } = useAuthStore();
+  useRequestRealtimeListener({ customerId: user?.id, enabled: Boolean(user?.id) });
   const vehiclesQuery = useCustomerVehiclesQuery(user?.id);
   const requestsQuery = useCustomerRequestsQuery(user?.id);
   const vehicles = vehiclesQuery.data ?? [];
