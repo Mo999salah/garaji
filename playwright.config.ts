@@ -1,3 +1,5 @@
+import './e2e/helpers/env';
+
 import { defineConfig, devices } from '@playwright/test';
 
 const port = process.env.EXPO_PORT ?? '8081';
