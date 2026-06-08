@@ -1,4 +1,4 @@
-import type { PropsWithChildren, ReactNode } from 'react';
+import type { PropsWithChildren } from 'react';
 import { View } from 'react-native';
 import { Swipeable } from 'react-native-gesture-handler';
 import type { SwipeableProps } from 'react-native-gesture-handler';
@@ -19,32 +19,37 @@ interface SwipeableRowProps extends PropsWithChildren {
 }
 
 function renderActions(actions: SwipeAction[], side: 'left' | 'right') {
-  return () => (
-    <View className={`flex-row ${side === 'right' ? '' : 'flex-row-reverse'}`}>
-      {actions.map((action) => (
-        <View
-          key={action.label}
-          className="w-20 items-center justify-center"
-          style={{ backgroundColor: action.bgColor }}
-        >
+  function SwipeActions() {
+    return (
+      <View className={`flex-row ${side === 'right' ? '' : 'flex-row-reverse'}`}>
+        {actions.map((action) => (
           <View
-            className="items-center justify-center rounded-xl px-2 py-3"
-            onTouchEnd={action.onPress}
+            key={action.label}
+            className="w-20 items-center justify-center"
+            style={{ backgroundColor: action.bgColor }}
           >
-            {action.icon ? (
-              <Text className="font-sans mb-1 text-lg">{action.icon}</Text>
-            ) : null}
-            <Text
-              className="font-sans text-xs font-bold"
-              style={{ color: action.color }}
+            <View
+              className="items-center justify-center rounded-xl px-2 py-3"
+              onTouchEnd={action.onPress}
             >
-              {action.label}
-            </Text>
+              {action.icon ? (
+                <Text className="font-sans mb-1 text-lg">{action.icon}</Text>
+              ) : null}
+              <Text
+                className="font-sans text-xs font-bold"
+                style={{ color: action.color }}
+              >
+                {action.label}
+              </Text>
+            </View>
           </View>
-        </View>
-      ))}
-    </View>
-  );
+        ))}
+      </View>
+    );
+  }
+
+  SwipeActions.displayName = `SwipeActions(${side})`;
+  return SwipeActions;
 }
 
 export function SwipeableRow({

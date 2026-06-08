@@ -23,17 +23,17 @@ export function ThemeToggle() {
     <Pressable
       accessibilityLabel={`تبديل المظهر: ${label}`}
       accessibilityRole="button"
-      className="min-h-10 flex-row-reverse items-center gap-2 rounded-md border border-[#E5E5E5] bg-white px-3 py-2 active:opacity-80 dark:border-dark-line dark:bg-dark-card"
+      className="min-h-11 flex-row-reverse items-center gap-2 rounded-lg border border-line bg-white px-3 py-2 shadow-tactile-sm active:opacity-80 dark:border-dark-line dark:bg-dark-card"
       onPress={handlePress}
       onLongPress={handleLongPress}
     >
-      <View className="rounded-md bg-[#F3F4F6] px-2 py-1 dark:bg-dark-line">
-        <Text className="font-sans text-[10px] font-black text-[#111111] dark:text-dark-ink">{icon}</Text>
+      <View className="rounded-md bg-brand-50 px-2 py-1 dark:bg-dark-brand-50">
+        <Text className="font-sans text-[10px] font-black text-brand-700 dark:text-dark-brand-500">{icon}</Text>
       </View>
-      <Text className="font-sans text-xs font-semibold text-[#111111] dark:text-dark-ink">{label}</Text>
+      <Text className="font-sans text-xs font-semibold text-ink dark:text-dark-ink">{label}</Text>
       {systemBadge && (
-        <View className="rounded-md bg-[#F3F4F6] px-1.5 py-0.5 dark:bg-dark-line">
-          <Text className="font-sans text-[10px] font-bold text-[#8A8A8A] dark:text-dark-muted">تلقائي</Text>
+        <View className="rounded-md bg-surface-soft px-1.5 py-0.5 dark:bg-dark-line">
+          <Text className="font-sans text-[10px] font-bold text-muted dark:text-dark-muted">تلقائي</Text>
         </View>
       )}
     </Pressable>

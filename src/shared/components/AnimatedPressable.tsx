@@ -1,4 +1,4 @@
-import type { PropsWithChildren } from 'react';
+/* eslint-disable react-hooks/immutability -- Reanimated shared values update on the UI thread */
 import { Pressable } from 'react-native';
 import type { PressableProps } from 'react-native';
 import Animated, {

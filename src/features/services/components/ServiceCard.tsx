@@ -1,4 +1,5 @@
 import { View } from 'react-native';
+import { Feather } from '@expo/vector-icons';
 
 import type { Service, ServiceType } from '@/features/services/types';
 import { AnimatedPressable } from '@/shared/components/AnimatedPressable';
@@ -33,8 +34,8 @@ export function ServiceCard({ onPress, selected, service }: ServiceCardProps) {
     >
       <View className="flex-row-reverse items-start justify-between gap-4">
         <View className="flex-1 items-end">
-          <View className="mb-3 h-9 w-9 items-center justify-center rounded-lg bg-gold-50 dark:bg-dark-gold-50">
-            <Text className="font-sans text-sm font-black text-gold-600 dark:text-dark-gold-600">خ</Text>
+          <View className="mb-3 h-10 w-10 items-center justify-center rounded-lg bg-action-50 dark:bg-emerald-950/20">
+            <Feather name="tool" size={18} color="#059669" />
           </View>
           <Text className="font-sans text-base font-bold text-ink text-right dark:text-dark-ink">{service.name}</Text>
           {service.description ? (
@@ -53,7 +54,7 @@ export function ServiceCard({ onPress, selected, service }: ServiceCardProps) {
         </View>
         <View className="items-end gap-2">
           {service.estimatedPrice !== undefined ? (
-            <Text className="font-sans text-base font-bold text-gold-500 dark:text-dark-gold-500">
+            <Text className="font-sans text-base font-bold text-action-700 dark:text-emerald-300">
               {service.estimatedPrice.toLocaleString('ar-SA')} ر.س
             </Text>
           ) : null}

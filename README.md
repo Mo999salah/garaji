@@ -7,7 +7,7 @@
     <a href="https://reactnative.dev"><img src="https://img.shields.io/badge/React%20Native-0.81.5-61DAFB.svg?style=flat-square&logo=react&logoColor=black" alt="React Native" /></a>
     <a href="https://typescriptlang.org"><img src="https://img.shields.io/badge/TypeScript-5.9.2-3178C6.svg?style=flat-square&logo=typescript&logoColor=white" alt="TypeScript" /></a>
     <a href="https://supabase.com"><img src="https://img.shields.io/badge/Supabase-PostgreSQL-3ECF8E.svg?style=flat-square&logo=supabase&logoColor=white" alt="Supabase" /></a>
-    <a href="https://jestjs.io"><img src="https://img.shields.io/badge/Jest-Tests%20Passed-C21325.svg?style=flat-square&logo=jest&logoColor=white" alt="Jest" /></a>
+    <a href="https://nodejs.org"><img src="https://img.shields.io/badge/Tests-node%3Atest-339933.svg?style=flat-square&logo=node.js&logoColor=white" alt="Tests" /></a>
   </p>
 
   <h4>
@@ -29,6 +29,7 @@
 *   [Getting Started](#getting-started)
 *   [Available Scripts](#available-scripts)
 *   [Quality Control & Automated Gates](#quality-control--automated-gates)
+*   [Deployment Checklist](#deployment-checklist)
 
 ---
 
@@ -70,40 +71,28 @@ The codebase follows a modular feature-driven architecture that isolates domains
 
 ```
 garaji/
-├── app/                      # Expo Router File-Based Routing
-│   ├── (auth)/               # User Sign-in, Sign-up & Recovery
-│   ├── (customer)/           # Client App Screens (Garage, Bookings, Timeline)
-│   └── (merchant)/           # Staff App Screens (Requests, Branch & Service Configs)
-├── src/                      # Application Source Code
-│   ├── features/             # Isolated Domain Features
-│   │   ├── auth/             # Session Listeners & Zustand Store
-│   │   ├── vehicles/         # Virtual Garage Management & Validation Rules
-│   │   ├── branches/         # Store Locations CRUD
-│   │   ├── services/         # Service Directory & Pricing
-│   │   └── requests/         # Booking Services & Status Timeline
-│   └── shared/               # Shared Components & Utilities
-│       ├── components/       # Reusable Atomic UI (Buttons, Cards, Inputs)
-│       ├── lib/              # Supabase Client & React Query Configuration
-│       └── types/            # TypeScript Schema Definitions
-└── supabase/                 # Database Schema & Migrations
+├── app/                      # Expo Router routes
+│   ├── (tabs)/               # Customer home, orders, vehicles
+│   ├── (admin)/              # Merchant dashboard, CRUD, analytics
+│   ├── login.tsx             # Auth (public, redirects if signed in)
+│   ├── book-service.tsx      # Mobile service booking + map
+│   └── order-details.tsx     # Shared request detail / operations
+├── src/
+│   ├── features/
+│   │   ├── auth/             # Session, RoleGate, AuthPublicGate
+│   │   ├── vehicles/         # Customer garage
+│   │   ├── branches/         # Branch catalog
+│   │   ├── services/         # Service catalog
+│   │   ├── requests/         # Bookings & status timeline
+│   │   └── operations/       # Technicians, maintenance plans, ops panel
+│   └── shared/               # UI kit, Supabase, React Query, hooks
+├── supabase/migrations/      # RLS, RPCs, seed data
+└── tests/                    # Unit tests (selectors, schemas)
 ```
 
-### Absolute Directory References:
-*   [app/](file:///c:/Users/MoSalah/Documents/GitHub/garaji/app) — Core app router and navigation hierarchies.
-    *   [app/(auth)/](file:///c:/Users/MoSalah/Documents/GitHub/garaji/app/\(auth\)) — Authentication and onboarding layouts.
-    *   [app/(customer)/](file:///c:/Users/MoSalah/Documents/GitHub/garaji/app/\(customer\)) — Customer-specific workspace.
-    *   [app/(merchant)/](file:///c:/Users/MoSalah/Documents/GitHub/garaji/app/\(merchant\)) — Operations and branch management portal.
-*   [src/features/](file:///c:/Users/MoSalah/Documents/GitHub/garaji/src/features) — Business logic directories grouped by features.
-    *   [src/features/auth/](file:///c:/Users/MoSalah/Documents/GitHub/garaji/src/features/auth) — Session state management.
-    *   [src/features/vehicles/](file:///c:/Users/MoSalah/Documents/GitHub/garaji/src/features/vehicles) — Car validations and details hooks.
-    *   [src/features/branches/](file:///c:/Users/MoSalah/Documents/GitHub/garaji/src/features/branches) — Geolocation store branch metadata.
-    *   [src/features/services/](file:///c:/Users/MoSalah/Documents/GitHub/garaji/src/features/services) — Services pricing and data layers.
-    *   [src/features/requests/](file:///c:/Users/MoSalah/Documents/GitHub/garaji/src/features/requests) — Order state transformations.
-*   [src/shared/](file:///c:/Users/MoSalah/Documents/GitHub/garaji/src/shared) — Shared libraries and reusable UI elements.
-    *   [src/shared/components/](file:///c:/Users/MoSalah/Documents/GitHub/garaji/src/shared/components) — Atomic UI components library.
-    *   [src/shared/lib/](file:///c:/Users/MoSalah/Documents/GitHub/garaji/src/shared/lib) — Database connection helper files.
-    *   [src/shared/types/](file:///c:/Users/MoSalah/Documents/GitHub/garaji/src/shared/types) — Core entity models.
-*   [supabase/migrations/](file:///c:/Users/MoSalah/Documents/GitHub/garaji/supabase/migrations) — SQL script histories.
+Design HTML exports under `.stitch/` are **gitignored** reference material only — not part of the runtime app.
+
+**Maps:** `book-service` uses `react-native-maps` on iOS/Android. On web, coordinates are entered manually or via browser geolocation (`AppMap.web.tsx` placeholder).
 
 ---
 
@@ -149,7 +138,7 @@ Booking states transition in a strictly controlled manner via database constrain
 *   **Backend Support:** Supabase (Auth, Postgres DB, Storage buckets)
 *   **Interface Styling:** NativeWind v4, Tailwind CSS v3
 *   **Validation Core:** React Hook Form & Zod
-*   **Testing Suite:** Jest & tsx compiler
+*   **Testing & Lint:** Node.js test runner (`tsx --test`), ESLint (`expo lint`)
 
 ---
 
@@ -160,7 +149,7 @@ Copy the configuration template:
 ```bash
 cp .env.example .env.local
 ```
-Update [.env.local](file:///c:/Users/MoSalah/Documents/GitHub/garaji/.env.local) with your Supabase credentials:
+Update `.env.local` with your Supabase credentials:
 ```env
 EXPO_PUBLIC_SUPABASE_URL=https://your-project-id.supabase.co
 EXPO_PUBLIC_SUPABASE_ANON_KEY=your-anon-public-key
@@ -184,8 +173,10 @@ Manage your workspace using the standard package scripts:
 | `npm run android` | Boots the application inside an Android Emulator. |
 | `npm run ios` | Boots the application inside an iOS Simulator. |
 | `npm run web` | Serves the project as a progressive web application. |
-| `npm run typecheck` | Validates code formatting and type safety. |
-| `npm test` | Runs internal testing files. |
+| `npm run typecheck` | Validates TypeScript types. |
+| `npm run lint` | Runs ESLint via Expo. |
+| `npm test` | Runs unit tests in `tests/`. |
+| `npm run test:e2e` | Runs Playwright web smoke tests (starts or reuses `npm run web`). |
 | `npm run doctor` | Performs diagnostic health checks on expo configs. |
 | `npm run release:check` | Asserts production schema RLS status and client code logic. |
 | `npm run quality:check` | Executes a complete quality build validation gate. |
@@ -198,16 +189,32 @@ Manage your workspace using the standard package scripts:
 
 The repository features automated checks to protect the build and data model structure before pushing edits or making releases:
 
-*   **Unit Tests:** Unit tests are located in [tests/](file:///c:/Users/MoSalah/Documents/GitHub/garaji/tests) which validate Zod schemas and request selectors.
-*   **Automatic Quality Gates:** Running `npm run quality:check` executes type checks, unit tests, doctor audits, and schema release checks.
+*   **Unit Tests:** Located in `tests/` — Zod schemas, request selectors, analytics helpers, auth routing.
+*   **Web Smoke (E2E):** `e2e/web-smoke.spec.ts` — login screen and guest redirect via Playwright.
+*   **Automatic Quality Gates:** Running `npm run quality:check` executes type checks, lint, unit tests, doctor audits, and schema release checks.
 
 ```bash
 # Run unit tests
 npm test
 
+# Run web smoke tests (requires Chromium — npx playwright install chromium)
+npm run test:e2e
+
 # Run full quality check gate
 npm run quality:check
 ```
+
+---
+
+## 🚢 Deployment Checklist
+
+Before promoting a build to production:
+
+1. **Database:** Run `npm run db:status` — all local migrations must be applied on the remote (`npm run db:push` if needed).
+2. **Environment:** Set `EXPO_PUBLIC_SUPABASE_URL` and `EXPO_PUBLIC_SUPABASE_ANON_KEY` in EAS/hosting secrets — never commit `.env.local`.
+3. **Quality gate:** `npm run quality:check` must pass (typecheck, lint, unit tests, release checks, web export).
+4. **Smoke test:** `npm run test:e2e` against the web build on your target port (`EXPO_DEV_SERVER_URL` if not 8081).
+5. **Mobile builds:** Use [EAS Build](https://docs.expo.dev/build/introduction/) for iOS/Android store binaries; maps require native `react-native-maps` (not the web coordinate fallback).
 
 ---
 ---
@@ -224,6 +231,7 @@ npm run quality:check
 *   [دليل التشغيل والتهيئة](#دليل-التشغيل-والتهيئة)
 *   [أوامر بيئة العمل المتاحة](#أوامر-بيئة-العمل-المتاحة)
 *   [ضمان الجودة والاختبارات التلقائية](#ضمان-الجودة-والاختبارات-التلقائية)
+*   [قائمة التحقق قبل النشر](#قائمة-التحقق-قبل-النشر)
 
 ---
 
@@ -265,40 +273,20 @@ npm run quality:check
 
 ```
 garaji/
-├── app/                      # مسارات الموجه لـ Expo Router
-│   ├── (auth)/               # تسجيل الدخول، التسجيل واسترجاع الحساب
-│   ├── (customer)/           # شاشات العميل (المرآب، الحجز، التتبع)
-│   └── (merchant)/           # شاشات مزود الخدمة (الطلبات، الفروع والخدمات)
-├── src/                      # الكود المصدري للتطبيق
-│   ├── features/             # منطق العمل مقسم حسب المهام
-│   │   ├── auth/             # مستمع الجلسات ومخزن حالة المستخدم (Zustand)
-│   │   ├── vehicles/         # نظام التحقق من سلامة بيانات المركبات
-│   │   ├── branches/         # بيانات مواقع الفروع الجغرافية
-│   │   ├── services/         # دليل الخدمات، التفاصيل والأسعار
-│   │   └── requests/         # معالجة طلبات الحجز ومراحل الانتقال
-│   └── shared/               # المكتبات والمكونات المشتركة
-│       ├── components/       # مكونات واجهة المستخدم الأساسية القابلة لإعادة الاستخدام
-│       ├── lib/              # تهيئة روابط قاعدة البيانات و React Query
-│       └── types/            # تعريف أنواع البيانات لبيئة العمل (Types)
-└── supabase/                 # جداول وهجرات قاعدة البيانات
+├── app/
+│   ├── (tabs)/               # الرئيسية، الطلبات، سياراتي
+│   ├── (admin)/              # لوحة التاجر، الفروع، الفنيين، التحليلات
+│   ├── login.tsx             # دخول (يُعاد توجيه المسجّل)
+│   ├── book-service.tsx      # حجز خدمة بالموقع + خريطة
+│   └── order-details.tsx     # تفاصيل الطلب والعمليات
+├── src/features/             # auth, vehicles, requests, operations, ...
+├── supabase/migrations/
+└── tests/
 ```
 
-### روابط الوصول المباشر للمجلدات:
-*   [app/](file:///c:/Users/MoSalah/Documents/GitHub/garaji/app) — هيكل المسارات العام.
-    *   [app/(auth)/](file:///c:/Users/MoSalah/Documents/GitHub/garaji/app/\(auth\)) — مسارات التحقق والهوية.
-    *   [app/(customer)/](file:///c:/Users/MoSalah/Documents/GitHub/garaji/app/\(customer\)) — واجهة العميل.
-    *   [app/(merchant)/](file:///c:/Users/MoSalah/Documents/GitHub/garaji/app/\(merchant\)) — بوابة الإدارة.
-*   [src/features/](file:///c:/Users/MoSalah/Documents/GitHub/garaji/src/features) — منطق العمل البرمجي.
-    *   [src/features/auth/](file:///c:/Users/MoSalah/Documents/GitHub/garaji/src/features/auth) — التحقق والمصادقة.
-    *   [src/features/vehicles/](file:///c:/Users/MoSalah/Documents/GitHub/garaji/src/features/vehicles) — شروط المركبة.
-    *   [src/features/branches/](file:///c:/Users/MoSalah/Documents/GitHub/garaji/src/features/branches) — الفروع الجغرافية.
-    *   [src/features/services/](file:///c:/Users/MoSalah/Documents/GitHub/garaji/src/features/services) — إدارة الخدمات والأسعار.
-    *   [src/features/requests/](file:///c:/Users/MoSalah/Documents/GitHub/garaji/src/features/requests) — الحجوزات والخطوط الزمنية للطلب.
-*   [src/shared/](file:///c:/Users/MoSalah/Documents/GitHub/garaji/src/shared) — الخدمات والواجهات المشتركة.
-    *   [src/shared/components/](file:///c:/Users/MoSalah/Documents/GitHub/garaji/src/shared/components) — مكتبة مكونات الواجهات.
-    *   [src/shared/lib/](file:///c:/Users/MoSalah/Documents/GitHub/garaji/src/shared/lib) — ملفات الاتصال وإدارة الجلسات.
-    *   [src/shared/types/](file:///c:/Users/MoSalah/Documents/GitHub/garaji/src/shared/types) — نماذج البيانات المشتركة.
-*   [supabase/migrations/](file:///c:/Users/MoSalah/Documents/GitHub/garaji/supabase/migrations) — ملفات هجرات قاعدة البيانات.
+ملفات التصميم في `.stitch/` **مستثناة من Git** — مرجع تصميم فقط وليست جزءاً من التطبيق.
+
+**الخرائط:** تفاعلية على iOS/Android عبر `react-native-maps`. على الويب يُدخل المستخدم الإحداثيات يدوياً أو يستخدم الموقع الحالي.
 
 ---
 
@@ -344,7 +332,7 @@ garaji/
 *   **قاعدة البيانات:** Supabase (نظام التحقق، جداول Postgres السحابية، سحابة التخزين)
 *   **التصميم والتنسيق:** NativeWind v4, Tailwind CSS v3
 *   **إدارة النماذج والتحقق:** React Hook Form و Zod
-*   **بيئة الفحص:** Jest و tsx compiler
+*   **الفحص والجودة:** `tsx --test` و ESLint (`expo lint`)
 
 ---
 
@@ -355,7 +343,7 @@ garaji/
 ```bash
 cp .env.example .env.local
 ```
-قم بتهيئة المتغيرات في ملف [.env.local](file:///c:/Users/MoSalah/Documents/GitHub/garaji/.env.local) مستعينًا ببيانات مشروع Supabase الخاص بك:
+قم بتهيئة المتغيرات في ملف `.env.local` مستعينًا ببيانات مشروع Supabase الخاص بك:
 ```env
 EXPO_PUBLIC_SUPABASE_URL=https://your-project-id.supabase.co
 EXPO_PUBLIC_SUPABASE_ANON_KEY=your-anon-public-key
@@ -380,7 +368,9 @@ npm start       # تشغيل خادم الحزم Metro
 | `npm run ios` | لتشغيل خادم المترو وبدء التطبيق داخل محاكي الآيفون. |
 | `npm run web` | لتشغيل وبدء التطبيق كنسخة ويب تفاعلية على المتصفح. |
 | `npm run typecheck` | للتأكد من خلو ملفات التطبيق البرمجية من أخطاء TypeScript. |
-| `npm test` | لتشغيل ملفات الاختبار البرمجية. |
+| `npm run lint` | لتشغيل ESLint عبر Expo. |
+| `npm test` | لتشغيل اختبارات الوحدة في `tests/`. |
+| `npm run test:e2e` | لتشغيل اختبارات smoke للويب عبر Playwright. |
 | `npm run doctor` | لفحص سلامة إعدادات التطبيق وتكامل مسارات الحزم. |
 | `npm run release:check` | للتحقق من أمان قاعدة البيانات وتطابق الجداول للإنتاج الفعلي. |
 | `npm run quality:check` | لتشغيل البوابة الشاملة للجودة (فحص الأنواع والاختبارات وتجهيز البناء للويب). |
@@ -393,13 +383,29 @@ npm start       # تشغيل خادم الحزم Metro
 
 يتبع المستودع معايير تحقق صارمة تضمن استقرار الكود وحمايته من التعديلات الخاطئة قبل عملية النشر الفعلي:
 
-*   **اختبارات الوحدة:** متوفرة داخل المجلد [tests/](file:///c:/Users/MoSalah/Documents/GitHub/garaji/tests) لضمان صحة كينونات Zod ومنطق تتبع الحالات لآلة الحالة.
-*   **بوابات الجودة التلقائية:** عند تشغيل `npm run quality:check` ستقوم الأداة تلقائياً بفحص سلامة الأنواع، اختبارات الوحدة، وفحص حالة أمان قاعدة البيانات وجودة روابط الموجه.
+*   **اختبارات الوحدة:** في `tests/` — مخططات Zod، محددات الطلبات، توجيه الأدوار، ومساعدات خطط الصيانة.
+*   **اختبارات smoke للويب:** `e2e/web-smoke.spec.ts` — شاشة الدخول وإعادة توجيه الضيف.
+*   **بوابات الجودة التلقائية:** عند تشغيل `npm run quality:check` ستقوم الأداة بفحص الأنواع، ESLint، اختبارات الوحدة، وفحص أمان قاعدة البيانات.
 
 ```bash
 # تشغيل اختبارات الوحدة البرمجية
 npm test
 
+# تشغيل smoke للويب (يتطلب Chromium: npx playwright install chromium)
+npm run test:e2e
+
 # تشغيل بوابة الجودة الشاملة للمشروع
 npm run quality:check
 ```
+
+---
+
+## 🚢 قائمة التحقق قبل النشر
+
+قبل رفع نسخة إنتاجية:
+
+1. **قاعدة البيانات:** `npm run db:status` — يجب تطبيق كل الهجرات على السيرفر البعيد (`npm run db:push` عند الحاجة).
+2. **المتغيرات:** ضع مفاتيح Supabase في أسرار EAS/الاستضافة — لا ترفع `.env.local`.
+3. **بوابة الجودة:** `npm run quality:check` يجب أن ينجح.
+4. **Smoke للويب:** `npm run test:e2e` على المنفذ المحدد (`EXPO_DEV_SERVER_URL` إن لم يكن 8081).
+5. **الجوال:** استخدم EAS Build لملفات iOS/Android؛ الخرائط تتطلب `react-native-maps` الأصلي وليس بديل الويب.

@@ -1,28 +1,31 @@
-import type { PropsWithChildren } from 'react';
-import { ActivityIndicator, View } from 'react-native';
+import type { PropsWithChildren } from "react";
+import { ActivityIndicator, View } from "react-native";
+import * as Haptics from "expo-haptics";
 
-import { AnimatedPressable } from '@/shared/components/AnimatedPressable';
+import { AnimatedPressable } from "@/shared/components/AnimatedPressable";
+import { AppText as Text } from "@/shared/components/AppText";
 
-import { AppText as Text } from '@/shared/components/AppText';
 interface AppButtonProps extends PropsWithChildren {
   onPress: () => void;
   disabled?: boolean;
   loading?: boolean;
-  variant?: 'primary' | 'secondary' | 'ghost';
+  variant?: "primary" | "secondary" | "ghost";
   accessibilityLabel?: string;
   className?: string;
 }
 
 const variants = {
-  primary: 'bg-[#111111] border-[#111111] dark:bg-[#E0E0E0] dark:border-[#E0E0E0]',
-  secondary: 'bg-[#F3F4F6] border-[#E5E5E5] dark:bg-dark-card dark:border-dark-line',
-  ghost: 'bg-transparent border-transparent',
+  primary:
+    "bg-brand-600 border-brand-600 shadow-tactile-sm dark:bg-brand-600 dark:border-brand-600",
+  secondary:
+    "bg-white border-line shadow-tactile-sm dark:bg-dark-card dark:border-dark-line",
+  ghost: "bg-transparent border-transparent",
 };
 
 const textVariants = {
-  primary: 'text-white font-bold dark:text-[#111111]',
-  secondary: 'text-[#111111] font-semibold dark:text-dark-ink',
-  ghost: 'text-[#111111] font-bold dark:text-dark-ink',
+  primary: "text-white font-bold dark:text-white",
+  secondary: "text-ink font-semibold dark:text-dark-ink",
+  ghost: "text-brand-700 font-bold dark:text-dark-brand-500",
 };
 
 export function AppButton({
@@ -30,28 +33,43 @@ export function AppButton({
   disabled,
   loading,
   onPress,
-  variant = 'primary',
+  variant = "primary",
   accessibilityLabel,
-  className = '',
+  className = "",
 }: AppButtonProps) {
+  const handlePress = () => {
+    if (disabled || loading) return;
+
+    // Provide a physical mechanical feedback click feel
+    try {
+      void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    } catch {
+      // Fail-safe for platforms/devices without physical haptic motors
+    }
+
+    onPress();
+  };
+
   return (
     <View
-      className={`overflow-hidden rounded-md border ${variants[variant]} ${
-        disabled || loading ? 'opacity-50' : ''
+      className={`overflow-hidden rounded-full border ${variants[variant]} ${
+        disabled || loading ? "opacity-50" : ""
       } ${className}`}
     >
       <AnimatedPressable
         accessibilityLabel={accessibilityLabel}
         accessibilityRole="button"
         disabled={disabled || loading}
-        onPress={onPress}
-        scaleValue={0.97}
+        onPress={handlePress}
+        scaleValue={0.98}
         className="min-h-12 items-center justify-center px-5"
       >
         {loading ? (
-          <ActivityIndicator color={variant === 'primary' ? '#FFFFFF' : '#111111'} />
+          <ActivityIndicator color={variant === "primary" ? "#FFFFFF" : "#0284C7"} />
         ) : (
-          <Text className={`font-sans text-base font-semibold ${textVariants[variant]}`}>{children}</Text>
+          <Text className={`font-sans text-base ${textVariants[variant]}`}>
+            {children}
+          </Text>
         )}
       </AnimatedPressable>
     </View>

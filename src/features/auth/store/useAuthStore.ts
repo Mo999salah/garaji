@@ -9,11 +9,18 @@ import {
   type SignInCredentials,
   type SignUpCredentials,
 } from '@/features/auth/services/supabaseAuthService';
+import { fetchActiveBranches, fetchAllBranches } from '@/features/branches/services/supabaseBranchService';
 import { useBranchStore } from '@/features/branches/store/useBranchStore';
-import { useRequestStore } from '@/features/requests/store/useRequestStore';
+import {
+  fetchAllRequests,
+  fetchCustomerRequests,
+} from '@/features/requests/services/supabaseRequestService';
+import { fetchActiveServices, fetchAllServices } from '@/features/services/services/supabaseServiceService';
 import { useServiceStore } from '@/features/services/store/useServiceStore';
-import { useVehicleStore } from '@/features/vehicles/store/useVehicleStore';
+import { fetchCustomerVehicles } from '@/features/vehicles/services/supabaseVehicleService';
 import type { AuthUser, UserRole } from '@/shared/types/auth';
+import { isSupabaseConfigured } from '@/shared/lib/supabase';
+import { queryClient } from '@/shared/lib/queryClient';
 import { resetSessionStores } from '@/shared/lib/sessionStores';
 
 type AuthStatus = 'idle' | 'loading' | 'authenticated' | 'unauthenticated' | 'blocked';
@@ -42,10 +49,28 @@ function getErrorMessage(error: unknown) {
 }
 
 async function syncRoleData(user: AuthUser) {
+  if (!isSupabaseConfigured) {
+    return;
+  }
+
   if (user.role === 'customer') {
     await Promise.all([
-      useVehicleStore.getState().loadVehicles(user.id),
-      useRequestStore.getState().loadCustomerRequests(user.id),
+      queryClient.prefetchQuery({
+        queryKey: ['vehicles', 'customer', user.id],
+        queryFn: () => fetchCustomerVehicles(user.id),
+      }),
+      queryClient.prefetchQuery({
+        queryKey: ['requests', 'customer', user.id],
+        queryFn: () => fetchCustomerRequests(user.id),
+      }),
+      queryClient.prefetchQuery({
+        queryKey: ['services', 'active'],
+        queryFn: fetchActiveServices,
+      }),
+      queryClient.prefetchQuery({
+        queryKey: ['branches', 'active'],
+        queryFn: fetchActiveBranches,
+      }),
       useServiceStore.getState().loadActiveServices(),
       useBranchStore.getState().loadActiveBranches(),
     ]);
@@ -54,7 +79,18 @@ async function syncRoleData(user: AuthUser) {
 
   if (user.role === 'merchant') {
     await Promise.all([
-      useRequestStore.getState().loadAllRequests(),
+      queryClient.prefetchQuery({
+        queryKey: ['requests', 'all'],
+        queryFn: fetchAllRequests,
+      }),
+      queryClient.prefetchQuery({
+        queryKey: ['services', 'all'],
+        queryFn: fetchAllServices,
+      }),
+      queryClient.prefetchQuery({
+        queryKey: ['branches', 'all'],
+        queryFn: fetchAllBranches,
+      }),
       useServiceStore.getState().loadAllServices(),
       useBranchStore.getState().loadAllBranches(),
     ]);
@@ -156,6 +192,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
       await signOutSupabase();
     } finally {
       resetSessionStores();
+      queryClient.clear();
       set({
         user: null,
         status: 'unauthenticated',
@@ -170,6 +207,4 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   setInfoMessage: (message) => set({ infoMessage: message }),
 }));
 
-export function getHomePathForRole(role: UserRole) {
-  return role === 'customer' ? '/(customer)/home' : '/(merchant)/home';
-}
+export { getHomePathForRole } from '@/features/auth/utils/homePaths';

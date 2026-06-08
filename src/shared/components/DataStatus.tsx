@@ -21,16 +21,16 @@ export function DataStatus({
 }: DataStatusProps) {
   if (isLoading) {
     return (
-      <View className="rounded-md border border-[#E5E5E5] bg-white p-6 dark:border-dark-line dark:bg-dark-card">
+      <View className="rounded-lg border border-line bg-white p-6 shadow-tactile-sm dark:border-dark-line dark:bg-dark-card">
         <LoadingSpinner label={loadingLabel} />
-        <Text className="font-sans mt-2 text-center text-sm font-semibold text-[#8A8A8A] dark:text-dark-muted">{loadingLabel}</Text>
+        <Text className="font-sans mt-2 text-center text-sm font-semibold text-muted dark:text-dark-muted">{loadingLabel}</Text>
       </View>
     );
   }
 
   if (errorMessage) {
     return (
-      <View className="rounded-md border border-red-200 bg-red-50 p-6 dark:border-red-800 dark:bg-red-950/40">
+      <View className="rounded-lg border border-red-200 bg-red-50 p-6 dark:border-red-800 dark:bg-red-950/40">
         <Text className="font-sans text-base font-bold text-red-800 dark:text-red-300">{errorTitle}</Text>
         <Text className="font-sans mt-1 text-sm leading-5 text-red-600 dark:text-red-400">{errorMessage}</Text>
         {onRetry ? (

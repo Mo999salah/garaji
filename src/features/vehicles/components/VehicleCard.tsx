@@ -1,4 +1,5 @@
 import { Pressable, View } from 'react-native';
+import { Feather } from '@expo/vector-icons';
 
 import type { Vehicle } from '@/features/vehicles/types';
 import { AnimatedPressable } from '@/shared/components/AnimatedPressable';
@@ -28,8 +29,8 @@ export function VehicleCard({ onEdit, onPress, selected, vehicle }: VehicleCardP
     >
       <View className="flex-row-reverse items-start justify-between gap-4">
         <View className="flex-1 items-end">
-          <View className="mb-3 h-9 w-9 items-center justify-center rounded-lg bg-brand-50 dark:bg-dark-brand-50">
-            <Text className="font-sans text-sm font-black text-brand-500 dark:text-dark-brand-500">سي</Text>
+          <View className="mb-3 h-10 w-10 items-center justify-center rounded-lg bg-brand-50 dark:bg-dark-brand-50">
+            <Feather name="truck" size={18} color="#0284C7" />
           </View>
           <Text className="font-sans text-lg font-bold text-ink text-right dark:text-dark-ink">
             {vehicle.make} {vehicle.model}

@@ -10,6 +10,7 @@ import {
 } from '@/features/requests/services/supabaseRequestService';
 import type { BranchBookingValues, MobileBookingValues } from '@/features/requests/schemas/requestSchema';
 import type { ServiceRequest, ServiceRequestStatus } from '@/features/requests/types';
+import { invalidateRequestQueries } from '@/shared/lib/invalidateQueries';
 
 interface RequestState {
   requests: ServiceRequest[];
@@ -92,6 +93,7 @@ export const useRequestStore = create<RequestState>((set, get) => ({
     try {
       const newRequest = await createBranchRequest(values);
       set((s) => ({ requests: [newRequest, ...s.requests] }));
+      await invalidateRequestQueries();
       return newRequest;
     } catch (err) {
       const message = err instanceof Error ? err.message : 'حدث خطأ غير متوقع';
@@ -107,6 +109,7 @@ export const useRequestStore = create<RequestState>((set, get) => ({
     try {
       const newRequest = await createMobileRequest(values);
       set((s) => ({ requests: [newRequest, ...s.requests] }));
+      await invalidateRequestQueries();
       return newRequest;
     } catch (err) {
       const message = err instanceof Error ? err.message : 'حدث خطأ غير متوقع';
@@ -126,6 +129,7 @@ export const useRequestStore = create<RequestState>((set, get) => ({
           requests: s.requests.map((r) => (r.id === requestId ? updated : r)),
           selectedRequest: s.selectedRequest?.id === requestId ? updated : s.selectedRequest,
         }));
+        await invalidateRequestQueries();
       }
     } catch (err) {
       const message = err instanceof Error ? err.message : 'حدث خطأ غير متوقع';

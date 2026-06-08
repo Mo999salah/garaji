@@ -8,6 +8,7 @@ import {
   updateVehicleRecord,
 } from '@/features/vehicles/services/supabaseVehicleService';
 import type { Vehicle } from '@/features/vehicles/types';
+import { invalidateVehicleQueries } from '@/shared/lib/invalidateQueries';
 
 interface VehicleState {
   vehicles: Vehicle[];
@@ -42,6 +43,7 @@ export const useVehicleStore = create<VehicleState>((set) => ({
   addVehicle: async (ownerId, values) => {
     const vehicle = await insertVehicle(ownerId, values);
     set((state) => ({ vehicles: [vehicle, ...state.vehicles] }));
+    await invalidateVehicleQueries(ownerId);
     return vehicle;
   },
 
@@ -56,6 +58,7 @@ export const useVehicleStore = create<VehicleState>((set) => ({
       vehicles: state.vehicles.map((v) => (v.id === vehicleId ? updated : v)),
     }));
 
+    await invalidateVehicleQueries(ownerId);
     return updated;
   },
 
@@ -65,6 +68,8 @@ export const useVehicleStore = create<VehicleState>((set) => ({
     set((state) => ({
       vehicles: state.vehicles.filter((v) => !(v.id === vehicleId && v.ownerId === ownerId)),
     }));
+
+    await invalidateVehicleQueries(ownerId);
   },
 
   reset: () => {

@@ -29,6 +29,20 @@ npm-debug.*
 yarn-debug.*
 yarn-error.*
 .playwright-mcp/
+playwright-report/
+test-results/
+blob-report/
+expo-web.log
+
+# Stitch mock exports (design reference only, not app source)
+.stitch/
+.stitch-mcp/
+
+# One-off Stitch HTML conversion scripts (not part of the app)
+scripts/convert_*.js
+scripts/fix_icon_*.js
+scripts/remove_*.js
+scripts/refactor_icons.js
 
 # macOS
 .DS_Store

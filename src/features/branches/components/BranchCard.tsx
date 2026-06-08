@@ -1,4 +1,5 @@
 import { View } from 'react-native';
+import { Feather } from '@expo/vector-icons';
 
 import type { Branch } from '@/features/branches/types';
 import { AnimatedPressable } from '@/shared/components/AnimatedPressable';
@@ -27,8 +28,8 @@ export function BranchCard({ branch, onPress, selected }: BranchCardProps) {
     >
       <View className="flex-row-reverse items-start justify-between gap-4">
         <View className="flex-1 items-end">
-          <View className="mb-3 h-9 w-9 items-center justify-center rounded-lg bg-gold-50 dark:bg-dark-gold-50">
-            <Text className="font-sans text-sm font-black text-gold-600 dark:text-dark-gold-600">فر</Text>
+          <View className="mb-3 h-10 w-10 items-center justify-center rounded-lg bg-amber-50 dark:bg-amber-950/20">
+            <Feather name="map-pin" size={18} color="#D97706" />
           </View>
           <Text className="font-sans text-base font-bold text-ink text-right dark:text-dark-ink">{branch.name}</Text>
           <Text className="font-sans mt-0.5 text-sm text-muted text-right dark:text-dark-muted">{branch.city}</Text>

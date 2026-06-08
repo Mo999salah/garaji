@@ -18,7 +18,7 @@ export function AuthBlockedState({ message }: AuthBlockedStateProps) {
 
   const handleSignOut = async () => {
     await signOut();
-    router.replace('/(auth)/login');
+    router.replace('/login');
   };
 
   const handleRetry = async () => {

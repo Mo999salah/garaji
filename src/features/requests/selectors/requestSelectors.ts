@@ -51,3 +51,52 @@ export function selectByStatus(
 ): ServiceRequest[] {
   return requests.filter((r) => r.status === status);
 }
+
+export type AnalyticsPeriod = '7d' | '30d' | '90d' | 'all';
+
+const ANALYTICS_PERIOD_DAYS: Record<Exclude<AnalyticsPeriod, 'all'>, number> = {
+  '7d': 7,
+  '30d': 30,
+  '90d': 90,
+};
+
+function startOfLocalDay(date: Date): Date {
+  return new Date(date.getFullYear(), date.getMonth(), date.getDate());
+}
+
+export function isWithinLocalDay(iso: string, reference = new Date()): boolean {
+  const parsed = new Date(iso);
+  if (Number.isNaN(parsed.getTime())) {
+    return false;
+  }
+
+  return startOfLocalDay(parsed).getTime() === startOfLocalDay(reference).getTime();
+}
+
+export function selectCompletedToday(
+  requests: ServiceRequest[],
+  reference = new Date(),
+): ServiceRequest[] {
+  return requests.filter(
+    (request) =>
+      request.status === 'completed' && isWithinLocalDay(request.updatedAt, reference),
+  );
+}
+
+export function filterRequestsByPeriod(
+  requests: ServiceRequest[],
+  period: AnalyticsPeriod,
+  reference = new Date(),
+): ServiceRequest[] {
+  if (period === 'all') {
+    return requests;
+  }
+
+  const cutoff = startOfLocalDay(reference);
+  cutoff.setDate(cutoff.getDate() - ANALYTICS_PERIOD_DAYS[period]);
+
+  return requests.filter((request) => {
+    const createdAt = new Date(request.createdAt);
+    return !Number.isNaN(createdAt.getTime()) && createdAt >= cutoff;
+  });
+}

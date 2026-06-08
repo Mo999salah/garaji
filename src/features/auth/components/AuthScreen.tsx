@@ -1,10 +1,112 @@
-import type { PropsWithChildren } from 'react';
-import { Pressable, ScrollView, View } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import type { PropsWithChildren } from "react";
+import {
+  Keyboard,
+  KeyboardAvoidingView,
+  Platform,
+  Pressable,
+  ScrollView,
+  TouchableWithoutFeedback,
+  View,
+} from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 
-import type { UserRole } from '@/shared/types/auth';
+import type { UserRole } from "@/shared/types/auth";
+import { AppText as Text } from "@/shared/components/AppText";
 
-import { AppText as Text } from '@/shared/components/AppText';
+const RING_SIZES = [280, 200, 130, 72] as const;
+
+function CinematicHeader() {
+  return (
+    <View
+      className="border-b border-dark-line bg-dark-surface"
+      style={{ height: 270, overflow: "hidden" }}
+    >
+      {RING_SIZES.map((size) => (
+        <View
+          key={size}
+          style={{
+            position: "absolute",
+            width: size,
+            height: size,
+            borderRadius: size / 2,
+            borderWidth: 0.5,
+            borderColor: "#FFB77D",
+            right: 60 - size / 2,
+            bottom: 20 - size / 2,
+            opacity: 0.22,
+          }}
+        />
+      ))}
+
+      <View
+        style={{
+          position: "absolute",
+          left: 0,
+          width: 100,
+          height: 1,
+          top: 88,
+          backgroundColor: "#85CFFF",
+          opacity: 0.22,
+        }}
+      />
+      <View
+        style={{
+          position: "absolute",
+          left: 0,
+          width: 68,
+          height: 1,
+          top: 105,
+          backgroundColor: "#FF8C00",
+          opacity: 0.24,
+        }}
+      />
+      <View
+        style={{
+          position: "absolute",
+          left: 0,
+          width: 42,
+          height: 0.5,
+          top: 122,
+          backgroundColor: "#85CFFF",
+          opacity: 0.14,
+        }}
+      />
+
+      <View style={{ position: "absolute", top: 28, left: 24 }}>
+        <Text
+          style={{
+            letterSpacing: 2,
+            fontSize: 11,
+            color: "#FFB77D",
+            fontFamily: "Tajawal_700Bold",
+          }}
+        >
+          K A R A J I
+        </Text>
+      </View>
+
+      <View className="absolute right-6 top-7 rounded-full border border-brand-500/20 bg-dark-card px-3 py-1">
+        <Text className="font-sans text-[10px] font-bold text-dark-brand-500">
+          جاهز للخدمة
+        </Text>
+      </View>
+
+      <View className="absolute bottom-7 left-6 right-6 rounded-2xl border border-dark-line bg-dark-card/95 p-5 shadow-tactile-sm">
+        <View className="mb-4 h-20 w-20 self-center items-center justify-center rounded-2xl border border-dark-line bg-dark-surface">
+          <Text className="font-sans text-4xl font-black text-dark-brand-500">
+            K
+          </Text>
+        </View>
+        <Text className="font-sans text-center text-2xl font-black text-dark-ink">
+          Karaji
+        </Text>
+        <Text className="font-sans mt-2 text-center text-sm leading-5 text-dark-muted">
+          خدمات السيارات، الحجوزات، والمتابعة في تجربة واحدة.
+        </Text>
+      </View>
+    </View>
+  );
+}
 
 /* ─────────────────────── Auth Gallery Canvas ─────────────────────── */
 
@@ -13,7 +115,7 @@ interface AuthScreenProps extends PropsWithChildren {
   title: string;
   subtitle: string;
   footer?: string;
-  variant?: 'default' | 'login';
+  variant?: "default" | "login";
 }
 
 export function AuthScreen({
@@ -21,53 +123,44 @@ export function AuthScreen({
   footer,
   subtitle,
   title,
-  variant = 'default',
 }: AuthScreenProps) {
   return (
-    <SafeAreaView className="flex-1 bg-[#FFFFFF] dark:bg-[#0A0A0A]">
-      <ScrollView
+    <SafeAreaView
+      className="flex-1 bg-dark-surface"
+      edges={["top", "bottom", "left", "right"]}
+    >
+      <KeyboardAvoidingView
+        behavior={Platform.OS === "ios" ? "padding" : undefined}
         className="flex-1"
-        contentContainerClassName="grow"
-        keyboardShouldPersistTaps="handled"
-        showsVerticalScrollIndicator={false}
       >
-        <View className="flex-1 justify-center px-7 py-10">
-          <View
-            style={[
-              { alignSelf: 'flex-start', maxWidth: 380, width: '100%' },
-              { direction: 'ltr' } as any,
-            ]}
+        <TouchableWithoutFeedback accessible={false} onPress={Keyboard.dismiss}>
+          <ScrollView
+            className="flex-1"
+            contentContainerClassName="grow"
+            keyboardShouldPersistTaps="handled"
+            showsVerticalScrollIndicator={false}
           >
-            {/* ── Monolith Brand Mark ── */}
-            <Text
-              className="font-sans text-xs font-bold text-[#111111] dark:text-[#F5F5F5]"
-              style={{ letterSpacing: 6 }}
-            >
-              G A R A J I .
-            </Text>
+            <CinematicHeader />
 
-            {/* ── Giant Asymmetric Headline ── */}
-            <View className="mt-16">
-              <Text className="font-sans text-right text-5xl font-black leading-tight text-[#111111] dark:text-[#F5F5F5]">
+            <View className="px-6 pb-14 pt-8">
+              <Text className="font-sans text-center text-3xl font-black leading-tight text-dark-ink">
                 {title}
               </Text>
-              <Text className="font-sans mt-4 text-right text-base leading-7 text-[#8A8A8A] dark:text-[#A0A0A0]">
+              <Text className="font-sans mt-3 text-center text-base leading-6 text-dark-muted">
                 {subtitle}
               </Text>
+
+              <View className="mt-8">{children}</View>
+
+              {footer ? (
+                <Text className="font-sans mt-10 text-center text-xs leading-5 text-dark-muted">
+                  {footer}
+                </Text>
+              ) : null}
             </View>
-
-            {/* ── Form Content ── */}
-            <View className="mt-12">{children}</View>
-
-            {/* ── Footer Trust Text ── */}
-            {footer ? (
-              <Text className="font-sans mt-10 text-right text-xs leading-5 text-[#C0C0C0] dark:text-[#555555]">
-                {footer}
-              </Text>
-            ) : null}
-          </View>
-        </View>
-      </ScrollView>
+          </ScrollView>
+        </TouchableWithoutFeedback>
+      </KeyboardAvoidingView>
     </SafeAreaView>
   );
 }
@@ -76,25 +169,25 @@ export function AuthScreen({
 
 interface AuthNoticeProps {
   message?: string | null;
-  tone?: 'success' | 'error' | 'info';
+  tone?: "success" | "error" | "info";
 }
 
 const noticeStyles = {
   success: {
-    container: 'border-[#111111] bg-[#F3F4F6] dark:border-[#E0E0E0] dark:bg-[#1F1F1F]',
-    text: 'text-[#111111] dark:text-[#F5F5F5]',
+    container: "rounded-lg border border-action-500/20 bg-action-50",
+    text: "text-action-700",
   },
   error: {
-    container: 'border-red-200 bg-red-50 dark:border-red-800 dark:bg-red-950/40',
-    text: 'text-red-700 dark:text-red-300',
+    container: "rounded-lg border border-red-200 bg-red-50",
+    text: "text-red-700",
   },
   info: {
-    container: 'border-[#E5E5E5] bg-[#F3F4F6] dark:border-[#2A2A2A] dark:bg-[#1F1F1F]',
-    text: 'text-[#111111] dark:text-[#F5F5F5]',
+    container: "rounded-lg border border-brand-500/20 bg-brand-50",
+    text: "text-dark-brand-500",
   },
 };
 
-export function AuthNotice({ message, tone = 'info' }: AuthNoticeProps) {
+export function AuthNotice({ message, tone = "info" }: AuthNoticeProps) {
   if (!message) {
     return null;
   }
@@ -102,8 +195,12 @@ export function AuthNotice({ message, tone = 'info' }: AuthNoticeProps) {
   const styles = noticeStyles[tone];
 
   return (
-    <View className={`border-b px-1 py-3 ${styles.container}`}>
-      <Text className={`font-sans text-right text-sm font-medium leading-5 ${styles.text}`}>{message}</Text>
+    <View className={`px-4 py-3 ${styles.container}`}>
+      <Text
+        className={`font-sans text-right text-sm font-medium leading-5 ${styles.text}`}
+      >
+        {message}
+      </Text>
     </View>
   );
 }
@@ -118,19 +215,19 @@ interface PasswordToggleProps {
 export function PasswordToggle({ onPress, visible }: PasswordToggleProps) {
   return (
     <Pressable
-      accessibilityLabel={visible ? 'إخفاء كلمة المرور' : 'إظهار كلمة المرور'}
+      accessibilityLabel={visible ? "إخفاء كلمة المرور" : "إظهار كلمة المرور"}
       accessibilityRole="button"
-      className="px-2 py-1 active:opacity-70"
+      className="min-h-11 justify-center px-2 py-1 active:opacity-60"
       onPress={onPress}
     >
-      <Text className="font-sans text-xs font-semibold text-[#111111] dark:text-[#E0E0E0]">
-        {visible ? 'إخفاء' : 'إظهار'}
+      <Text className="font-sans text-xs font-semibold text-dark-brand-500">
+        {visible ? "إخفاء" : "إظهار"}
       </Text>
     </Pressable>
   );
 }
 
-/* ─────────────────────── Auth Text Button (Kinetic Link) ─────────────────────── */
+/* ─────────────────────── Auth Text Button ─────────────────────── */
 
 interface AuthTextButtonProps {
   children: string;
@@ -141,12 +238,12 @@ export function AuthTextButton({ children, onPress }: AuthTextButtonProps) {
   return (
     <Pressable
       accessibilityRole="button"
-      className="py-1 active:opacity-60"
+      className="min-h-11 justify-center py-1 active:opacity-60"
       onPress={onPress}
     >
       <Text
-        className="font-sans text-sm font-semibold text-[#8A8A8A] dark:text-[#A0A0A0]"
-        style={{ textDecorationLine: 'underline' }}
+        className="font-sans text-sm font-semibold text-dark-brand-500"
+        style={{ textDecorationLine: "underline" }}
       >
         {children}
       </Text>
@@ -163,20 +260,22 @@ interface RoleSelectorProps {
 
 export function RoleSelector({ onChange, value }: RoleSelectorProps) {
   return (
-    <View className="gap-2">
-      <Text className="font-sans text-right text-sm font-semibold text-[#111111] dark:text-[#F5F5F5]">نوع الحساب</Text>
+    <View className="gap-2.5">
+      <Text className="font-sans text-right text-xs font-semibold text-dark-muted">
+        نوع الحساب
+      </Text>
       <View className="flex-row-reverse gap-3">
         <RoleOption
           description="حجوزات ومتابعة مركبات"
           label="عميل"
-          onPress={() => onChange('customer')}
-          selected={value === 'customer'}
+          onPress={() => onChange("customer")}
+          selected={value === "customer"}
         />
         <RoleOption
           description="إدارة الطلبات والفروع"
           label="تاجر"
-          onPress={() => onChange('merchant')}
-          selected={value === 'merchant'}
+          onPress={() => onChange("merchant")}
+          selected={value === "merchant"}
         />
       </View>
     </View>
@@ -190,28 +289,33 @@ interface RoleOptionProps {
   selected: boolean;
 }
 
-function RoleOption({ description, label, onPress, selected }: RoleOptionProps) {
+function RoleOption({
+  description,
+  label,
+  onPress,
+  selected,
+}: RoleOptionProps) {
   return (
     <Pressable
       accessibilityRole="radio"
       accessibilityState={{ checked: selected }}
-      className={`min-h-[88px] flex-1 justify-between rounded-md border p-4 active:opacity-80 ${
+      className={`min-h-[96px] flex-1 justify-between rounded-lg border p-4 active:opacity-80 ${
         selected
-          ? 'border-[#111111] bg-[#111111] dark:border-[#E0E0E0] dark:bg-[#E0E0E0]'
-          : 'border-[#E5E5E5] bg-white dark:border-[#2A2A2A] dark:bg-[#141414]'
+          ? "border-brand-600 bg-dark-brand-50"
+          : "border-dark-line bg-dark-surface"
       }`}
       onPress={onPress}
     >
       <Text
         className={`font-sans text-right text-base font-bold ${
-          selected ? 'text-white dark:text-[#111111]' : 'text-[#111111] dark:text-[#F5F5F5]'
+          selected ? "text-dark-brand-500" : "text-dark-ink"
         }`}
       >
         {label}
       </Text>
       <Text
         className={`font-sans mt-2 text-right text-xs leading-5 ${
-          selected ? 'text-white/60 dark:text-[#111111]/60' : 'text-[#8A8A8A] dark:text-[#A0A0A0]'
+          selected ? "text-dark-brand-500" : "text-dark-muted"
         }`}
       >
         {description}

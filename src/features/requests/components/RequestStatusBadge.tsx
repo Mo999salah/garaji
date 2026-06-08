@@ -1,66 +1,81 @@
-import { useEffect } from 'react';
-import { View } from 'react-native';
+import { useEffect } from "react";
+import { View } from "react-native";
 import Animated, {
   useAnimatedStyle,
   useSharedValue,
   withRepeat,
   withSequence,
   withTiming,
-} from 'react-native-reanimated';
+} from "react-native-reanimated";
+import { Feather } from "@expo/vector-icons";
 
-import { STATUS_LABELS } from '@/features/requests/selectors/requestSelectors';
-import type { ServiceRequestStatus } from '@/features/requests/types';
+import { STATUS_LABELS } from "@/features/requests/selectors/requestSelectors";
+import type { ServiceRequestStatus } from "@/features/requests/types";
+import { AppText as Text } from "@/shared/components/AppText";
 
-import { AppText as Text } from '@/shared/components/AppText';
-
-/* ── Status Icons (Unicode) ── */
-const STATUS_ICONS: Record<ServiceRequestStatus, string> = {
-  pending: '◷',
-  confirmed: '✓',
-  in_progress: '⚡',
-  completed: '●',
-  cancelled: '✕',
+const STATUS_ICONS: Record<
+  ServiceRequestStatus,
+  keyof typeof Feather.glyphMap
+> = {
+  pending: "clock",
+  confirmed: "check-circle",
+  in_progress: "activity",
+  completed: "check-circle",
+  cancelled: "x-circle",
 };
 
-interface RequestStatusBadgeProps {
-  status: ServiceRequestStatus;
+interface BadgeConfig {
+  container: string;
+  iconColor: string;
+  text: string;
 }
 
-const badgeStyles: Record<ServiceRequestStatus, { container: string; icon: string; text: string }> = {
+const badgeStyles: Record<ServiceRequestStatus, BadgeConfig> = {
   pending: {
-    container: 'border-amber-200/80 bg-amber-50/60 dark:border-amber-700/40 dark:bg-amber-950/20',
-    icon: 'text-amber-500',
-    text: 'text-amber-700 dark:text-amber-300',
+    container:
+      "border-amber-500/20 bg-amber-500/5 dark:border-amber-500/20 dark:bg-amber-500/10",
+    iconColor: "#F59E0B",
+    text: "text-amber-500 dark:text-amber-400",
   },
   confirmed: {
-    container: 'border-sky-200/80 bg-sky-50/60 dark:border-sky-700/40 dark:bg-sky-950/20',
-    icon: 'text-sky-500',
-    text: 'text-sky-700 dark:text-sky-300',
+    container:
+      "border-brand-500/20 bg-brand-50 dark:border-dark-brand-500/20 dark:bg-dark-brand-50",
+    iconColor: "#0284C7",
+    text: "text-brand-700 dark:text-dark-brand-500",
   },
   in_progress: {
-    container: 'border-[#111111] bg-[#111111] dark:border-[#E0E0E0] dark:bg-[#E0E0E0]',
-    icon: 'text-white dark:text-[#111111]',
-    text: 'text-white dark:text-[#111111]',
+    container:
+      "border-action-500/25 bg-action-50 dark:border-emerald-400/25 dark:bg-emerald-950/20",
+    iconColor: "#059669",
+    text: "text-action-700 font-bold dark:text-emerald-300",
   },
   completed: {
-    container: 'border-emerald-200/80 bg-emerald-50/60 dark:border-emerald-700/40 dark:bg-emerald-950/20',
-    icon: 'text-emerald-500',
-    text: 'text-emerald-700 dark:text-emerald-300',
+    container:
+      "border-emerald-500/20 bg-emerald-500/5 dark:border-emerald-500/20 dark:bg-emerald-500/10",
+    iconColor: "#059669",
+    text: "text-action-700 dark:text-emerald-300",
   },
   cancelled: {
-    container: 'border-[#E5E5E5] bg-[#F3F4F6] dark:border-dark-line dark:bg-dark-card',
-    icon: 'text-[#8A8A8A]',
-    text: 'text-[#8A8A8A] dark:text-dark-muted',
+    container:
+      "border-line bg-surface-soft dark:border-dark-line dark:bg-dark-card",
+    iconColor: "#6B7280",
+    text: "text-muted dark:text-dark-muted",
   },
 };
 
-function PulsingDot({ color }: { color: string }) {
+function PulsingIcon({
+  name,
+  color,
+}: {
+  name: keyof typeof Feather.glyphMap;
+  color: string;
+}) {
   const opacity = useSharedValue(1);
 
   useEffect(() => {
     opacity.value = withRepeat(
       withSequence(
-        withTiming(0.3, { duration: 800 }),
+        withTiming(0.4, { duration: 800 }),
         withTiming(1, { duration: 800 }),
       ),
       -1,
@@ -74,25 +89,32 @@ function PulsingDot({ color }: { color: string }) {
 
   return (
     <Animated.View style={animStyle}>
-      <Text className={`font-sans text-xs ${color}`}>●</Text>
+      <Feather name={name} size={12} color={color} />
     </Animated.View>
   );
 }
 
 export function RequestStatusBadge({ status }: RequestStatusBadgeProps) {
   const styles = badgeStyles[status];
-  const showPulse = status === 'in_progress' || status === 'pending';
+  const iconName = STATUS_ICONS[status];
+  const isPulsing = status === "in_progress" || status === "pending";
 
   return (
-    <View className={`flex-row-reverse items-center gap-1.5 rounded-md border px-2.5 py-1 ${styles.container}`}>
-      {showPulse ? (
-        <PulsingDot color={styles.icon} />
+    <View
+      className={`flex-row-reverse items-center gap-1.5 rounded-full border px-2.5 py-1 ${styles.container}`}
+    >
+      {isPulsing ? (
+        <PulsingIcon name={iconName} color={styles.iconColor} />
       ) : (
-        <Text className={`font-sans text-xs ${styles.icon}`}>{STATUS_ICONS[status]}</Text>
+        <Feather name={iconName} size={12} color={styles.iconColor} />
       )}
       <Text className={`font-sans text-xs font-semibold ${styles.text}`}>
         {STATUS_LABELS[status]}
       </Text>
     </View>
   );
+}
+
+interface RequestStatusBadgeProps {
+  status: ServiceRequestStatus;
 }

@@ -19,11 +19,11 @@ function resolveTheme(mode: ThemeMode, systemScheme: 'light' | 'dark'): 'light' 
   return mode;
 }
 
-let _systemScheme: 'light' | 'dark' = 'light';
+let _systemScheme: 'light' | 'dark' = 'dark';
 
 export const useThemeStore = create<ThemeState>((set, get) => ({
   mode: 'system' as ThemeMode,
-  resolved: 'light' as const,
+  resolved: 'dark' as const,
   hasHydrated: false,
 
   setMode: (mode: ThemeMode) => {

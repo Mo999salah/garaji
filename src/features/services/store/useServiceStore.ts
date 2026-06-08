@@ -8,6 +8,7 @@ import {
 } from '@/features/services/services/supabaseServiceService';
 import type { ServiceFormValues } from '@/features/services/schemas/serviceSchema';
 import type { Service } from '@/features/services/types';
+import { invalidateServiceQueries } from '@/shared/lib/invalidateQueries';
 
 interface ServiceState {
   services: Service[];
@@ -69,6 +70,7 @@ export const useServiceStore = create<ServiceState>((set, get) => ({
       set((s) => ({
         services: [...s.services, newService].sort((a, b) => a.sortOrder - b.sortOrder),
       }));
+      await invalidateServiceQueries();
     } catch (err) {
       const message = err instanceof Error ? err.message : 'حدث خطأ غير متوقع';
       set({ error: message });
@@ -88,6 +90,7 @@ export const useServiceStore = create<ServiceState>((set, get) => ({
             .map((sv) => (sv.id === serviceId ? updated : sv))
             .sort((a, b) => a.sortOrder - b.sortOrder),
         }));
+        await invalidateServiceQueries();
       }
     } catch (err) {
       const message = err instanceof Error ? err.message : 'حدث خطأ غير متوقع';

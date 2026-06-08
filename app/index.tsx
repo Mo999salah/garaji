@@ -22,7 +22,7 @@ export default function IndexRoute() {
       return <AuthBlockedState message={errorMessage} />;
     }
 
-    return <Redirect href="/(auth)/login" />;
+    return <Redirect href="/login" />;
   }
 
   return <Redirect href={getHomePathForRole(user.role) as Href} />;

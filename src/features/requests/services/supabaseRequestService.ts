@@ -55,6 +55,7 @@ function mapRequest(
     scheduledAt: row.scheduled_at,
     status: row.status as ServiceRequestStatus,
     assignedStaffId: row.assigned_staff_id ?? undefined,
+    assignedTechnicianId: row.assigned_technician_id ?? undefined,
     notes: row.notes ?? undefined,
     estimatedPrice: row.estimated_price ?? undefined,
     finalPrice: row.final_price ?? undefined,
@@ -67,7 +68,7 @@ function mapRequest(
 const requestSelect = `
   id, customer_id, vehicle_id, service_id, request_type,
   branch_id, location_city, location_address, location_lat, location_lng,
-  scheduled_at, status, assigned_staff_id, notes,
+  scheduled_at, status, assigned_staff_id, assigned_technician_id, notes,
   estimated_price, final_price, created_at, updated_at,
   service_request_events (id, request_id, status, note, created_at)
 `;

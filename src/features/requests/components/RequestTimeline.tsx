@@ -6,6 +6,7 @@ import Animated, {
   useSharedValue,
   withTiming,
 } from 'react-native-reanimated';
+import { Feather } from '@expo/vector-icons';
 
 import { STATUS_LABELS } from '@/features/requests/selectors/requestSelectors';
 import type { ServiceRequestEvent, ServiceRequestStatus } from '@/features/requests/types';
@@ -26,26 +27,34 @@ const ORDERED_STATUSES: ServiceRequestStatus[] = [
 
 const STATUS_DOT_COLORS: Record<ServiceRequestStatus, string> = {
   pending: 'bg-amber-400',
-  confirmed: 'bg-sky-500',
-  in_progress: 'bg-[#111111] dark:bg-[#E0E0E0]',
+  confirmed: 'bg-brand-500',
+  in_progress: 'bg-action-500',
   completed: 'bg-emerald-500',
   cancelled: 'bg-red-400',
 };
 
 const STATUS_TEXT_COLORS: Record<ServiceRequestStatus, string> = {
   pending: 'text-amber-700 dark:text-amber-300',
-  confirmed: 'text-sky-700 dark:text-sky-300',
-  in_progress: 'text-[#111111] dark:text-[#F5F5F5]',
+  confirmed: 'text-brand-700 dark:text-dark-brand-500',
+  in_progress: 'text-action-700 dark:text-emerald-300',
   completed: 'text-emerald-700 dark:text-emerald-300',
   cancelled: 'text-red-600 dark:text-red-400',
 };
 
-const STATUS_ICONS: Record<ServiceRequestStatus, string> = {
-  pending: '◷',
-  confirmed: '✓',
-  in_progress: '⚡',
-  completed: '●',
-  cancelled: '✕',
+const STATUS_ICONS: Record<ServiceRequestStatus, keyof typeof Feather.glyphMap> = {
+  pending: 'clock',
+  confirmed: 'check-circle',
+  in_progress: 'activity',
+  completed: 'check-circle',
+  cancelled: 'x-circle',
+};
+
+const STATUS_ICON_COLORS: Record<ServiceRequestStatus, string> = {
+  pending: '#B45309',
+  confirmed: '#0284C7',
+  in_progress: '#059669',
+  completed: '#059669',
+  cancelled: '#DC2626',
 };
 
 function formatEventDate(iso: string): string {
@@ -70,7 +79,7 @@ function ActivePulse() {
   const animStyle = useAnimatedStyle(() => ({
     width: `${width.value}%`,
     height: 2,
-    backgroundColor: '#111111',
+    backgroundColor: '#0284C7',
     borderRadius: 1,
     marginTop: 4,
   }));
@@ -87,7 +96,7 @@ export function RequestTimeline({ currentStatus, events }: RequestTimelineProps)
         className="rounded-md border border-red-200/60 bg-red-50/40 p-4 dark:border-red-800/30 dark:bg-red-950/20"
       >
         <View className="flex-row-reverse items-center gap-2">
-          <Text className="font-sans text-sm">✕</Text>
+          <Feather name="x-circle" size={16} color="#DC2626" />
           <Text className="font-sans text-sm font-semibold text-red-700 dark:text-red-300">الطلب ملغى</Text>
         </View>
         {cancelEvent?.note ? (
@@ -116,19 +125,23 @@ export function RequestTimeline({ currentStatus, events }: RequestTimelineProps)
             >
               <View className="items-center">
                 <View className={`mt-1 h-3 w-3 rounded-full ${dotColor}`} />
-                {!isLast && <View className="mt-0.5 flex-1 w-0.5 bg-[#E5E5E5] dark:bg-dark-line" />}
+                {!isLast && <View className="mt-0.5 flex-1 w-0.5 bg-line dark:bg-dark-line" />}
               </View>
               <View className="flex-1 pb-3">
                 <View className="flex-row-reverse items-center gap-1.5">
-                  <Text className={`font-sans text-xs ${textColor}`}>{STATUS_ICONS[event.status]}</Text>
+                  <Feather
+                    name={STATUS_ICONS[event.status]}
+                    size={13}
+                    color={STATUS_ICON_COLORS[event.status]}
+                  />
                   <Text className={`font-sans text-sm font-semibold ${textColor}`}>
                     {STATUS_LABELS[event.status]}
                   </Text>
                 </View>
                 {event.note ? (
-                  <Text className="font-sans mt-0.5 text-xs text-[#8A8A8A] dark:text-dark-muted">{event.note}</Text>
+                  <Text className="font-sans mt-0.5 text-xs text-muted dark:text-dark-muted">{event.note}</Text>
                 ) : null}
-                <Text className="font-sans mt-0.5 text-xs text-[#8A8A8A] dark:text-dark-muted">{formatEventDate(event.createdAt)}</Text>
+                <Text className="font-sans mt-0.5 text-xs text-muted dark:text-dark-muted">{formatEventDate(event.createdAt)}</Text>
                 {isLast && <ActivePulse />}
               </View>
             </Animated.View>
@@ -145,8 +158,8 @@ export function RequestTimeline({ currentStatus, events }: RequestTimelineProps)
       {ORDERED_STATUSES.map((step, index) => {
         const isComplete = index <= currentIndex;
         const isCurrent = index === currentIndex;
-        const dotColor = isComplete ? STATUS_DOT_COLORS[step] : 'bg-[#E5E5E5] dark:bg-dark-line';
-        const textColor = isComplete ? STATUS_TEXT_COLORS[step] : 'text-[#8A8A8A] dark:text-dark-muted';
+        const dotColor = isComplete ? STATUS_DOT_COLORS[step] : 'bg-line dark:bg-dark-line';
+        const textColor = isComplete ? STATUS_TEXT_COLORS[step] : 'text-muted dark:text-dark-muted';
         return (
           <Animated.View
             entering={FadeIn.delay(index * 80).duration(250)}
@@ -156,7 +169,13 @@ export function RequestTimeline({ currentStatus, events }: RequestTimelineProps)
             <View className={`h-3.5 w-3.5 rounded-full ${dotColor}`} />
             <View className="flex-1">
               <View className="flex-row-reverse items-center gap-1.5">
-                {isComplete && <Text className={`font-sans text-xs ${textColor}`}>{STATUS_ICONS[step]}</Text>}
+                {isComplete && (
+                  <Feather
+                    name={STATUS_ICONS[step]}
+                    size={13}
+                    color={STATUS_ICON_COLORS[step]}
+                  />
+                )}
                 <Text className={`font-sans text-sm font-semibold ${textColor}`}>
                   {STATUS_LABELS[step]}
                 </Text>

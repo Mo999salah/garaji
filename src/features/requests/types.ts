@@ -29,6 +29,7 @@ export interface ServiceRequest {
   scheduledAt: string;
   status: ServiceRequestStatus;
   assignedStaffId?: string;
+  assignedTechnicianId?: string;
   notes?: string;
   estimatedPrice?: number;
   finalPrice?: number;
