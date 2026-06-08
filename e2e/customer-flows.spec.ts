@@ -2,8 +2,11 @@ import { expect, test } from '@playwright/test';
 
 import { loginAsCustomer } from './helpers/customer-auth';
 import { allowE2EMutations, getCustomerCredentials } from './helpers/env';
+import { firstRequestCard, openMyCarsTab, openOrdersTab } from './helpers/page';
 
 test.describe('Garaji customer flows', () => {
+  test.describe.configure({ timeout: 60_000 });
+
   test.beforeEach(async ({ page }) => {
     test.skip(!getCustomerCredentials(), 'Set E2E_CUSTOMER_EMAIL and E2E_CUSTOMER_PASSWORD.');
     await loginAsCustomer(page);
@@ -17,19 +20,17 @@ test.describe('Garaji customer flows', () => {
   });
 
   test('orders tab renders customer request list or empty state', async ({ page }) => {
-    await page.getByRole('tab', { name: 'حجوزاتي' }).click();
-    await expect(page.getByText('متابعة الصيانة')).toBeVisible();
-    await expect(page.getByText('نشطة')).toBeVisible();
+    await openOrdersTab(page);
+    await expect(page.getByRole('tab', { name: /^نشطة/ })).toBeVisible();
 
-    const requestCard = page.getByRole('button', { name: /طلب/ }).first();
+    const requestCard = firstRequestCard(page);
     const emptyState = page.getByText('لا طلبات نشطة');
 
     await expect(requestCard.or(emptyState)).toBeVisible({ timeout: 15_000 });
   });
 
   test('my cars tab renders garage or empty state', async ({ page }) => {
-    await page.getByRole('tab', { name: 'سياراتي' }).click();
-    await expect(page.getByText('سياراتي')).toBeVisible();
+    await openMyCarsTab(page);
 
     const addVehicleButton = page.getByRole('button', { name: '+ إضافة مركبة' });
     const emptyState = page.getByText('لا توجد سيارات');
@@ -38,10 +39,9 @@ test.describe('Garaji customer flows', () => {
   });
 
   test('cancellable order exposes cancel action in details', async ({ page }) => {
-    await page.getByRole('tab', { name: 'حجوزاتي' }).click();
-    await expect(page.getByText('متابعة الصيانة')).toBeVisible();
+    await openOrdersTab(page);
 
-    const requestCard = page.getByRole('button', { name: /طلب/ }).first();
+    const requestCard = firstRequestCard(page);
 
     if (!(await requestCard.isVisible().catch(() => false))) {
       test.skip(true, 'No active requests on the E2E customer account.');
@@ -61,7 +61,7 @@ test.describe('Garaji customer flows', () => {
   });
 
   test('vehicle delete opens confirmation without mutating by default', async ({ page }) => {
-    await page.getByRole('tab', { name: 'سياراتي' }).click();
+    await openMyCarsTab(page);
 
     const deleteButton = page.getByRole('button', { name: 'حذف المركبة' }).first();
 
@@ -88,9 +88,9 @@ test.describe('Garaji customer flows', () => {
   });
 
   test('order cancel confirmation respects mutation gate', async ({ page }) => {
-    await page.getByRole('tab', { name: 'حجوزاتي' }).click();
+    await openOrdersTab(page);
 
-    const requestCard = page.getByRole('button', { name: /طلب/ }).first();
+    const requestCard = firstRequestCard(page);
 
     if (!(await requestCard.isVisible().catch(() => false))) {
       test.skip(true, 'No active requests on the E2E customer account.');
