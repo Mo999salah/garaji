@@ -43,20 +43,17 @@ export default function CustomerVehiclesScreen() {
   return (
     <View className="flex-1 bg-surface">
       {/* Top Bar */}
-      <View className="z-40 bg-[#F7F7F8]/80 px-margin-mobile pt-10 pb-4 flex-row-reverse items-center justify-between">
+      <View className="z-40 bg-background/80 px-margin-mobile pt-10 pb-4 flex-row-reverse items-center justify-between">
         <Pressable 
+          accessibilityLabel="رجوع"
+          accessibilityRole="button"
           onPress={() => { if (router.canGoBack()) router.back(); else router.push('/(tabs)/'); }}
           className="w-10 h-10 flex items-center justify-center rounded-full active:bg-surface-container-high"
         >
           <MaterialIcons name="arrow-forward" size={24} color="#1a1c1d" />
         </Pressable>
         <Text className="font-title-md text-[20px] leading-[28px] font-bold text-on-surface">سياراتي</Text>
-        <Pressable 
-          onPress={() => router.push('/add-vehicle')}
-          className="w-10 h-10 flex items-center justify-center rounded-full bg-primary-container shadow-sm active:scale-95"
-        >
-          <MaterialIcons name="add" size={20} color="#f4fffc" />
-        </Pressable>
+        <View className="w-10 h-10" />
       </View>
 
       <ScrollView 

@@ -79,7 +79,7 @@ function OrderDetailsScreen() {
   if (!request) {
     return (
       <View className="flex-1 bg-background">
-        <View className="bg-surface shadow-[0px_4px_20px_rgba(0,0,0,0.04)] flex-row-reverse justify-between items-center px-margin-mobile py-4 sticky top-0 z-50">
+        <View className="bg-surface shadow-[0px_4px_20px_rgba(0,0,0,0.04)] flex-row-reverse justify-between items-center px-margin-mobile py-4 z-50">
           <Pressable onPress={() => router.back()} className="flex-none active:scale-95 w-8 items-end">
             <MaterialIcons name="arrow-forward" size={24} color="#00685f" />
           </Pressable>
@@ -163,7 +163,7 @@ function OrderDetailsScreen() {
   return (
     <View className="flex-1 bg-background">
       {/* Top App Bar */}
-      <View className="bg-surface shadow-[0px_4px_20px_rgba(0,0,0,0.04)] flex-row-reverse justify-between items-center px-margin-mobile py-4 sticky top-0 z-50">
+      <View className="bg-surface shadow-[0px_4px_20px_rgba(0,0,0,0.04)] flex-row-reverse justify-between items-center px-margin-mobile py-4 z-50">
         <Pressable onPress={() => router.back()} className="flex-none active:scale-95 w-8 items-end">
           <MaterialIcons name="arrow-forward" size={24} color="#00685f" />
         </Pressable>
@@ -211,15 +211,21 @@ function OrderDetailsScreen() {
               <View className="w-12 h-12 rounded-full bg-secondary-container flex items-center justify-center">
                 <MaterialIcons name="person" size={24} color="#63627a" />
               </View>
-              <Text className="font-body-md text-[16px] leading-[24px] font-bold text-on-surface text-right">خالد سعد</Text>
+              <Text className="font-body-md text-[16px] leading-[24px] font-bold text-on-surface text-right">
+                {(request as any).technicianName ?? 'لم يُعيّن فني بعد'}
+              </Text>
             </View>
-            <Pressable 
-              onPress={() => Linking.openURL('whatsapp://send?text=مرحباً، لدي استفسار بخصوص طلبي&phone=+966500000000')}
-              className="h-10 px-4 rounded-xl border border-[#25D366] flex-row-reverse items-center gap-2 active:bg-[#25D366]/10"
-            >
-              <Text className="font-button-text text-[16px] leading-[16px] text-[#25D366]">واتساب</Text>
-              <FontAwesome name="whatsapp" size={20} color="#25D366" />
-            </Pressable>
+            {(request as any).technicianPhone ? (
+              <Pressable 
+                accessibilityLabel="تواصل عبر واتساب"
+                accessibilityRole="button"
+                onPress={() => Linking.openURL(`whatsapp://send?text=مرحباً، لدي استفسار بخصوص طلبي&phone=${(request as any).technicianPhone}`)}
+                className="h-10 px-4 rounded-xl border border-whatsapp flex-row-reverse items-center gap-2 active:bg-whatsapp/10"
+              >
+                <Text className="font-button-text text-[16px] leading-[16px] text-whatsapp">واتساب</Text>
+                <FontAwesome name="whatsapp" size={20} color="#25D366" />
+              </Pressable>
+            ) : null}
           </View>
         </View>
 

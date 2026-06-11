@@ -14,6 +14,7 @@ import { useServiceStore } from '@/features/services/store/useServiceStore';
 import { AppText as Text } from '@/shared/components/AppText';
 import { LoadingSpinner } from '@/shared/components/LoadingSpinner';
 import { ScreenContainer } from '@/shared/components/ScreenContainer';
+import { AppColors } from '@/shared/lib/colors';
 
 type TabRoute = 'index' | 'orders' | 'my-cars' | 'profile';
 
@@ -27,12 +28,14 @@ const TAB_META: Record<
   profile: { title: 'حسابي', icon: 'user' },
 };
 
+
+
 function CustomerTabBar({ descriptors, navigation, state }: BottomTabBarProps) {
   const insets = useSafeAreaInsets();
 
   return (
     <View
-      className="flex-row-reverse items-center justify-around border-t border-line bg-white px-4 pt-2 dark:border-dark-line dark:bg-dark-card"
+      className="flex-row-reverse items-center justify-around border-t border-outline-variant bg-surface-container-lowest px-4 pt-2"
       style={{ paddingBottom: Math.max(insets.bottom, 8) }}
     >
       {state.routes.map((route, index) => {
@@ -64,9 +67,9 @@ function CustomerTabBar({ descriptors, navigation, state }: BottomTabBarProps) {
             className="min-w-[72px] items-center justify-center rounded-xl px-2 py-2 active:opacity-80"
             onPress={onPress}
           >
-            <Feather color={isFocused ? '#0D9488' : '#6B7280'} name={meta.icon} size={22} />
+            <Feather color={isFocused ? AppColors.primary : AppColors.outline} name={meta.icon} size={22} />
             <Text
-              className={`font-sans mt-1 text-xs ${isFocused ? 'font-bold text-primary' : 'text-muted dark:text-dark-muted'}`}
+              className={`font-sans mt-1 text-xs ${isFocused ? 'font-bold text-primary' : 'text-on-surface-variant'}`}
             >
               {label}
             </Text>

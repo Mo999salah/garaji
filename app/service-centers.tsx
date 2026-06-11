@@ -1,7 +1,7 @@
 import { router } from 'expo-router';
 import * as Location from 'expo-location';
 import { useEffect, useMemo, useState } from 'react';
-import { Alert, ScrollView, TouchableOpacity, View, Pressable, TextInput } from 'react-native';
+import { Alert, ScrollView, View, Pressable, TextInput } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
 
 import { RoleGate } from '@/features/auth/components/RoleGate';
@@ -149,10 +149,10 @@ function BranchesIndexScreen() {
   return (
     <View className="flex-1 bg-background pb-24">
       {/* TopAppBar */}
-      <View className="flex-row-reverse justify-between items-center px-margin-mobile py-stack-md w-full sticky top-0 z-50 bg-surface shadow-[0px_4px_20px_rgba(0,0,0,0.04)]">
+      <View className="flex-row-reverse justify-between items-center px-margin-mobile py-stack-md w-full z-50 bg-surface shadow-[0px_4px_20px_rgba(0,0,0,0.04)]">
         <View className="w-10" />
         <Text className="font-title-md text-[20px] leading-[28px] text-primary font-bold">مراكز الخدمة</Text>
-        <Pressable onPress={() => router.back()} className="text-on-surface-variant hover:opacity-80 transition-opacity active:scale-95 p-2 w-10 items-center justify-center">
+        <Pressable onPress={() => router.back()} className="active:scale-95 p-2 w-10 items-center justify-center">
           <MaterialIcons name="arrow-forward" size={24} color="#3d4947" />
         </Pressable>
       </View>
@@ -262,7 +262,7 @@ function BranchesIndexScreen() {
 
                 <Pressable
                   onPress={() => handleBookBranch(branch.id)}
-                  className="mt-2 w-full h-12 bg-primary rounded-[14px] active:scale-[0.98] transition-all flex-row-reverse items-center justify-center shadow-md"
+                  className="mt-2 w-full h-12 bg-primary rounded-[14px] active:scale-[0.98] flex-row-reverse items-center justify-center shadow-md"
                 >
                   <Text className="text-white text-[16px] font-bold font-button-text">حجز موعد</Text>
                 </Pressable>

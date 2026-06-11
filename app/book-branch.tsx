@@ -7,8 +7,6 @@ import {
   KeyboardAvoidingView,
   Platform,
   ScrollView,
-  TouchableOpacity,
-  TouchableWithoutFeedback,
   View,
   Pressable,
 } from 'react-native';
@@ -110,10 +108,10 @@ function BookBranchScreen() {
   if (!vehicles.length) {
     return (
       <View className="flex-1 bg-background">
-        <View className="bg-surface shadow-[0px_4px_20px_rgba(0,0,0,0.04)] flex-row-reverse justify-between items-center px-margin-mobile py-4 sticky top-0 z-50">
+        <View className="bg-surface shadow-[0px_4px_20px_rgba(0,0,0,0.04)] flex-row-reverse justify-between items-center px-margin-mobile py-4 z-50">
           <View className="flex-none w-10" />
           <Text className="font-title-md text-[20px] leading-[28px] text-on-surface flex-1 text-center font-bold">حجز موعد</Text>
-          <Pressable onPress={() => router.back()} className="w-10 h-10 flex items-center justify-center rounded-full active:bg-surface-container-high transition-colors">
+          <Pressable onPress={() => router.back()} className="w-10 h-10 flex items-center justify-center rounded-full active:bg-surface-container-high">
             <MaterialIcons name="arrow-forward" size={24} color="#3d4947" />
           </Pressable>
         </View>
@@ -139,10 +137,15 @@ function BookBranchScreen() {
   return (
     <View className="flex-1 bg-background pb-[100px]">
       {/* Top App Bar */}
-      <View className="bg-surface shadow-[0px_4px_20px_rgba(0,0,0,0.04)] flex-row-reverse justify-between items-center px-margin-mobile py-4 sticky top-0 z-50">
+      <View className="bg-surface shadow-[0px_4px_20px_rgba(0,0,0,0.04)] flex-row-reverse justify-between items-center px-margin-mobile py-4 z-50">
         <View className="flex-none w-10" />
         <Text className="font-title-md text-[20px] leading-[28px] text-on-surface flex-1 text-center font-bold">حجز موعد</Text>
-        <Pressable onPress={() => router.back()} className="w-10 h-10 flex items-center justify-center rounded-full active:bg-surface-container-high transition-colors">
+        <Pressable
+          accessibilityLabel="رجوع"
+          accessibilityRole="button"
+          onPress={() => router.back()}
+          className="w-10 h-10 flex items-center justify-center rounded-full active:bg-surface-container-high"
+        >
           <MaterialIcons name="arrow-forward" size={24} color="#3d4947" />
         </Pressable>
       </View>
@@ -151,7 +154,7 @@ function BookBranchScreen() {
         behavior={Platform.OS === 'ios' ? 'padding' : undefined}
         className="flex-1"
       >
-        <TouchableWithoutFeedback accessible={false} onPress={Keyboard.dismiss}>
+        <Pressable accessible={false} onPress={Keyboard.dismiss} style={{ flex: 1 }}>
           <ScrollView
             contentContainerClassName="px-margin-mobile pt-stack-lg flex-grow"
             keyboardDismissMode={Platform.OS === 'ios' ? 'interactive' : 'on-drag'}
@@ -262,10 +265,10 @@ function BookBranchScreen() {
                       {TIME_SLOTS.map((slot) => {
                         const isSelected = value === slot;
                         return (
-                          <TouchableOpacity
+                          <Pressable
                             accessibilityRole="radio"
                             accessibilityState={{ selected: isSelected }}
-                            className={`rounded-[16px] border px-4 py-2.5 transition-colors ${
+                            className={`rounded-[16px] border px-4 py-2.5 ${
                               isSelected
                                 ? 'border-primary bg-primary-container/10'
                                 : 'border-outline-variant bg-surface-container-lowest'
@@ -280,7 +283,7 @@ function BookBranchScreen() {
                             >
                               {slot}
                             </Text>
-                          </TouchableOpacity>
+                          </Pressable>
                         );
                       })}
                     </View>
@@ -313,7 +316,7 @@ function BookBranchScreen() {
             </View>
 
           </ScrollView>
-        </TouchableWithoutFeedback>
+        </Pressable>
       </KeyboardAvoidingView>
 
       {/* Bottom Action Bar (Fixed) */}
@@ -321,7 +324,7 @@ function BookBranchScreen() {
         <Pressable 
           disabled={isLoading}
           onPress={handleSubmit(onSubmit)} 
-          className={`w-full h-12 bg-primary rounded-[16px] flex-row-reverse items-center justify-center gap-2 active:bg-surface-tint transition-colors ${isLoading ? 'opacity-50' : ''}`}
+          className={`w-full h-12 bg-primary rounded-[16px] flex-row-reverse items-center justify-center gap-2 active:bg-surface-tint ${isLoading ? 'opacity-50' : ''}`}
         >
           <Text className="font-button-text text-[16px] leading-[16px] font-bold text-on-primary">تأكيد الحجز</Text>
           <MaterialIcons name="arrow-back" size={20} color="white" />

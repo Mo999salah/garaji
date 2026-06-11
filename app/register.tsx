@@ -120,7 +120,7 @@ function CustomRoleSelector({ value, onChange }: { value: UserRole; onChange: (r
   return (
     <View className="flex-row-reverse gap-4">
       <Pressable 
-        className={`flex-1 flex-col items-end p-4 border-2 rounded-2xl shadow-[0px_4px_20px_rgba(0,0,0,0.04)] active:scale-95 transition-transform ${
+        className={`flex-1 flex-col items-end p-4 border-2 rounded-2xl shadow-[0px_4px_20px_rgba(0,0,0,0.04)] active:scale-95 ${
           value === 'customer' 
           ? 'bg-primary-container/10 border-primary' 
           : 'bg-surface-container-lowest border-transparent'
@@ -138,7 +138,7 @@ function CustomRoleSelector({ value, onChange }: { value: UserRole; onChange: (r
       </Pressable>
 
       <Pressable 
-        className={`flex-1 flex-col items-end p-4 border-2 rounded-2xl shadow-[0px_4px_20px_rgba(0,0,0,0.04)] active:scale-95 transition-transform ${
+        className={`flex-1 flex-col items-end p-4 border-2 rounded-2xl shadow-[0px_4px_20px_rgba(0,0,0,0.04)] active:scale-95 ${
           value === 'merchant' 
           ? 'bg-primary-container/10 border-primary' 
           : 'bg-surface-container-lowest border-transparent'
@@ -233,7 +233,7 @@ export default function SignupScreen() {
 
   return (
     <AuthPublicGate>
-      <View className="bg-background min-h-screen flex-1 flex-col items-center justify-center p-margin-mobile">
+      <View className="bg-background flex-1 flex-col items-center justify-center p-margin-mobile">
         <View className="w-full max-w-md flex-col gap-stack-lg pt-12 pb-12">
           
           {/* Header Section */}
@@ -390,7 +390,7 @@ export default function SignupScreen() {
             <Pressable
               disabled={isSubmitting}
               onPress={() => void onSubmit()}
-              className={`w-full h-12 bg-primary rounded-[14px] shadow-[0px_4px_20px_rgba(0,104,95,0.2)] flex items-center justify-center mt-6 active:scale-95 transition-all ${isSubmitting ? 'opacity-70' : ''}`}
+              className={`w-full h-12 bg-primary rounded-[14px] shadow-[0px_4px_20px_rgba(0,104,95,0.2)] flex items-center justify-center mt-6 active:scale-95 ${isSubmitting ? 'opacity-70' : ''}`}
             >
               {isSubmitting ? (
                 <ActivityIndicator color="#ffffff" />

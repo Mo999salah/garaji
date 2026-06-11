@@ -12,6 +12,7 @@ import { useCustomerVehiclesQuery } from '@/features/vehicles/hooks/useVehiclesQ
 import { AppText as Text } from '@/shared/components/AppText';
 import { EmptyState } from '@/shared/components/EmptyState';
 import { ScreenContainer } from '@/shared/components/ScreenContainer';
+import { SkeletonCard } from '@/shared/components/SkeletonCard';
 import { useScreenRefresh } from '@/shared/hooks/useScreenRefresh';
 
 export default function CustomerHomeScreen() {
@@ -49,6 +50,20 @@ export default function CustomerHomeScreen() {
     }
   };
 
+  // Loading state
+  if (vehiclesQuery.isLoading || requestsQuery.isLoading) {
+    return (
+      <ScreenContainer>
+        <View className="flex-col gap-stack-lg pt-6 pb-10">
+          <SkeletonCard variant="metric" />
+          <SkeletonCard />
+          <SkeletonCard />
+          <SkeletonCard />
+        </View>
+      </ScreenContainer>
+    );
+  }
+
   return (
     <ScreenContainer refreshControl={refreshControl}>
       <View className="flex-col pb-10">
@@ -82,6 +97,8 @@ export default function CustomerHomeScreen() {
           {/* Hero CTA */}
           <View className="bg-surface-container-lowest rounded-2xl p-2 shadow-[0px_4px_20px_rgba(0,0,0,0.04)]">
             <Pressable 
+              accessibilityLabel="حجز موعد صيانة"
+              accessibilityRole="button"
               className="bg-primary rounded-xl p-5 flex-row-reverse items-center justify-between active:scale-[0.98] overflow-hidden"
               onPress={() => router.push('/book-branch')}
             >
@@ -104,6 +121,8 @@ export default function CustomerHomeScreen() {
             <View className="bg-surface-container-lowest rounded-2xl shadow-[0px_4px_20px_rgba(0,0,0,0.04)] overflow-hidden flex-col">
               
               <Pressable 
+                accessibilityLabel="خدمة بالموقع — الفني يصل إليك"
+                accessibilityRole="button"
                 className="flex-row-reverse items-center justify-between p-4 border-b border-surface-container-low active:bg-surface-container-high"
                 onPress={() => router.push('/book-service')}
               >
@@ -120,6 +139,8 @@ export default function CustomerHomeScreen() {
               </Pressable>
 
               <Pressable 
+                accessibilityLabel="سياراتي — عرض وإدارة المركبات"
+                accessibilityRole="button"
                 className="flex-row-reverse items-center justify-between p-4 border-b border-surface-container-low active:bg-surface-container-high"
                 onPress={() => router.push('/(tabs)/my-cars' as Href)}
               >
@@ -136,6 +157,8 @@ export default function CustomerHomeScreen() {
               </Pressable>
 
               <Pressable 
+                accessibilityLabel="خطط الصيانة — المواعيد القادمة"
+                accessibilityRole="button"
                 className="flex-row-reverse items-center justify-between p-4 active:bg-surface-container-high"
                 onPress={() => router.push('/maintenance-plans')}
               >

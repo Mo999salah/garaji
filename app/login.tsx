@@ -57,7 +57,7 @@ export default function LoginScreen() {
 
   return (
     <AuthPublicGate>
-      <View className="bg-background min-h-screen flex-1 flex-col items-center justify-center p-margin-mobile">
+      <View className="bg-background flex-1 flex-col items-center justify-center p-margin-mobile">
         {/* Main Container */}
         <View className="w-full max-w-md flex-col gap-stack-lg">
           

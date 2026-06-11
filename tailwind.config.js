@@ -42,6 +42,16 @@ module.exports = {
         "on-error": "#ffffff",
         "error-container": "#ffdad6",
         "on-error-container": "#93000a",
+
+        warning: "#F59E0B",
+        "on-warning": "#1a1c1d",
+        "warning-container": "#FEF3C7",
+
+        success: "#10b981",
+        "on-success": "#ffffff",
+        "success-container": "#d1fae5",
+
+        whatsapp: "#25D366",
       },
       spacing: {
         'unit': '4px',

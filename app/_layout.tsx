@@ -14,11 +14,16 @@ import { useAuthStore } from '@/features/auth/store/useAuthStore';
 import { ErrorBoundary as ReactErrorBoundary } from '@/shared/components/ErrorBoundary';
 import { AppText as Text } from '@/shared/components/AppText';
 import { OfflineBanner } from '@/shared/components/OfflineBanner';
-import { ThemeProvider } from '@/shared/components/ThemeProvider';
+import { ThemeProvider, useTheme } from '@/shared/components/ThemeProvider';
 import { configureAppDirection } from '@/shared/i18n/rtl';
 import { appFontMap, configureDefaultFonts } from '@/shared/lib/fonts';
 import { queryClient } from '@/shared/lib/queryClient';
-import { useThemeStore } from '@/shared/store/useThemeStore';
+
+/** StatusBar that adapts to the current theme. */
+function DynamicStatusBar() {
+  const { colorScheme } = useTheme();
+  return <StatusBar style={colorScheme === 'dark' ? 'light' : 'dark'} />;
+}
 
 export function ErrorBoundary({ error, retry }: ErrorBoundaryProps) {
   useEffect(() => {
@@ -48,7 +53,7 @@ export function ErrorBoundary({ error, retry }: ErrorBoundaryProps) {
           onPress={() => void retry()}
         >
           <Text className="font-sans text-base font-black text-slate-950">
-            Reload App
+            إعادة تحميل التطبيق
           </Text>
         </Pressable>
       </View>
@@ -86,7 +91,7 @@ export default function RootLayout() {
         <QueryClientProvider client={queryClient}>
           <SafeAreaProvider>
             <ReactErrorBoundary>
-              <StatusBar style="dark" />
+              <DynamicStatusBar />
               {canRenderApp ? <Stack screenOptions={{ headerShown: false }} /> : null}
               <OfflineBanner />
             </ReactErrorBoundary>

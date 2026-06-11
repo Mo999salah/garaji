@@ -37,7 +37,7 @@ export default function ProfileScreen() {
   return (
     <View className="flex-1 bg-surface">
       {/* Top App Bar */}
-      <View className="bg-surface shadow-[0px_4px_20px_rgba(0,0,0,0.04)] flex-row-reverse justify-between items-center px-margin-mobile py-4 sticky top-0 z-50">
+      <View className="bg-surface shadow-[0px_4px_20px_rgba(0,0,0,0.04)] flex-row-reverse justify-between items-center px-margin-mobile py-4 z-50">
         <View className="w-10 h-10" />
         <Text className="font-title-md text-[20px] leading-[28px] text-primary flex-1 text-center font-bold">الملف الشخصي</Text>
         <View className="w-10 h-10" />
@@ -56,7 +56,7 @@ export default function ProfileScreen() {
             <Feather name="user" size={32} color="#00685f" />
           </View>
           <Text className="font-title-lg text-[24px] font-bold text-on-surface mb-1">
-            {user?.role === 'customer' ? 'عميل' : 'مستخدم'}
+            {user?.fullName ?? (user?.role === 'customer' ? 'عميل' : 'مستخدم')}
           </Text>
           <Text className="font-body-md text-[16px] text-on-surface-variant opacity-80">
             {user?.email ? user.email : (user?.id ? user.id.slice(0, 8) : 'بريد إلكتروني غير متاح')}

@@ -17,7 +17,7 @@ function AdminTechnicianCard({ technician, onPress }: { technician: Technician; 
   return (
     <Pressable 
       onPress={onPress}
-      className="bg-surface-container-lowest rounded-3xl p-4 flex-row-reverse items-center shadow-[0px_4px_20px_rgba(0,0,0,0.04)] mb-3 active:scale-[0.98] transition-transform"
+      className="bg-surface-container-lowest rounded-3xl p-4 flex-row-reverse items-center shadow-[0px_4px_20px_rgba(0,0,0,0.04)] mb-3 active:scale-[0.98]"
     >
       <View className="w-12 h-12 rounded-full bg-surface-container-high flex items-center justify-center ml-4 shrink-0 overflow-hidden relative">
         {/* We don't have images in the backend model, so we show a fallback icon */}
@@ -76,17 +76,17 @@ export default function AdminTechniciansScreen() {
   return (
     <View className="flex-1 bg-background pb-[80px] relative">
       {/* Top Navigation Bar */}
-      <View className="bg-surface shadow-[0px_4px_20px_rgba(0,0,0,0.04)] w-full top-0 sticky z-40 flex flex-row-reverse justify-between items-center px-margin-mobile h-16 transition-all duration-300">
+      <View className="bg-surface shadow-[0px_4px_20px_rgba(0,0,0,0.04)] w-full z-40 flex flex-row-reverse justify-between items-center px-margin-mobile h-16">
         <Pressable 
           onPress={() => router.back()} 
-          className="w-10 h-10 flex items-center justify-center rounded-full text-on-surface-variant hover:bg-surface-container-low transition-colors active:opacity-80"
+          className="w-10 h-10 flex items-center justify-center rounded-full active:opacity-80"
         >
           <MaterialIcons name="arrow-forward" size={24} color="#3d4947" />
         </Pressable>
         <Text className="font-display-lg-mobile text-[28px] font-extrabold text-primary flex-1 text-center tracking-tight">Garaji</Text>
         <Pressable 
           onPress={() => router.push('/(admin)/technicians/new')}
-          className="w-10 h-10 flex items-center justify-center rounded-full text-primary hover:bg-surface-container-low transition-colors active:opacity-80"
+          className="w-10 h-10 flex items-center justify-center rounded-full active:opacity-80"
         >
           <MaterialIcons name="add" size={24} color="#00685f" />
         </Pressable>
@@ -102,7 +102,7 @@ export default function AdminTechniciansScreen() {
           <Text className="font-display-lg-mobile text-[28px] font-extrabold text-[#1A1A2E]">الفنيون</Text>
           <Pressable 
             onPress={() => router.push('/(admin)/technicians/new')}
-            className="w-10 h-10 bg-primary-container rounded-full flex items-center justify-center shadow-[0px_8px_30px_rgba(0,0,0,0.08)] active:scale-95 transition-transform"
+            className="w-10 h-10 bg-primary-container rounded-full flex items-center justify-center shadow-[0px_8px_30px_rgba(0,0,0,0.08)] active:scale-95"
           >
             <MaterialIcons name="add" size={24} color="#ffffff" />
           </Pressable>
@@ -150,7 +150,7 @@ export default function AdminTechniciansScreen() {
       {/* Floating Action Button */}
       <Pressable 
         onPress={() => router.push('/(admin)/technicians/new')}
-        className="absolute bottom-margin-mobile left-margin-mobile w-14 h-14 bg-primary-container rounded-full shadow-[0px_8px_30px_rgba(0,0,0,0.08)] flex items-center justify-center z-50 active:scale-90 transition-transform"
+        className="absolute bottom-margin-mobile left-margin-mobile w-14 h-14 bg-primary-container rounded-full shadow-[0px_8px_30px_rgba(0,0,0,0.08)] flex items-center justify-center z-50 active:scale-90"
       >
         <MaterialIcons name="add" size={28} color="#ffffff" />
       </Pressable>

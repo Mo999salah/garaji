@@ -56,14 +56,14 @@ export default function AdminAnalyticsScreen() {
   return (
     <View className="flex-1 bg-background pb-[80px] relative">
       {/* Top Navigation Bar */}
-      <View className="bg-surface shadow-[0px_4px_20px_rgba(0,0,0,0.04)] w-full top-0 sticky z-40 flex flex-row-reverse justify-between items-center px-margin-mobile h-16 transition-all duration-300">
+      <View className="bg-surface shadow-[0px_4px_20px_rgba(0,0,0,0.04)] w-full z-40 flex flex-row-reverse justify-between items-center px-margin-mobile h-16">
         <Pressable 
-          className="w-10 h-10 flex items-center justify-center rounded-full text-on-surface-variant hover:bg-surface-container-low transition-colors active:opacity-80"
+          className="w-10 h-10 flex items-center justify-center rounded-full active:opacity-80"
         >
           <MaterialIcons name="menu" size={24} color="#3d4947" />
         </Pressable>
         <Text className="font-display-lg-mobile text-[20px] font-extrabold text-primary flex-1 text-center tracking-tight">التحليلات</Text>
-        <View className="w-8 h-8 rounded-full bg-surface-container-highest overflow-hidden cursor-pointer flex items-center justify-center">
+        <View className="w-8 h-8 rounded-full bg-surface-container-highest overflow-hidden flex items-center justify-center">
           <MaterialIcons name="person" size={20} color="#3d4947" />
         </View>
       </View>
@@ -88,7 +88,7 @@ export default function AdminAnalyticsScreen() {
                 <Pressable
                   key={p}
                   onPress={() => setPeriod(p)}
-                  className={`px-6 py-2.5 rounded-full ml-2 transition-all active:scale-95 ${period === p ? 'bg-[#0D9488] shadow-md' : 'bg-surface shadow-sm hover:bg-surface-container'}`}
+                  className={`px-6 py-2.5 rounded-full ml-2 active:scale-95 ${period === p ? 'bg-[#0D9488] shadow-md' : 'bg-surface shadow-sm'}`}
                 >
                   <Text className={`font-button-text text-[16px] font-bold ${period === p ? 'text-white' : 'text-on-surface-variant'}`}>
                     {PERIOD_LABELS[p]}
@@ -106,13 +106,13 @@ export default function AdminAnalyticsScreen() {
               
               {/* Minimal Chart Visualization (Simplified without SVG) */}
               <View className="relative h-32 w-full flex-col justify-end px-2">
-                <View className="absolute inset-0 flex-col justify-between pointer-events-none border-b border-[#F3F4F6] pb-6">
+                <View className="absolute inset-0 flex-col justify-between border-b border-[#F3F4F6] pb-6">
                   <View className="w-full border-t border-[#F3F4F6] h-[1px]" />
                   <View className="w-full border-t border-[#F3F4F6] h-[1px]" />
                   <View className="w-full border-t border-[#F3F4F6] h-[1px]" />
                 </View>
                 {/* Fake Line Chart */}
-                <View className="absolute inset-x-0 bottom-6 h-16 pointer-events-none items-center justify-center">
+                <View className="absolute inset-x-0 bottom-6 h-16 items-center justify-center">
                   <View className="w-full h-full border-b-[3px] border-[#0D9488] opacity-50 rounded-[100%]" style={{ borderTopWidth: 0, borderLeftWidth: 0, borderRightWidth: 0 }} />
                 </View>
 

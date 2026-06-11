@@ -1,5 +1,5 @@
 import { useState, useRef } from 'react';
-import { View, ScrollView, Dimensions, Pressable } from 'react-native';
+import { View, ScrollView, useWindowDimensions, Pressable, I18nManager } from 'react-native';
 import { router } from 'expo-router';
 import { Feather } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -8,7 +8,7 @@ import Animated, { FadeIn, FadeInDown, SlideInRight } from 'react-native-reanima
 import { AppText as Text } from '@/shared/components/AppText';
 import { AppButton } from '@/shared/components/AppButton';
 
-const { width } = Dimensions.get('window');
+
 
 const ONBOARDING_DATA = [
   {
@@ -34,6 +34,7 @@ const ONBOARDING_DATA = [
 export default function OnboardingScreen() {
   const [currentIndex, setCurrentIndex] = useState(0);
   const scrollRef = useRef<ScrollView>(null);
+  const { width } = useWindowDimensions();
 
   const completeOnboarding = async () => {
     try {
@@ -48,7 +49,8 @@ export default function OnboardingScreen() {
   const handleNext = () => {
     if (currentIndex < ONBOARDING_DATA.length - 1) {
       const nextIndex = currentIndex + 1;
-      scrollRef.current?.scrollTo({ x: -nextIndex * width, animated: true });
+      const xOffset = I18nManager.isRTL ? -nextIndex * width : nextIndex * width;
+      scrollRef.current?.scrollTo({ x: xOffset, animated: true });
       setCurrentIndex(nextIndex);
     } else {
       completeOnboarding();
@@ -114,7 +116,7 @@ export default function OnboardingScreen() {
           {ONBOARDING_DATA.map((_, idx) => (
             <View
               key={idx}
-              className={`h-2 rounded-full transition-all ${
+              className={`h-2 rounded-full ${
                 idx === currentIndex ? 'w-8 bg-primary' : 'w-2 bg-surface-container-highest'
               }`}
             />

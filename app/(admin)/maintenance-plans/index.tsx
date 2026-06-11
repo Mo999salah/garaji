@@ -1,6 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
 import { router } from 'expo-router';
-import { ScrollView, TouchableOpacity, View } from 'react-native';
+import { ScrollView, Pressable, View } from 'react-native';
 
 import { fetchAllMaintenancePlans } from '@/features/operations/services/supabaseOperationsService';
 import type { MaintenancePlan } from '@/features/operations/types';
@@ -132,7 +132,7 @@ export default function AdminMaintenancePlansScreen() {
                 ? `${vehicle.make} ${vehicle.model}`
                 : 'مركبة غير معروفة';
               return (
-                <TouchableOpacity
+                <Pressable
                   key={plan.id}
                   onPress={() =>
                     router.push({
@@ -142,7 +142,7 @@ export default function AdminMaintenancePlansScreen() {
                   }
                 >
                   <AdminMaintenancePlanCard plan={plan} vehicleLabel={vehicleLabel} />
-                </TouchableOpacity>
+                </Pressable>
               );
             })
           )}

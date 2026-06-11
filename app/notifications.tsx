@@ -53,6 +53,8 @@ export default function NotificationsScreen() {
       {/* Top Bar */}
       <View className="z-40 bg-surface px-margin-mobile pt-10 pb-4 flex-row-reverse items-center justify-between border-b border-surface-container-highest">
         <Pressable 
+          accessibilityLabel="رجوع"
+          accessibilityRole="button"
           onPress={() => router.back()}
           className="w-10 h-10 flex items-center justify-center rounded-full active:bg-surface-container-high"
         >

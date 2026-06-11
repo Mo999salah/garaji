@@ -46,7 +46,7 @@ function AdminOrderCard({ request, onPress }: { request: ServiceRequest; onPress
   return (
     <Pressable 
       onPress={onPress}
-      className={`bg-surface rounded-[18px] p-gutter shadow-[0px_4px_20px_rgba(0,0,0,0.04)] relative overflow-hidden mb-4 transition-all duration-200 active:scale-[0.98] ${isCompleted ? 'opacity-90' : ''}`}
+      className={`bg-surface rounded-[18px] p-gutter shadow-[0px_4px_20px_rgba(0,0,0,0.04)] relative overflow-hidden mb-4 active:scale-[0.98] ${isCompleted ? 'opacity-90' : ''}`}
     >
       <View className="flex-row-reverse justify-between items-start mb-4">
         {isPending && (
@@ -114,17 +114,17 @@ function AdminOrderCard({ request, onPress }: { request: ServiceRequest; onPress
 
       {isPending && (
         <View className="flex-row-reverse gap-3">
-          <Pressable className="flex-1 bg-primary h-[48px] rounded-xl flex items-center justify-center transition-opacity hover:opacity-90 active:scale-95">
+          <Pressable className="flex-1 bg-primary h-[48px] rounded-xl flex items-center justify-center active:scale-95">
             <Text className="text-white font-button-text text-[16px] font-bold">قبول</Text>
           </Pressable>
-          <Pressable className="flex-1 bg-surface-container-low h-[48px] rounded-xl flex items-center justify-center transition-colors hover:bg-surface-container active:scale-95">
+          <Pressable className="flex-1 bg-surface-container-low h-[48px] rounded-xl flex items-center justify-center active:scale-95">
             <Text className="text-on-surface font-button-text text-[16px] font-bold">رفض</Text>
           </Pressable>
         </View>
       )}
 
       {isConfirmed && (
-        <Pressable className="w-full bg-surface-container-high h-[48px] rounded-xl flex items-center justify-center transition-colors hover:bg-surface-variant active:scale-95">
+        <Pressable className="w-full bg-surface-container-high h-[48px] rounded-xl flex items-center justify-center active:scale-95">
           <Text className="text-primary font-button-text text-[16px] font-bold">بدء العمل</Text>
         </Pressable>
       )}
@@ -155,9 +155,9 @@ export default function AdminManageOrdersScreen() {
   return (
     <View className="flex-1 bg-background pb-[80px] relative">
       {/* TopAppBar */}
-      <View className="bg-surface shadow-[0px_4px_20px_rgba(0,0,0,0.04)] w-full top-0 sticky z-40">
+      <View className="bg-surface shadow-[0px_4px_20px_rgba(0,0,0,0.04)] w-full z-40">
         <View className="flex-row-reverse justify-between items-center px-margin-mobile h-16 w-full">
-          <Pressable onPress={() => router.back()} className="p-2 rounded-full hover:bg-surface-container-low active:scale-95 transition-all">
+          <Pressable onPress={() => router.back()} className="p-2 rounded-full active:scale-95">
             <MaterialIcons name="menu" size={24} color="#00685f" />
           </Pressable>
           <Text className="font-title-md text-[20px] text-primary font-bold absolute left-1/2 -translate-x-1/2">إدارة الطلبات</Text>
@@ -181,8 +181,8 @@ export default function AdminManageOrdersScreen() {
                 <Pressable
                   key={tab.id}
                   onPress={() => setActiveTab(tab.id)}
-                  className={`flex-row-reverse items-center justify-center px-6 py-2 rounded-full flex-shrink-0 shadow-sm border transition-all duration-200
-                    ${isActive ? 'bg-primary border-primary' : 'bg-surface border-surface-container-highest hover:bg-surface-container-lowest'}
+                  className={`flex-row-reverse items-center justify-center px-6 py-2 rounded-full flex-shrink-0 shadow-sm border
+                    ${isActive ? 'bg-primary border-primary' : 'bg-surface border-surface-container-highest'}
                   `}
                 >
                   <Text className={`font-label-sm text-[13px] font-bold ${isActive ? 'text-white' : 'text-on-surface-variant'}`}>

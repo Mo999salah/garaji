@@ -47,7 +47,7 @@ function UrgentPlanCard({ plan, nowMs }: { plan: MaintenancePlan; nowMs: number 
 
   return (
     <View className="bg-surface-container-lowest rounded-[16px] shadow-[0px_4px_20px_rgba(0,0,0,0.04)] border-r-4 border-[#F59E0B] p-4 flex-col gap-4 relative overflow-hidden">
-      <View className="absolute -top-10 -right-10 w-32 h-32 bg-[#F59E0B]/5 rounded-full blur-2xl pointer-events-none" />
+      <View className="absolute -top-10 -right-10 w-32 h-32 bg-[#F59E0B]/5 rounded-full" />
       
       <View className="flex-row-reverse justify-between items-start z-10">
         <View className="bg-[#F59E0B]/10 px-3 py-1 rounded-full flex-row-reverse items-center gap-1">
@@ -70,7 +70,7 @@ function UrgentPlanCard({ plan, nowMs }: { plan: MaintenancePlan; nowMs: number 
       
       <Pressable 
         onPress={() => router.push('/book-branch')}
-        className="w-full h-12 bg-primary rounded-[14px] flex items-center justify-center transition-all duration-200 active:scale-95 z-10 shadow-[0px_4px_10px_rgba(0,104,95,0.2)]"
+        className="w-full h-12 bg-primary rounded-[14px] flex items-center justify-center active:scale-95 z-10 shadow-[0px_4px_10px_rgba(0,104,95,0.2)]"
       >
         <Text className="text-white font-button-text text-[16px] leading-[16px] font-bold">حجز موعد الآن</Text>
       </Pressable>
@@ -99,7 +99,7 @@ function UpcomingPlanRow({ plan }: { plan: MaintenancePlan }) {
 
 function HistoryPlanRow({ plan }: { plan: MaintenancePlan }) {
   return (
-    <View className="bg-surface-container-lowest rounded-[16px] shadow-[0px_4px_20px_rgba(0,0,0,0.04)] p-4 flex-row-reverse items-center gap-4 transition-all duration-200 active:scale-[0.99] mb-3">
+    <View className="bg-surface-container-lowest rounded-[16px] shadow-[0px_4px_20px_rgba(0,0,0,0.04)] p-4 flex-row-reverse items-center gap-4 active:scale-[0.99] mb-3">
       <View className="w-10 h-10 rounded-full bg-[#22C55E]/10 flex items-center justify-center shrink-0">
         <MaterialIcons name="check-circle" size={24} color="#22C55E" />
       </View>
@@ -155,14 +155,14 @@ function MaintenancePlansScreen() {
   return (
     <View className="flex-1 bg-background pb-24">
       {/* TopAppBar */}
-      <View className="flex-row-reverse justify-between items-center px-margin-mobile py-stack-md w-full sticky top-0 z-50 bg-surface shadow-[0px_4px_20px_rgba(0,0,0,0.04)]">
+      <View className="flex-row-reverse justify-between items-center px-margin-mobile py-stack-md w-full z-50 bg-surface shadow-[0px_4px_20px_rgba(0,0,0,0.04)]">
         <View className="flex-row-reverse items-center gap-3 w-10">
           <Pressable onPress={() => router.push('/add-maintenance-plan')}>
             <MaterialIcons name="add" size={24} color="#00685f" />
           </Pressable>
         </View>
         <Text className="font-title-md text-[20px] leading-[28px] text-primary font-bold">خطط الصيانة</Text>
-        <Pressable onPress={() => router.back()} className="text-on-surface-variant hover:opacity-80 transition-opacity active:scale-95 p-2 w-10 items-center justify-center">
+        <Pressable onPress={() => router.back()} className="active:scale-95 p-2 w-10 items-center justify-center">
           <MaterialIcons name="menu" size={24} color="#00685f" />
         </Pressable>
       </View>
@@ -192,10 +192,10 @@ function MaintenancePlansScreen() {
                   <Pressable 
                     key={v.id}
                     onPress={() => setSelectedVehicleId(v.id)}
-                    className={`px-6 py-3 rounded-full transition-all duration-200 shadow-sm flex-shrink-0 ${
+                    className={`px-6 py-3 rounded-full shadow-sm flex-shrink-0 ${
                       selectedVehicleId === v.id 
                         ? 'bg-primary' 
-                        : 'bg-surface-container hover:bg-surface-container-high'
+                        : 'bg-surface-container'
                     }`}
                   >
                     <Text className={`font-label-sm text-[13px] font-bold ${

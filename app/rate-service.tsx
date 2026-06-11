@@ -66,7 +66,7 @@ export default function RateServiceScreen() {
   return (
     <View className="flex-1 bg-surface">
       {/* Top App Bar */}
-      <View className="bg-surface shadow-[0px_4px_20px_rgba(0,0,0,0.04)] flex-row-reverse justify-between items-center px-margin-mobile py-4 sticky top-0 z-50">
+      <View className="bg-surface shadow-[0px_4px_20px_rgba(0,0,0,0.04)] flex-row-reverse justify-between items-center px-margin-mobile py-4 z-50">
         <View className="w-10 h-10" />
         <Text className="font-title-md text-[20px] leading-[28px] text-primary flex-1 text-center font-bold">تقييم الخدمة</Text>
         <Pressable onPress={() => router.back()} className="w-10 h-10 flex items-center justify-center rounded-full active:bg-surface-container-high">

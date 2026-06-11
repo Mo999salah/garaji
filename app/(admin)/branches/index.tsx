@@ -16,7 +16,7 @@ function AdminBranchCard({ branch, onPress }: { branch: Branch; onPress: () => v
   return (
     <Pressable 
       onPress={onPress}
-      className={`bg-surface-container-lowest rounded-2xl shadow-[0px_4px_20px_rgba(0,0,0,0.04)] overflow-hidden flex-col transition-transform active:scale-[0.98] mb-stack-lg ${!isOpen ? 'opacity-90' : ''}`}
+      className={`bg-surface-container-lowest rounded-2xl shadow-[0px_4px_20px_rgba(0,0,0,0.04)] overflow-hidden flex-col active:scale-[0.98] mb-stack-lg ${!isOpen ? 'opacity-90' : ''}`}
     >
       <View className="p-4 flex-col gap-stack-md">
         <View className="flex-row-reverse justify-between items-start">
@@ -49,7 +49,7 @@ function AdminBranchCard({ branch, onPress }: { branch: Branch; onPress: () => v
       {/* Map Preview Area */}
       <View className={`w-full h-32 bg-surface-container-low relative flex items-center justify-center overflow-hidden ${!isOpen ? 'opacity-70' : ''}`}>
         <View className="absolute inset-0 opacity-20" style={{ backgroundColor: '#e2e2e3' }} />
-        <View className={`w-10 h-10 rounded-full flex items-center justify-center shadow-md transition-transform ${isOpen ? 'bg-primary-container text-on-primary-container' : 'bg-outline text-surface'}`}>
+        <View className={`w-10 h-10 rounded-full flex items-center justify-center shadow-md ${isOpen ? 'bg-primary-container text-on-primary-container' : 'bg-outline text-surface'}`}>
           <MaterialIcons name="pin-drop" size={24} color={isOpen ? '#f4fffc' : '#f9f9fa'} />
         </View>
       </View>
@@ -65,17 +65,17 @@ export default function AdminBranchesScreen() {
   return (
     <View className="flex-1 bg-background pb-[80px] relative">
       {/* Top Navigation Bar */}
-      <View className="bg-surface shadow-[0px_4px_20px_rgba(0,0,0,0.04)] w-full top-0 sticky z-40 flex flex-row-reverse justify-between items-center px-margin-mobile h-16 transition-all duration-300">
+      <View className="bg-surface shadow-[0px_4px_20px_rgba(0,0,0,0.04)] w-full z-40 flex flex-row-reverse justify-between items-center px-margin-mobile h-16">
         <Pressable 
           onPress={() => router.back()} 
-          className="w-10 h-10 flex items-center justify-center rounded-full text-on-surface-variant hover:bg-surface-container-low transition-colors active:opacity-80"
+          className="w-10 h-10 flex items-center justify-center rounded-full active:opacity-80"
         >
           <MaterialIcons name="arrow-forward" size={24} color="#3d4947" />
         </Pressable>
         <Text className="font-title-md text-[20px] font-bold text-primary flex-1 text-center">الفروع</Text>
         <Pressable 
           onPress={() => router.push('/(admin)/branches/new')}
-          className="w-10 h-10 flex items-center justify-center rounded-full text-primary hover:bg-surface-container-low transition-colors active:opacity-80"
+          className="w-10 h-10 flex items-center justify-center rounded-full active:opacity-80"
         >
           <MaterialIcons name="add" size={24} color="#00685f" />
         </Pressable>

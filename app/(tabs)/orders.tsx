@@ -62,17 +62,17 @@ export default function CustomerOrdersScreen() {
   return (
     <View className="flex-1 bg-background">
       {/* Top App Bar */}
-      <View className="bg-surface shadow-[0px_4px_20px_rgba(0,0,0,0.04)] flex-row-reverse items-center justify-between px-margin-mobile w-full h-16 z-50 sticky top-0">
-        <Pressable className="p-2 rounded-full active:scale-95 transition-transform hover:bg-surface-container-high">
-          <MaterialIcons name="menu" size={24} color="#00685f" />
-        </Pressable>
-        <Text className="font-title-md text-[20px] leading-[28px] font-bold text-primary">طلباتي</Text>
+      <View className="bg-surface shadow-[0px_4px_20px_rgba(0,0,0,0.04)] flex-row-reverse items-center justify-between px-margin-mobile w-full h-16 z-50">
         <Pressable 
+          accessibilityLabel="الإشعارات"
+          accessibilityRole="button"
           onPress={() => router.push('/notifications')}
-          className="p-2 rounded-full active:scale-95 transition-transform hover:bg-surface-container-high"
+          className="p-2 rounded-full active:scale-95"
         >
           <MaterialIcons name="notifications" size={24} color="#00685f" />
         </Pressable>
+        <Text className="font-title-md text-[20px] leading-[28px] font-bold text-primary">طلباتي</Text>
+        <View className="w-10 h-10" />
       </View>
 
       <ScrollView
@@ -94,7 +94,7 @@ export default function CustomerOrdersScreen() {
                 <Pressable
                   key={tab.id}
                   onPress={() => setActiveTab(tab.id)}
-                  className={`rounded-full px-5 py-2.5 shadow-sm transition-opacity ${
+                  className={`rounded-full px-5 py-2.5 shadow-sm ${
                     isActive 
                       ? "bg-primary" 
                       : "bg-surface-container-low active:bg-surface-container-high"

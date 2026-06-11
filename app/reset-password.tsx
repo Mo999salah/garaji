@@ -45,7 +45,7 @@ export default function ForgotPasswordScreen() {
 
   return (
     <AuthPublicGate>
-      <View className="bg-background min-h-screen flex-1 flex-col items-center justify-center px-margin-mobile">
+      <View className="bg-background flex-1 flex-col items-center justify-center px-margin-mobile">
         {/* Container */}
         <View className="w-full max-w-md flex-col gap-stack-lg">
           
@@ -108,7 +108,7 @@ export default function ForgotPasswordScreen() {
             <Pressable
               disabled={isSubmitting}
               onPress={() => void onSubmit()}
-              className={`w-full h-12 bg-primary rounded-[14px] flex items-center justify-center mt-stack-sm active:scale-95 transition-transform duration-200 shadow-[0px_4px_20px_rgba(0,104,95,0.2)] ${isSubmitting ? 'opacity-70' : ''}`}
+              className={`w-full h-12 bg-primary rounded-[14px] flex items-center justify-center mt-stack-sm active:scale-95 shadow-[0px_4px_20px_rgba(0,104,95,0.2)] ${isSubmitting ? 'opacity-70' : ''}`}
             >
               {isSubmitting ? (
                 <ActivityIndicator color="#ffffff" />
@@ -121,7 +121,7 @@ export default function ForgotPasswordScreen() {
 
           {/* Footer Link */}
           <View className="flex-row items-center justify-center mt-stack-md pb-stack-lg">
-            <Pressable onPress={() => router.replace('/login' as Href)} className="active:opacity-80 transition-opacity">
+            <Pressable onPress={() => router.replace('/login' as Href)} className="active:opacity-80">
               <Text className="text-primary font-button-text text-[16px] leading-[16px] font-bold">العودة لتسجيل الدخول</Text>
             </Pressable>
           </View>

@@ -13,7 +13,7 @@ function AdminServiceCard({ service, onPress }: { service: Service; onPress: () 
   return (
     <Pressable 
       onPress={onPress}
-      className={`bg-surface rounded-[20px] shadow-[0px_4px_20px_rgba(0,0,0,0.04)] p-4 flex-col gap-1 relative mb-4 transition-all duration-200 active:scale-[0.98] ${!service.isActive ? 'opacity-75' : ''}`}
+      className={`bg-surface rounded-[20px] shadow-[0px_4px_20px_rgba(0,0,0,0.04)] p-4 flex-col gap-1 relative mb-4 active:scale-[0.98] ${!service.isActive ? 'opacity-75' : ''}`}
     >
       <View className="flex-row-reverse justify-between items-start">
         <View className="flex-1 items-end">
@@ -60,17 +60,17 @@ export default function AdminServicesScreen() {
   return (
     <View className="flex-1 bg-background pb-24 relative">
       {/* Top Navigation Bar */}
-      <View className="flex-row-reverse justify-between items-center px-margin-mobile h-16 w-full z-40 bg-surface shadow-[0px_4px_20px_rgba(0,0,0,0.04)] sticky top-0">
+      <View className="flex-row-reverse justify-between items-center px-margin-mobile h-16 w-full z-40 bg-surface shadow-[0px_4px_20px_rgba(0,0,0,0.04)]">
         <Pressable 
           onPress={() => router.back()} 
-          className="text-on-surface-variant hover:bg-surface-container-low transition-colors p-2 rounded-full active:opacity-80 flex items-center justify-center"
+          className="p-2 rounded-full active:opacity-80 flex items-center justify-center"
         >
           <MaterialIcons name="arrow-forward" size={24} color="#3d4947" />
         </Pressable>
         <Text className="font-title-md text-[20px] font-bold text-on-surface flex-1 text-center">الخدمات</Text>
         <Pressable 
           onPress={() => router.push('/(admin)/services/new')}
-          className="text-primary hover:bg-surface-container-low transition-colors p-2 rounded-full active:opacity-80 flex items-center justify-center"
+          className="p-2 rounded-full active:opacity-80 flex items-center justify-center"
         >
           <MaterialIcons name="add" size={24} color="#00685f" />
         </Pressable>
@@ -109,7 +109,7 @@ export default function AdminServicesScreen() {
       {/* Floating Action Button */}
       <Pressable 
         onPress={() => router.push('/(admin)/services/new')}
-        className="absolute bottom-margin-mobile left-margin-mobile w-14 h-14 bg-primary-container rounded-full shadow-[0px_8px_30px_rgba(0,0,0,0.08)] flex items-center justify-center z-50 hover:bg-primary transition-colors active:scale-95"
+        className="absolute bottom-margin-mobile left-margin-mobile w-14 h-14 bg-primary-container rounded-full shadow-[0px_8px_30px_rgba(0,0,0,0.08)] flex items-center justify-center z-50 active:scale-95"
       >
         <MaterialIcons name="add" size={24} color="#ffffff" />
       </Pressable>

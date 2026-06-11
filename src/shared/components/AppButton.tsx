@@ -6,10 +6,13 @@ import { AnimatedPressable } from "@/shared/components/AnimatedPressable";
 import { AppText as Text } from "@/shared/components/AppText";
 
 interface AppButtonProps extends PropsWithChildren {
+  /** Text label — alternative to `children`. */
+  label?: string;
   onPress: () => void;
   disabled?: boolean;
   loading?: boolean;
   variant?: "primary" | "secondary" | "ghost";
+  size?: "md" | "lg";
   accessibilityLabel?: string;
   className?: string;
 }
@@ -30,10 +33,12 @@ const textVariants = {
 
 export function AppButton({
   children,
+  label,
   disabled,
   loading,
   onPress,
   variant = "primary",
+  size = "md",
   accessibilityLabel,
   className = "",
 }: AppButtonProps) {
@@ -65,7 +70,7 @@ export function AppButton({
           <ActivityIndicator color={variant === "primary" ? "#ffffff" : "#00685f"} />
         ) : (
           <Text className={`font-button-text text-[16px] leading-[16px] ${textVariants[variant]}`}>
-            {children}
+            {children ?? label}
           </Text>
         )}
       </AnimatedPressable>
