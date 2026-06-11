@@ -1,10 +1,10 @@
 import { router } from 'expo-router';
+import { Pressable, View } from 'react-native';
 
 import { RoleGate } from '@/features/auth/components/RoleGate';
 import { useAuthStore } from '@/features/auth/store/useAuthStore';
 import { VehicleForm } from '@/features/vehicles/components/VehicleForm';
 import { useVehicleStore } from '@/features/vehicles/store/useVehicleStore';
-import { ScreenContainer } from '@/shared/components/ScreenContainer';
 import type { VehicleFormValues } from '@/features/vehicles/schemas/vehicleSchema';
 
 import { AppText as Text } from '@/shared/components/AppText';
@@ -20,10 +20,24 @@ function NewVehicleScreen() {
   };
 
   return (
-    <ScreenContainer scroll={false}>
-      <Text className="font-sans mb-4 px-4 text-2xl font-bold text-ink">إضافة سيارة جديدة</Text>
-      <VehicleForm isLoading={isLoading} onSubmit={handleSubmit} submitLabel="إضافة السيارة" />
-    </ScreenContainer>
+    <View className="flex-1 bg-background">
+      {/* Top Navigation */}
+      <View className="flex-row-reverse items-center justify-between px-margin-mobile h-16 bg-surface-container-lowest z-50 shadow-[0px_1px_2px_rgba(0,0,0,0.05)]">
+        <View className="flex-1" />
+        <Text className="font-title-md text-[20px] leading-[28px] font-bold text-on-surface text-center flex-1">إضافة مركبة</Text>
+        <View className="flex-1 flex-row-reverse justify-end">
+          <Pressable 
+            onPress={() => router.back()}
+            className="px-2 py-1 rounded-md active:bg-surface-container-low"
+          >
+            <Text className="text-primary font-label-sm text-[13px] leading-[18px] font-bold">إلغاء</Text>
+          </Pressable>
+        </View>
+      </View>
+
+      {/* Main Content */}
+      <VehicleForm isLoading={isLoading} onSubmit={handleSubmit} submitLabel="حفظ المركبة" />
+    </View>
   );
 }
 

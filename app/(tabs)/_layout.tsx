@@ -15,7 +15,7 @@ import { AppText as Text } from '@/shared/components/AppText';
 import { LoadingSpinner } from '@/shared/components/LoadingSpinner';
 import { ScreenContainer } from '@/shared/components/ScreenContainer';
 
-type TabRoute = 'index' | 'orders' | 'my-cars';
+type TabRoute = 'index' | 'orders' | 'my-cars' | 'profile';
 
 const TAB_META: Record<
   TabRoute,
@@ -24,6 +24,7 @@ const TAB_META: Record<
   index: { title: 'الرئيسية', icon: 'home' },
   orders: { title: 'حجوزاتي', icon: 'calendar' },
   'my-cars': { title: 'سياراتي', icon: 'truck' },
+  profile: { title: 'حسابي', icon: 'user' },
 };
 
 function CustomerTabBar({ descriptors, navigation, state }: BottomTabBarProps) {
@@ -113,6 +114,7 @@ export default function CustomerTabsLayout() {
       <Tabs.Screen name="index" options={{ title: 'الرئيسية' }} />
       <Tabs.Screen name="orders" options={{ title: 'حجوزاتي' }} />
       <Tabs.Screen name="my-cars" options={{ title: 'سياراتي' }} />
+      <Tabs.Screen name="profile" options={{ title: 'حسابي' }} />
     </Tabs>
   );
 }

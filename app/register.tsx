@@ -6,16 +6,12 @@ import { Controller, useForm, useWatch } from 'react-hook-form';
 import { ActivityIndicator, Pressable, TextInput, View } from 'react-native';
 import type { TextInputProps } from 'react-native';
 import { z } from 'zod';
+import { MaterialIcons } from '@expo/vector-icons';
+import { Image } from 'expo-image';
 
 import { AppText as Text } from '@/shared/components/AppText';
 import { AuthPublicGate } from '@/features/auth/components/AuthPublicGate';
-import {
-  AuthNotice,
-  AuthScreen,
-  AuthTextButton,
-  PasswordToggle,
-  RoleSelector,
-} from '@/features/auth/components/AuthScreen';
+import { AuthNotice } from '@/features/auth/components/AuthScreen';
 import { getHomePathForRole, useAuthStore } from '@/features/auth/store/useAuthStore';
 import type { UserRole } from '@/shared/types/auth';
 
@@ -43,12 +39,10 @@ type SignupForm = z.infer<typeof signupSchema>;
 
 function getPasswordScore(password: string) {
   let score = 0;
-
   if (password.length >= 8) score += 1;
   if (/[A-Z]/.test(password) && /[a-z]/.test(password)) score += 1;
   if (/\d/.test(password)) score += 1;
   if (/[^A-Za-z0-9]/.test(password)) score += 1;
-
   return score;
 }
 
@@ -64,7 +58,6 @@ interface ArchInputProps {
   keyboardType?: TextInputProps['keyboardType'];
   placeholder?: string;
   secureTextEntry?: boolean;
-  textAlign?: 'left' | 'right' | 'center';
   value: string;
   onBlur: () => void;
   onChangeText: (text: string) => void;
@@ -82,20 +75,25 @@ function ArchInput({
   const [focused, setFocused] = useState(false);
 
   return (
-    <View className="gap-1.5">
-      <Text className="font-sans text-right text-xs font-semibold text-[#8A8A8A] dark:text-[#A0A0A0]">
+    <View className="flex-col gap-1">
+      <Text className="text-on-background font-label-sm text-[13px] leading-[18px] text-right font-bold pr-1">
         {label}
       </Text>
-      <View className="relative">
+      <View className="relative justify-center">
+        {trailing ? (
+          <View className="absolute left-4 z-10">
+            {trailing}
+          </View>
+        ) : null}
         <TextInput
-          className={`font-sans min-h-12 border-b text-base text-[#111111] dark:text-[#F5F5F5] ${
-            trailing ? 'pl-20' : ''
+          className={`w-full h-12 rounded-xl text-on-surface text-right font-body-md text-[16px] leading-[24px] ${
+            trailing ? 'pl-12 pr-4' : 'px-4'
           } ${
             error
-              ? 'border-red-400'
+              ? 'border border-error'
               : focused
-                ? 'border-[#111111] dark:border-[#E0E0E0]'
-                : 'border-black/10 dark:border-white/10'
+                ? 'bg-surface-container-lowest border border-primary'
+                : 'bg-surface-container-low border-none'
           }`}
           onBlur={() => {
             setFocused(false);
@@ -103,22 +101,84 @@ function ArchInput({
           }}
           onFocus={() => setFocused(true)}
           onChangeText={onChangeText}
-          placeholderTextColor="#C0C0C0"
+          placeholderTextColor="#bcc9c6"
           style={{ fontFamily: 'Tajawal_400Regular' }}
-          textAlign={props.textAlign || 'right'}
           value={value}
           {...props}
         />
-        {trailing ? (
-          <View className="absolute bottom-0 left-1 top-0 justify-center">{trailing}</View>
-        ) : null}
       </View>
       {error ? (
-        <Text className="font-sans text-right text-xs text-red-500">{error}</Text>
+        <Text className="font-label-sm text-[13px] leading-[18px] text-error text-right">{error}</Text>
       ) : null}
     </View>
   );
 }
+
+/* ─────────────── Role Selector ─────────────── */
+
+function CustomRoleSelector({ value, onChange }: { value: UserRole; onChange: (role: UserRole) => void }) {
+  return (
+    <View className="flex-row-reverse gap-4">
+      <Pressable 
+        className={`flex-1 flex-col items-end p-4 border-2 rounded-2xl shadow-[0px_4px_20px_rgba(0,0,0,0.04)] active:scale-95 transition-transform ${
+          value === 'customer' 
+          ? 'bg-primary-container/10 border-primary' 
+          : 'bg-surface-container-lowest border-transparent'
+        }`}
+        onPress={() => onChange('customer')}
+      >
+        <MaterialIcons 
+          name="directions-car" 
+          size={32} 
+          color={value === 'customer' ? "#00685f" : "#3d4947"} 
+          style={{ marginBottom: 12 }}
+        />
+        <Text className="text-on-background font-title-md text-[16px] leading-[24px] font-bold mb-1">عميل</Text>
+        <Text className="text-on-surface-variant font-label-sm text-[13px] leading-[18px] text-right">حجز صيانة ومتابعة سياراتك</Text>
+      </Pressable>
+
+      <Pressable 
+        className={`flex-1 flex-col items-end p-4 border-2 rounded-2xl shadow-[0px_4px_20px_rgba(0,0,0,0.04)] active:scale-95 transition-transform ${
+          value === 'merchant' 
+          ? 'bg-primary-container/10 border-primary' 
+          : 'bg-surface-container-lowest border-transparent'
+        }`}
+        onPress={() => onChange('merchant')}
+      >
+        <MaterialIcons 
+          name="build" 
+          size={32} 
+          color={value === 'merchant' ? "#00685f" : "#3d4947"} 
+          style={{ marginBottom: 12 }}
+        />
+        <Text className="text-on-background font-title-md text-[16px] leading-[24px] font-bold mb-1">مركز خدمة</Text>
+        <Text className="text-on-surface-variant font-label-sm text-[13px] leading-[18px] text-right">إدارة الطلبات والفروع</Text>
+      </Pressable>
+    </View>
+  );
+}
+
+/* ─────────────── Password Meter ─────────────── */
+
+function PasswordMeter({ score }: { score: number }) {
+  const label = score >= 4 ? 'قوية' : score >= 2 ? 'متوسطة' : 'ضعيفة';
+  return (
+    <View className="pt-2 flex-col space-y-2">
+      <View className="flex-row-reverse gap-1 h-1">
+        {[1, 2, 3, 4].map((step) => (
+          <View
+            className={`flex-1 rounded-full ${step <= score ? 'bg-primary' : 'bg-surface-variant'}`}
+            key={step}
+          />
+        ))}
+      </View>
+      <Text className="text-on-surface-variant font-label-sm text-[13px] leading-[18px] text-right mt-1">
+        قوة كلمة المرور: {label}
+      </Text>
+    </View>
+  );
+}
+
 
 /* ─────────────── Signup Screen ─────────────── */
 
@@ -127,6 +187,7 @@ export default function SignupScreen() {
   const signUp = useAuthStore((state) => state.signUp);
   const errorMessage = useAuthStore((state) => state.errorMessage);
   const clearError = useAuthStore((state) => state.clearError);
+  
   const {
     control,
     handleSubmit,
@@ -144,6 +205,7 @@ export default function SignupScreen() {
       region: '',
     },
   });
+  
   const selectedRole = useWatch({ control, name: 'role' });
   const password = useWatch({ control, name: 'password' });
   const passwordScore = useMemo(() => getPasswordScore(password ?? ''), [password]);
@@ -171,178 +233,184 @@ export default function SignupScreen() {
 
   return (
     <AuthPublicGate>
-    <AuthScreen
-      footer="يتم إنشاء الملف الشخصي تلقائياً بعد اكتمال التسجيل في Supabase."
-      subtitle="اختر نوع الحساب، ثم أكمل بياناتك الأساسية."
-      title={'أنشئ\nحسابك.'}
-    >
-      <View className="gap-5">
-        <RoleSelector onChange={setRole} value={selectedRole} />
-
-        <Controller
-          control={control}
-          name="fullName"
-          render={({ field: { onBlur, onChange, value } }) => (
-            <ArchInput
-              autoComplete="name"
-              error={errors.fullName?.message}
-              label="الاسم الكامل"
-              onBlur={onBlur}
-              onChangeText={onChange}
-              textAlign="right"
-              value={value}
-            />
-          )}
-        />
-
-        <Controller
-          control={control}
-          name="phone"
-          render={({ field: { onBlur, onChange, value } }) => (
-            <ArchInput
-              autoComplete="tel"
-              error={errors.phone?.message}
-              inputMode="tel"
-              keyboardType="phone-pad"
-              label="رقم الجوال"
-              onBlur={onBlur}
-              onChangeText={onChange}
-              placeholder="+966 5X XXX XXXX"
-              textAlign="right"
-              value={value ?? ''}
-            />
-          )}
-        />
-
-        <Controller
-          control={control}
-          name="email"
-          render={({ field: { onBlur, onChange, value } }) => (
-            <ArchInput
-              autoCapitalize="none"
-              autoComplete="email"
-              error={errors.email?.message}
-              inputMode="email"
-              keyboardType="email-address"
-              label="البريد الإلكتروني"
-              onBlur={onBlur}
-              onChangeText={onChange}
-              placeholder="name@example.com"
-              textAlign="right"
-              value={value}
-            />
-          )}
-        />
-
-        <Controller
-          control={control}
-          name="password"
-          render={({ field: { onBlur, onChange, value } }) => (
-            <ArchInput
-              autoCapitalize="none"
-              autoComplete="new-password"
-              error={errors.password?.message}
-              label="كلمة المرور"
-              onBlur={onBlur}
-              onChangeText={onChange}
-              secureTextEntry={!passwordVisible}
-              textAlign="right"
-              trailing={
-                <PasswordToggle
-                  onPress={() => setPasswordVisible((current) => !current)}
-                  visible={passwordVisible}
-                />
-              }
-              value={value}
-            />
-          )}
-        />
-
-        <PasswordMeter score={passwordScore} />
-
-        {selectedRole === 'merchant' ? (
-          <View className="gap-5 border-t border-black/5 pt-5 dark:border-white/5">
-            <Controller
-              control={control}
-              name="merchantName"
-              render={({ field: { onBlur, onChange, value } }) => (
-                <ArchInput
-                  error={errors.merchantName?.message}
-                  label="اسم المنشأة"
-                  onBlur={onBlur}
-                  onChangeText={onChange}
-                  textAlign="right"
-                  value={value ?? ''}
-                />
-              )}
-            />
-            <Controller
-              control={control}
-              name="region"
-              render={({ field: { onBlur, onChange, value } }) => (
-                <ArchInput
-                  error={errors.region?.message}
-                  label="المنطقة"
-                  onBlur={onBlur}
-                  onChangeText={onChange}
-                  placeholder="مثال: الرياض"
-                  textAlign="right"
-                  value={value ?? ''}
-                />
-              )}
-            />
+      <View className="bg-background min-h-screen flex-1 flex-col items-center justify-center p-margin-mobile">
+        <View className="w-full max-w-md flex-col gap-stack-lg pt-12 pb-12">
+          
+          {/* Header Section */}
+          <View className="flex-col items-center gap-stack-sm">
+            <View className="w-16 h-16 rounded-full bg-surface-container-lowest shadow-[0px_4px_20px_rgba(0,0,0,0.04)] flex items-center justify-center mb-2 overflow-hidden">
+              <Image 
+                source={require('../assets/images/logo.png')} 
+                className="w-full h-full"
+                contentFit="cover" 
+              />
+            </View>
+            <Text className="text-on-background font-bold text-[24px] leading-[32px]">كراجي</Text>
+            <Text className="text-on-surface-variant text-[14px] leading-[20px]">منصة خدمات سيارتك</Text>
           </View>
-        ) : null}
 
-        <AuthNotice message={errorMessage} tone="error" />
+          {/* Title Section */}
+          <View className="text-right gap-stack-sm">
+            <Text className="text-on-background font-display-lg-mobile text-[28px] leading-[36px] font-bold text-right">إنشاء حساب جديد</Text>
+            <Text className="text-on-surface-variant font-body-md text-[16px] leading-[24px] text-right">اختر نوع حسابك وأكمل بياناتك</Text>
+          </View>
 
-        {/* ── Monochrome Block CTA ── */}
-        <Pressable
-          accessibilityLabel="إنشاء الحساب"
-          accessibilityRole="button"
-          className="mt-3 h-14 w-full items-center justify-center rounded-md bg-[#111111] active:opacity-90 dark:bg-[#E0E0E0]"
-          disabled={isSubmitting}
-          onPress={() => void onSubmit()}
-          style={isSubmitting ? { opacity: 0.5 } : undefined}
-        >
-          {isSubmitting ? (
-            <ActivityIndicator color="#FFFFFF" />
-          ) : (
-            <Text className="font-sans text-base font-bold text-white dark:text-[#111111]">
-              إنشاء الحساب
-            </Text>
-          )}
-        </Pressable>
+          {/* Account Type Selector */}
+          <CustomRoleSelector onChange={setRole} value={selectedRole} />
 
-        {/* ── Kinetic Staggered Link ── */}
-        <View className="mt-2 flex-row items-center justify-center gap-2">
-          <Text className="font-sans text-sm text-[#C0C0C0] dark:text-[#555555]">لديك حساب؟</Text>
-          <AuthTextButton onPress={() => router.replace('/login' as Href)}>
-            تسجيل الدخول
-          </AuthTextButton>
+          {/* Form Card */}
+          <View className="bg-surface-container-lowest rounded-[16px] p-6 shadow-[0px_4px_20px_rgba(0,0,0,0.04)] flex-col gap-stack-md">
+            
+            <Controller
+              control={control}
+              name="fullName"
+              render={({ field: { onBlur, onChange, value } }) => (
+                <ArchInput
+                  autoComplete="name"
+                  error={errors.fullName?.message}
+                  label="الاسم الكامل"
+                  onBlur={onBlur}
+                  onChangeText={onChange}
+                  placeholder="الاسم الكامل"
+                  value={value}
+                />
+              )}
+            />
+
+            <Controller
+              control={control}
+              name="phone"
+              render={({ field: { onBlur, onChange, value } }) => (
+                <View className="mt-4">
+                  <ArchInput
+                    autoComplete="tel"
+                    error={errors.phone?.message}
+                    inputMode="tel"
+                    keyboardType="phone-pad"
+                    label="رقم الجوال"
+                    onBlur={onBlur}
+                    onChangeText={onChange}
+                    placeholder="+966 5X XXX XXXX"
+                    value={value ?? ''}
+                  />
+                </View>
+              )}
+            />
+
+            <Controller
+              control={control}
+              name="email"
+              render={({ field: { onBlur, onChange, value } }) => (
+                <View className="mt-4">
+                  <ArchInput
+                    autoCapitalize="none"
+                    autoComplete="email"
+                    error={errors.email?.message}
+                    inputMode="email"
+                    keyboardType="email-address"
+                    label="البريد الإلكتروني"
+                    onBlur={onBlur}
+                    onChangeText={onChange}
+                    placeholder="example@email.com"
+                    value={value}
+                  />
+                </View>
+              )}
+            />
+
+            <Controller
+              control={control}
+              name="password"
+              render={({ field: { onBlur, onChange, value } }) => (
+                <View className="mt-4">
+                  <ArchInput
+                    autoCapitalize="none"
+                    autoComplete="new-password"
+                    error={errors.password?.message}
+                    label="كلمة المرور"
+                    onBlur={onBlur}
+                    onChangeText={onChange}
+                    placeholder="*********"
+                    secureTextEntry={!passwordVisible}
+                    trailing={
+                      <Pressable 
+                        className="p-2"
+                        onPress={() => setPasswordVisible((current) => !current)}
+                      >
+                        <MaterialIcons 
+                          name={passwordVisible ? "visibility" : "visibility-off"} 
+                          size={20} 
+                          color="#6d7a77" 
+                        />
+                      </Pressable>
+                    }
+                    value={value}
+                  />
+                  <PasswordMeter score={passwordScore} />
+                </View>
+              )}
+            />
+
+            {selectedRole === 'merchant' ? (
+              <View className="flex-col gap-4 border-t border-black/5 mt-4 pt-4 dark:border-white/5">
+                <Controller
+                  control={control}
+                  name="merchantName"
+                  render={({ field: { onBlur, onChange, value } }) => (
+                    <ArchInput
+                      error={errors.merchantName?.message}
+                      label="اسم المنشأة"
+                      onBlur={onBlur}
+                      onChangeText={onChange}
+                      placeholder="أدخل اسم المنشأة"
+                      value={value ?? ''}
+                    />
+                  )}
+                />
+                <Controller
+                  control={control}
+                  name="region"
+                  render={({ field: { onBlur, onChange, value } }) => (
+                    <ArchInput
+                      error={errors.region?.message}
+                      label="المنطقة"
+                      onBlur={onBlur}
+                      onChangeText={onChange}
+                      placeholder="مثال: الرياض"
+                      value={value ?? ''}
+                    />
+                  )}
+                />
+              </View>
+            ) : null}
+
+            <AuthNotice message={errorMessage} tone="error" />
+
+            {/* Primary Button */}
+            <Pressable
+              disabled={isSubmitting}
+              onPress={() => void onSubmit()}
+              className={`w-full h-12 bg-primary rounded-[14px] shadow-[0px_4px_20px_rgba(0,104,95,0.2)] flex items-center justify-center mt-6 active:scale-95 transition-all ${isSubmitting ? 'opacity-70' : ''}`}
+            >
+              {isSubmitting ? (
+                <ActivityIndicator color="#ffffff" />
+              ) : (
+                <Text className="text-on-primary font-button-text text-[16px] leading-[16px] font-bold">إنشاء الحساب</Text>
+              )}
+            </Pressable>
+
+          </View>
+
+          {/* Footer Links */}
+          <View className="flex-row-reverse items-center justify-center gap-2 mt-4">
+            <Text className="text-on-surface-variant font-body-md text-[14px] leading-[20px]">لديك حساب بالفعل؟</Text>
+            <Pressable onPress={() => router.replace('/login' as Href)}>
+              <Text className="text-primary font-bold text-[14px] leading-[20px]">تسجيل الدخول</Text>
+            </Pressable>
+          </View>
+
         </View>
       </View>
-    </AuthScreen>
     </AuthPublicGate>
-  );
-}
-
-/* ─────────────── Password Meter ─────────────── */
-
-function PasswordMeter({ score }: { score: number }) {
-  const label = score >= 4 ? 'قوية' : score >= 2 ? 'متوسطة' : 'ضعيفة';
-
-  return (
-    <View className="gap-2">
-      <View className="flex-row gap-2">
-        {[1, 2, 3, 4].map((step) => (
-          <View
-            className={`h-1 flex-1 ${step <= score ? 'bg-[#111111] dark:bg-[#E0E0E0]' : 'bg-[#E5E5E5] dark:bg-[#2A2A2A]'}`}
-            key={step}
-          />
-        ))}
-      </View>
-      <Text className="font-sans text-right text-xs font-medium text-[#8A8A8A] dark:text-[#A0A0A0]">قوة كلمة المرور: {label}</Text>
-    </View>
   );
 }

@@ -1,10 +1,10 @@
-import { View } from 'react-native';
-import { Feather } from '@expo/vector-icons';
+import { View, Pressable } from 'react-native';
+import { MaterialIcons } from '@expo/vector-icons';
 
 import type { Branch } from '@/features/branches/types';
-import { AnimatedPressable } from '@/shared/components/AnimatedPressable';
 
 import { AppText as Text } from '@/shared/components/AppText';
+
 interface BranchCardProps {
   branch: Branch;
   onPress?: () => void;
@@ -12,41 +12,53 @@ interface BranchCardProps {
 }
 
 export function BranchCard({ branch, onPress, selected }: BranchCardProps) {
-  const containerCls = [
-    'rounded-lg border p-5 shadow-sm shadow-brand-700/10 bg-card dark:bg-dark-card dark:shadow-none',
-    selected
-      ? 'border-brand-500 bg-brand-50/60 dark:border-dark-brand-500 dark:bg-dark-brand-50/60'
-      : 'border-line dark:border-dark-line',
-  ].join(' ');
-
   return (
-    <AnimatedPressable
+    <Pressable
       accessibilityLabel={branch.name}
       accessibilityRole="button"
-      className={containerCls}
+      className="relative block"
       onPress={onPress}
     >
-      <View className="flex-row-reverse items-start justify-between gap-4">
-        <View className="flex-1 items-end">
-          <View className="mb-3 h-10 w-10 items-center justify-center rounded-lg bg-amber-50 dark:bg-amber-950/20">
-            <Feather name="map-pin" size={18} color="#D97706" />
-          </View>
-          <Text className="font-sans text-base font-bold text-ink text-right dark:text-dark-ink">{branch.name}</Text>
-          <Text className="font-sans mt-0.5 text-sm text-muted text-right dark:text-dark-muted">{branch.city}</Text>
-          <Text className="font-sans mt-0.5 text-sm text-muted text-right dark:text-dark-muted">{branch.address}</Text>
-          {branch.workingHours ? (
-            <Text className="font-sans mt-2 text-xs text-muted text-right dark:text-dark-muted">ساعات العمل: {branch.workingHours}</Text>
-          ) : null}
-          {branch.phone ? (
-            <Text className="font-sans mt-1 text-xs text-muted text-right dark:text-dark-muted">الهاتف: {branch.phone}</Text>
-          ) : null}
-        </View>
+      <View className={`bg-surface-container-lowest rounded-[16px] p-4 shadow-[0px_4px_20px_rgba(0,0,0,0.04)] border flex-row-reverse items-start gap-4 transition-all duration-200 ${
+        selected ? 'border-primary bg-[#F4FFFC]' : 'border-transparent'
+      }`}>
         {selected && (
-          <View className="h-6 w-6 items-center justify-center rounded-lg bg-brand-500 shadow-sm shadow-brand-700/10 dark:bg-dark-brand-500">
-            <Text className="font-sans text-xs font-bold text-white dark:text-brand-700">✓</Text>
-          </View>
+          <View className="absolute right-0 top-1/2 -translate-y-1/2 w-[4px] h-3/4 bg-primary rounded-l-full" />
         )}
+        
+        <View className={`w-12 h-12 rounded-full flex items-center justify-center shrink-0 ${
+          selected ? 'bg-primary-container/20' : 'bg-surface-container-highest'
+        }`}>
+          <MaterialIcons name="storefront" size={24} color={selected ? "#00685f" : "#3d4947"} />
+        </View>
+
+        <View className="flex-1">
+          <View className="flex-row-reverse justify-between items-start mb-1">
+            <Text className="font-button-text text-[16px] leading-[16px] font-bold text-on-background text-right">{branch.name}</Text>
+            <View className="flex-row-reverse items-center gap-1 bg-surface-container rounded-full px-2 py-0.5">
+              <Text className="font-label-sm text-[11px] text-on-surface-variant">4.8</Text>
+              <MaterialIcons name="star" size={12} color="#fbbf24" />
+            </View>
+          </View>
+          <Text className="font-body-md text-[14px] leading-[24px] text-on-surface-variant mb-2 text-right">{branch.address}</Text>
+          <View className="flex-row-reverse items-center gap-4 text-on-surface-variant">
+            <View className="flex-row-reverse items-center gap-1">
+              <MaterialIcons name="location-on" size={14} color="#3d4947" />
+              <Text className="font-label-sm text-[12px] leading-[18px] text-on-surface-variant">2.5 كم</Text>
+            </View>
+            <View className="flex-row-reverse items-center gap-1">
+              <MaterialIcons name="schedule" size={14} color="#3d4947" />
+              <Text className="font-label-sm text-[12px] leading-[18px] text-on-surface-variant">مفتوح الآن</Text>
+            </View>
+          </View>
+        </View>
+
+        <View className={`w-5 h-5 rounded-full border-2 flex items-center justify-center shrink-0 mt-1 transition-colors ${
+          selected ? 'border-primary bg-primary' : 'border-outline'
+        }`}>
+          {selected && <MaterialIcons name="check" size={12} color="white" />}
+        </View>
       </View>
-    </AnimatedPressable>
+    </Pressable>
   );
 }

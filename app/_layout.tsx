@@ -58,7 +58,6 @@ export function ErrorBoundary({ error, retry }: ErrorBoundaryProps) {
 
 export default function RootLayout() {
   const hydrateSession = useAuthStore((state) => state.hydrateSession);
-  const resolved = useThemeStore((s: { resolved: 'light' | 'dark' }) => s.resolved);
   const [fontsLoaded, fontError] = useFonts(appFontMap);
 
   useAuthSessionListener();
@@ -87,7 +86,7 @@ export default function RootLayout() {
         <QueryClientProvider client={queryClient}>
           <SafeAreaProvider>
             <ReactErrorBoundary>
-              <StatusBar style={resolved === 'dark' ? 'light' : 'dark'} />
+              <StatusBar style="dark" />
               {canRenderApp ? <Stack screenOptions={{ headerShown: false }} /> : null}
               <OfflineBanner />
             </ReactErrorBoundary>

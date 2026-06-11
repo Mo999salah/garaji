@@ -9,7 +9,7 @@ import { z } from 'zod';
 import { AppText as Text } from '@/shared/components/AppText';
 import { requestPasswordReset } from '@/features/auth/services/supabaseAuthService';
 import { AuthPublicGate } from '@/features/auth/components/AuthPublicGate';
-import { AuthNotice, AuthScreen, AuthTextButton } from '@/features/auth/components/AuthScreen';
+import { AuthNotice } from '@/features/auth/components/AuthScreen';
 
 const forgotPasswordSchema = z.object({
   email: z.string().trim().email('أدخل بريداً إلكترونياً صحيحاً.'),
@@ -21,6 +21,7 @@ export default function ForgotPasswordScreen() {
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const [emailFocused, setEmailFocused] = useState(false);
+  
   const {
     control,
     handleSubmit,
@@ -44,81 +45,89 @@ export default function ForgotPasswordScreen() {
 
   return (
     <AuthPublicGate>
-    <AuthScreen
-      footer="بعد فتح الرابط من البريد، اختر كلمة مرور جديدة ثم عد إلى تسجيل الدخول."
-      subtitle="أدخل بريد الحساب وسنرسل رابطاً آمناً لإعادة التعيين."
-      title={'إعادة\nتعيين.'}
-    >
-      <View className="gap-6">
-        {/* ── Email Architectural Line ── */}
-        <Controller
-          control={control}
-          name="email"
-          render={({ field: { onBlur, onChange, value } }) => (
-            <View className="gap-1.5">
-              <Text className="font-sans text-right text-xs font-semibold text-[#8A8A8A] dark:text-[#A0A0A0]">
-                البريد الإلكتروني
-              </Text>
-              <TextInput
-                autoCapitalize="none"
-                autoComplete="email"
-                inputMode="email"
-                keyboardType="email-address"
-                className={`font-sans min-h-12 border-b text-base text-[#111111] dark:text-[#F5F5F5] ${
-                  errors.email
-                    ? 'border-red-400'
-                    : emailFocused
-                      ? 'border-[#111111] dark:border-[#E0E0E0]'
-                      : 'border-black/10 dark:border-white/10'
-                }`}
-                onBlur={() => {
-                  setEmailFocused(false);
-                  onBlur();
-                }}
-                onFocus={() => setEmailFocused(true)}
-                onChangeText={onChange}
-                placeholder="name@example.com"
-                placeholderTextColor="#C0C0C0"
-                style={{ fontFamily: 'Tajawal_400Regular' }}
-                textAlign="right"
-                value={value}
-              />
-              {errors.email?.message ? (
-                <Text className="font-sans text-right text-xs text-red-500">{errors.email.message}</Text>
-              ) : null}
+      <View className="bg-background min-h-screen flex-1 flex-col items-center justify-center px-margin-mobile">
+        {/* Container */}
+        <View className="w-full max-w-md flex-col gap-stack-lg">
+          
+          {/* Brand Mark */}
+          <View className="flex-col items-center justify-center gap-stack-sm mt-stack-lg">
+            <View className="w-16 h-16 bg-primary rounded-2xl flex items-center justify-center shadow-[0px_4px_20px_rgba(0,0,0,0.04)]">
+              <Text className="text-on-primary font-display-lg text-[32px] leading-[40px] font-bold">ك</Text>
             </View>
-          )}
-        />
+            <Text className="text-on-surface font-title-md text-[20px] leading-[28px] font-bold">كراجي</Text>
+          </View>
 
-        <AuthNotice message={successMessage} tone="success" />
-        <AuthNotice message={errorMessage} tone="error" />
+          {/* Page Title Section */}
+          <View className="flex-col gap-stack-sm text-right">
+            <Text className="text-on-surface font-display-lg-mobile text-[28px] leading-[36px] font-extrabold tracking-tight text-right">إعادة تعيين كلمة المرور</Text>
+            <Text className="text-tertiary-container font-body-md text-[16px] leading-[24px] text-right">أدخل بريدك الإلكتروني وسنرسل لك رابط إعادة التعيين</Text>
+          </View>
 
-        {/* ── Monochrome Block CTA ── */}
-        <Pressable
-          accessibilityLabel="إرسال رابط إعادة التعيين"
-          accessibilityRole="button"
-          className="mt-2 h-14 w-full items-center justify-center rounded-md bg-[#111111] active:opacity-90 dark:bg-[#E0E0E0]"
-          disabled={isSubmitting}
-          onPress={() => void onSubmit()}
-          style={isSubmitting ? { opacity: 0.5 } : undefined}
-        >
-          {isSubmitting ? (
-            <ActivityIndicator color="#FFFFFF" />
-          ) : (
-            <Text className="font-sans text-base font-bold text-white dark:text-[#111111]">
-              إرسال رابط إعادة التعيين
-            </Text>
-          )}
-        </Pressable>
+          {/* Form Area (Card) */}
+          <View className="bg-surface-container-lowest rounded-2xl p-6 shadow-[0px_4px_20px_rgba(0,0,0,0.04)] w-full flex-col gap-stack-md">
+            
+            <Controller
+              control={control}
+              name="email"
+              render={({ field: { onBlur, onChange, value } }) => (
+                <View className="flex-col gap-2">
+                  <Text className="text-on-surface font-label-sm text-[13px] leading-[18px] text-right block font-bold">البريد الإلكتروني</Text>
+                  <TextInput
+                    autoCapitalize="none"
+                    autoComplete="email"
+                    inputMode="email"
+                    keyboardType="email-address"
+                    className={`w-full h-12 rounded-[14px] px-4 font-body-md text-[16px] leading-[24px] text-on-surface text-right ${
+                      errors.email ? 'border border-error' :
+                      emailFocused ? 'bg-surface-container-lowest border border-primary' : 'bg-surface-container-low border-none'
+                    }`}
+                    onBlur={() => {
+                      setEmailFocused(false);
+                      onBlur();
+                    }}
+                    onFocus={() => setEmailFocused(true)}
+                    onChangeText={onChange}
+                    placeholder="example@email.com"
+                    placeholderTextColor="#bcc9c6"
+                    style={{ fontFamily: 'Tajawal_400Regular' }}
+                    value={value}
+                  />
+                  {errors.email?.message ? (
+                    <Text className="font-label-sm text-[13px] leading-[18px] text-error text-right">{errors.email.message}</Text>
+                  ) : null}
+                </View>
+              )}
+            />
 
-        {/* ── Kinetic Link ── */}
-        <View className="mt-2 items-center">
-          <AuthTextButton onPress={() => router.replace('/login' as Href)}>
-            العودة لتسجيل الدخول
-          </AuthTextButton>
+            <View className="mt-2">
+              <AuthNotice message={successMessage} tone="success" />
+              <AuthNotice message={errorMessage} tone="error" />
+            </View>
+
+            {/* Action Button */}
+            <Pressable
+              disabled={isSubmitting}
+              onPress={() => void onSubmit()}
+              className={`w-full h-12 bg-primary rounded-[14px] flex items-center justify-center mt-stack-sm active:scale-95 transition-transform duration-200 shadow-[0px_4px_20px_rgba(0,104,95,0.2)] ${isSubmitting ? 'opacity-70' : ''}`}
+            >
+              {isSubmitting ? (
+                <ActivityIndicator color="#ffffff" />
+              ) : (
+                <Text className="text-on-primary font-button-text text-[16px] leading-[16px] font-bold">إرسال رابط إعادة التعيين</Text>
+              )}
+            </Pressable>
+
+          </View>
+
+          {/* Footer Link */}
+          <View className="flex-row items-center justify-center mt-stack-md pb-stack-lg">
+            <Pressable onPress={() => router.replace('/login' as Href)} className="active:opacity-80 transition-opacity">
+              <Text className="text-primary font-button-text text-[16px] leading-[16px] font-bold">العودة لتسجيل الدخول</Text>
+            </Pressable>
+          </View>
+
         </View>
       </View>
-    </AuthScreen>
     </AuthPublicGate>
   );
 }

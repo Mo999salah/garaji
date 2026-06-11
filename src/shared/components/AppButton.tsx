@@ -16,16 +16,16 @@ interface AppButtonProps extends PropsWithChildren {
 
 const variants = {
   primary:
-    "bg-brand-600 border-brand-600 shadow-tactile-sm dark:bg-brand-600 dark:border-brand-600",
+    "bg-primary border-primary shadow-[0px_8px_30px_rgba(0,104,95,0.08)]",
   secondary:
-    "bg-white border-line shadow-tactile-sm dark:bg-dark-card dark:border-dark-line",
+    "bg-surface-container-lowest border-surface-container-high shadow-sm",
   ghost: "bg-transparent border-transparent",
 };
 
 const textVariants = {
-  primary: "text-white font-bold dark:text-white",
-  secondary: "text-ink font-semibold dark:text-dark-ink",
-  ghost: "text-brand-700 font-bold dark:text-dark-brand-500",
+  primary: "text-on-primary font-bold",
+  secondary: "text-on-surface font-semibold",
+  ghost: "text-primary font-bold",
 };
 
 export function AppButton({
@@ -40,19 +40,16 @@ export function AppButton({
   const handlePress = () => {
     if (disabled || loading) return;
 
-    // Provide a physical mechanical feedback click feel
     try {
       void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-    } catch {
-      // Fail-safe for platforms/devices without physical haptic motors
-    }
+    } catch {}
 
     onPress();
   };
 
   return (
     <View
-      className={`overflow-hidden rounded-full border ${variants[variant]} ${
+      className={`overflow-hidden rounded-[14px] border ${variants[variant]} ${
         disabled || loading ? "opacity-50" : ""
       } ${className}`}
     >
@@ -65,9 +62,9 @@ export function AppButton({
         className="min-h-12 items-center justify-center px-5"
       >
         {loading ? (
-          <ActivityIndicator color={variant === "primary" ? "#FFFFFF" : "#0284C7"} />
+          <ActivityIndicator color={variant === "primary" ? "#ffffff" : "#00685f"} />
         ) : (
-          <Text className={`font-sans text-base ${textVariants[variant]}`}>
+          <Text className={`font-button-text text-[16px] leading-[16px] ${textVariants[variant]}`}>
             {children}
           </Text>
         )}

@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useId } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 
 import { isSupabaseConfigured, supabase } from '@/shared/lib/supabase';
@@ -30,6 +30,7 @@ export function useRequestRealtimeListener({
   enabled = true,
 }: UseRequestRealtimeListenerOptions = {}) {
   const queryClient = useQueryClient();
+  const hookId = useId();
 
   useEffect(() => {
     if (!enabled || !isSupabaseConfigured || !supabase) {
@@ -54,6 +55,7 @@ export function useRequestRealtimeListener({
         requestId ? `request-${requestId}` : null,
         !requestId && customerId ? `customer-${customerId}` : null,
         !requestId && !customerId ? 'all' : null,
+        hookId, // Add unique hook ID to prevent channel collisions
       ]
         .filter(Boolean)
         .join(':');
@@ -90,7 +92,7 @@ export function useRequestRealtimeListener({
       isMounted = false;
 
       if (channel) {
-        void channel.unsubscribe();
+        void supabase.removeChannel(channel);
       }
     };
   }, [customerId, enabled, queryClient, requestId]);

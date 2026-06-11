@@ -1,12 +1,12 @@
 import { router, useLocalSearchParams } from 'expo-router';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { Alert, ScrollView, View } from 'react-native';
+import { Alert, ScrollView, View, Pressable, Linking } from 'react-native';
+import { MaterialIcons, FontAwesome } from '@expo/vector-icons';
 
 import { RoleGate } from '@/features/auth/components/RoleGate';
 import { useAuthStore } from '@/features/auth/store/useAuthStore';
 import { useAllBranchesQuery } from '@/features/branches/hooks/useBranchesQuery';
 import { RequestOperationsPanel } from '@/features/operations/components/RequestOperationsPanel';
-import { RequestStatusBadge } from '@/features/requests/components/RequestStatusBadge';
 import { RequestTimeline } from '@/features/requests/components/RequestTimeline';
 import { useRequestByIdQuery } from '@/features/requests/hooks/useRequestsQuery';
 import { useRequestRealtimeListener } from '@/features/requests/hooks/useRequestRealtimeListener';
@@ -21,11 +21,8 @@ import type { ServiceRequestStatus } from '@/features/requests/types';
 import { useAllServicesQuery } from '@/features/services/hooks/useServicesQuery';
 import { useCustomerVehiclesQuery } from '@/features/vehicles/hooks/useVehiclesQuery';
 import { AppButton } from '@/shared/components/AppButton';
-import { AppCard } from '@/shared/components/AppCard';
 import { EmptyState } from '@/shared/components/EmptyState';
 import { LoadingSpinner } from '@/shared/components/LoadingSpinner';
-import { SectionHeader } from '@/shared/components/OperationalUI';
-import { ScreenContainer } from '@/shared/components/ScreenContainer';
 
 import { AppText as Text } from '@/shared/components/AppText';
 
@@ -73,20 +70,24 @@ function OrderDetailsScreen() {
 
   if (isRequestLoading && !request) {
     return (
-      <ScreenContainer scroll={false}>
+      <View className="flex-1 bg-background justify-center">
         <LoadingSpinner label="جارٍ تحميل تفاصيل الطلب..." />
-      </ScreenContainer>
+      </View>
     );
   }
 
   if (!request) {
     return (
-      <ScreenContainer>
-        <EmptyState message="تعذّر إيجاد هذا الطلب." title="الطلب غير موجود" />
-        <View className="mt-4">
-          <AppButton onPress={() => router.back()}>رجوع</AppButton>
+      <View className="flex-1 bg-background">
+        <View className="bg-surface shadow-[0px_4px_20px_rgba(0,0,0,0.04)] flex-row-reverse justify-between items-center px-margin-mobile py-4 sticky top-0 z-50">
+          <Pressable onPress={() => router.back()} className="flex-none active:scale-95 w-8 items-end">
+            <MaterialIcons name="arrow-forward" size={24} color="#00685f" />
+          </Pressable>
+          <Text className="font-title-md text-[20px] leading-[28px] text-primary flex-1 text-center font-bold">تفاصيل الطلب</Text>
+          <View className="flex-none w-8" />
         </View>
-      </ScreenContainer>
+        <EmptyState message="تعذّر إيجاد هذا الطلب." title="الطلب غير موجود" />
+      </View>
     );
   }
 
@@ -98,18 +99,21 @@ function OrderDetailsScreen() {
     ? `${vehicle.make} ${vehicle.model} ${vehicle.year}`
     : isVehiclesLoading
       ? 'جارٍ تحميل بيانات السيارة...'
-      : undefined;
+      : 'مركبة غير محددة';
   const serviceName =
-    service?.name ?? (isServicesLoading ? 'جارٍ تحميل بيانات الخدمة...' : undefined);
+    service?.name ?? (isServicesLoading ? 'جارٍ تحميل بيانات الخدمة...' : request.requestType === 'branch_appointment' ? 'خدمة فرع' : 'خدمة موقع');
   const branchName =
-    branch?.name ?? (isBranchesLoading ? 'جارٍ تحميل بيانات الفرع...' : undefined);
+    branch?.name ?? (isBranchesLoading ? 'جارٍ تحميل بيانات الفرع...' : 'فرع غير محدد');
 
-  const typeLabel =
-    request.requestType === 'branch_appointment' ? 'حجز فرع' : 'خدمة بالموقع';
   const scheduledDate = new Date(request.scheduledAt).toLocaleString('ar-SA', {
-    dateStyle: 'medium',
-    timeStyle: 'short',
+    month: 'long',
+    day: 'numeric',
+    year: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
+    hour12: true,
   });
+
   const priceLabel =
     request.finalPrice !== undefined || request.estimatedPrice !== undefined
       ? `${request.finalPrice ?? request.estimatedPrice} ر.س`
@@ -154,46 +158,75 @@ function OrderDetailsScreen() {
     ]);
   };
 
-  return (
-    <ScreenContainer scroll={false}>
-      <ScrollView contentContainerClassName="gap-4 px-5 py-5">
-        <View className="rounded-2xl border border-line bg-card p-5 dark:border-dark-line dark:bg-dark-card">
-          <View className="flex-row-reverse items-start justify-between gap-3">
-            <View className="flex-1 items-end gap-1">
-              <Text className="font-sans text-right text-2xl font-black text-ink dark:text-dark-ink">
-                {typeLabel}
-              </Text>
-              <Text className="font-sans text-right text-xs font-medium text-muted dark:text-dark-muted">
-                رقم الطلب {request.id.slice(0, 8)}
-              </Text>
-            </View>
-            <RequestStatusBadge status={request.status} />
-          </View>
+  const shortId = request.id.slice(0, 4).toUpperCase();
 
-          <View className="mt-5 flex-row-reverse gap-3">
-            <View className="flex-1 rounded-lg border border-line bg-surface-soft p-3 dark:border-dark-line dark:bg-dark-surface">
-              <Text className="font-sans text-right text-xs font-bold text-muted dark:text-dark-muted">
-                الموعد
-              </Text>
-              <Text className="font-sans mt-1 text-right text-sm font-bold text-ink dark:text-dark-ink">
-                {scheduledDate}
-              </Text>
+  return (
+    <View className="flex-1 bg-background">
+      {/* Top App Bar */}
+      <View className="bg-surface shadow-[0px_4px_20px_rgba(0,0,0,0.04)] flex-row-reverse justify-between items-center px-margin-mobile py-4 sticky top-0 z-50">
+        <Pressable onPress={() => router.back()} className="flex-none active:scale-95 w-8 items-end">
+          <MaterialIcons name="arrow-forward" size={24} color="#00685f" />
+        </Pressable>
+        <Text className="font-title-md text-[20px] leading-[28px] text-primary flex-1 text-center font-bold">تفاصيل الطلب</Text>
+        <View className="flex-none w-8" />
+      </View>
+
+      <ScrollView contentContainerClassName="px-margin-mobile py-stack-md flex-col gap-stack-lg pb-32" showsVerticalScrollIndicator={false}>
+        {/* Status Header Card */}
+        <View className="bg-surface-container-lowest rounded-[20px] shadow-[0px_4px_20px_rgba(0,0,0,0.04)] p-6 text-center flex-col items-center justify-center gap-2">
+          <View className="bg-primary-container/20 px-6 py-2 rounded-full">
+            <Text className="text-primary-container font-title-md text-[20px] leading-[28px] font-bold text-center">
+              {STATUS_LABELS[request.status]}
+            </Text>
+          </View>
+          <Text className="text-on-surface-variant font-body-md text-[16px] leading-[24px] opacity-80 mt-1">الطلب #{shortId}</Text>
+        </View>
+
+        {/* Status Timeline */}
+        <RequestTimeline currentStatus={request.status} events={request.events} />
+
+        {/* Details Card */}
+        <View className="bg-surface-container-lowest rounded-[20px] shadow-[0px_4px_20px_rgba(0,0,0,0.04)] overflow-hidden">
+          <DetailRow label="المركبة" value={vehicleName} />
+          <DetailRow label="الخدمة" value={serviceName} />
+          <DetailRow 
+            label={request.requestType === 'branch_appointment' ? 'الفرع' : 'الموقع'} 
+            value={request.requestType === 'branch_appointment' ? branchName : (request.locationCity ? `${request.locationCity} - ${request.locationAddress || ''}` : 'موقع غير محدد')} 
+          />
+          <View className="px-6 py-4 flex-row-reverse justify-between items-center border-b border-surface-variant/50">
+            <Text className="text-on-surface-variant text-label-sm font-label-sm text-[13px] leading-[18px]">التاريخ</Text>
+            <Text className="text-on-surface font-body-md text-[16px] leading-[24px] font-bold text-left" style={{ textAlign: 'left' }}>{scheduledDate}</Text>
+          </View>
+          <View className="px-6 py-4 flex-row-reverse justify-between items-center bg-surface-container-low/30">
+            <Text className="text-on-surface-variant text-label-sm font-label-sm text-[13px] leading-[18px]">التكلفة الإجمالية</Text>
+            <Text className="text-primary font-title-md text-[20px] leading-[28px] font-bold">{priceLabel}</Text>
+          </View>
+        </View>
+
+        {/* Technician Section */}
+        <View className="bg-surface-container-lowest rounded-[20px] shadow-[0px_4px_20px_rgba(0,0,0,0.04)] p-6 mb-8">
+          <Text className="font-title-md text-[18px] leading-[28px] font-bold text-on-surface mb-4 text-right">الفني المسؤول</Text>
+          <View className="flex-row-reverse items-center justify-between">
+            <View className="flex-row-reverse items-center gap-3">
+              <View className="w-12 h-12 rounded-full bg-secondary-container flex items-center justify-center">
+                <MaterialIcons name="person" size={24} color="#63627a" />
+              </View>
+              <Text className="font-body-md text-[16px] leading-[24px] font-bold text-on-surface text-right">خالد سعد</Text>
             </View>
-            <View className="flex-1 rounded-lg border border-line bg-surface-soft p-3 dark:border-dark-line dark:bg-dark-surface">
-              <Text className="font-sans text-right text-xs font-bold text-muted dark:text-dark-muted">
-                القيمة
-              </Text>
-              <Text className="font-sans mt-1 text-right text-sm font-bold text-gold-600 dark:text-dark-gold-500">
-                {priceLabel}
-              </Text>
-            </View>
+            <Pressable 
+              onPress={() => Linking.openURL('whatsapp://send?text=مرحباً، لدي استفسار بخصوص طلبي&phone=+966500000000')}
+              className="h-10 px-4 rounded-xl border border-[#25D366] flex-row-reverse items-center gap-2 active:bg-[#25D366]/10"
+            >
+              <Text className="font-button-text text-[16px] leading-[16px] text-[#25D366]">واتساب</Text>
+              <FontAwesome name="whatsapp" size={20} color="#25D366" />
+            </Pressable>
           </View>
         </View>
 
         {isMerchant && !isTerminal(request.status) && nextStatuses.length > 0 ? (
-          <AppCard tone="elevated">
-            <SectionHeader subtitle="اختر الخطوة التالية للطلب." title="الإجراء المطلوب" />
-            <View className="mt-4 gap-2">
+          <View className="bg-surface-container-lowest rounded-[20px] shadow-[0px_4px_20px_rgba(0,0,0,0.04)] p-6 mb-4">
+            <Text className="font-title-md text-[18px] leading-[28px] font-bold text-on-surface mb-4 text-right">الإجراء المطلوب</Text>
+            <View className="gap-2">
               {nextStatuses.map((status) => (
                 <AppButton
                   key={status}
@@ -205,73 +238,37 @@ function OrderDetailsScreen() {
                 </AppButton>
               ))}
             </View>
-          </AppCard>
+          </View>
         ) : null}
 
         {showCustomerCancel ? (
-          <AppCard tone="elevated">
-            <SectionHeader
-              subtitle="يمكنك إلغاء الطلب قبل بدء التنفيذ."
-              title="إلغاء الطلب"
-            />
-            <View className="mt-4">
-              <AppButton
-                loading={cancelMutation.isPending}
-                onPress={handleCustomerCancel}
-                variant="ghost"
-              >
-                إلغاء الطلب
-              </AppButton>
-            </View>
-          </AppCard>
+          <View className="bg-surface-container-lowest rounded-[20px] shadow-[0px_4px_20px_rgba(0,0,0,0.04)] p-6 mb-4">
+            <AppButton
+              loading={cancelMutation.isPending}
+              onPress={handleCustomerCancel}
+              variant="secondary"
+            >
+              إلغاء الطلب
+            </AppButton>
+          </View>
         ) : null}
 
-        <AppCard tone="quiet">
-          <SectionHeader
-            subtitle={
-              isMerchant
-                ? 'كل البيانات اللازمة للتواصل والتنفيذ.'
-                : 'المعلومات الأساسية لتنفيذ الخدمة.'
-            }
-            title="تفاصيل الطلب"
-          />
-          <View className="mt-4 gap-3">
-            <DetailRow label="موعد الخدمة" value={scheduledDate} />
-            {vehicleName ? <DetailRow label="السيارة" value={vehicleName} /> : null}
-            {serviceName ? <DetailRow label="الخدمة" value={serviceName} /> : null}
-            {request.requestType === 'branch_appointment' && branchName ? (
-              <DetailRow label="الفرع" value={branchName} />
-            ) : null}
-            {request.locationCity ? (
-              <DetailRow
-                label="الموقع"
-                value={`${request.locationCity}${request.locationAddress ? ` — ${request.locationAddress}` : ''}`}
-              />
-            ) : null}
-            {request.notes ? <DetailRow label="ملاحظات" value={request.notes} /> : null}
-            {request.estimatedPrice !== undefined ? (
-              <DetailRow label="السعر التقديري" value={`${request.estimatedPrice} ر.س`} />
-            ) : null}
-            {request.finalPrice !== undefined ? (
-              <DetailRow label="السعر النهائي" value={`${request.finalPrice} ر.س`} />
-            ) : null}
-          </View>
-        </AppCard>
-
-        {request.events && request.events.length > 0 ? (
-          <View className="gap-2">
-            <SectionHeader title="سجل الحالات" />
-            <RequestTimeline currentStatus={request.status} events={request.events} />
+        {request.status === 'completed' && user?.role === 'customer' ? (
+          <View className="bg-surface-container-lowest rounded-[20px] shadow-[0px_4px_20px_rgba(0,0,0,0.04)] p-6 mb-4">
+            <Text className="font-title-md text-[18px] leading-[28px] font-bold text-on-surface mb-4 text-right">تقييم الخدمة</Text>
+            <AppButton
+              onPress={() => router.push({ pathname: '/rate-service', params: { id: request.id } })}
+              variant="primary"
+            >
+              قيّم الخدمة الآن
+            </AppButton>
           </View>
         ) : null}
 
         <RequestOperationsPanel mode={isMerchant ? 'merchant' : 'customer'} request={request} />
 
-        <AppButton onPress={() => router.back()} variant="secondary">
-          رجوع
-        </AppButton>
       </ScrollView>
-    </ScreenContainer>
+    </View>
   );
 }
 
@@ -285,11 +282,9 @@ export default function OrderDetailsRoute() {
 
 function DetailRow({ label, value }: { label: string; value: string }) {
   return (
-    <View className="flex-row justify-between gap-2">
-      <Text className="font-sans text-sm text-muted dark:text-dark-muted">{label}</Text>
-      <Text className="font-sans flex-1 text-right text-sm font-medium text-ink dark:text-dark-ink">
-        {value}
-      </Text>
+    <View className="px-6 py-4 flex-row-reverse justify-between items-center border-b border-surface-variant/50">
+      <Text className="text-on-surface-variant text-label-sm font-label-sm text-[13px] leading-[18px]">{label}</Text>
+      <Text className="text-on-surface font-body-md text-[16px] leading-[24px] font-bold text-right">{value}</Text>
     </View>
   );
 }

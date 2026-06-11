@@ -1,4 +1,5 @@
 import { router, useLocalSearchParams } from 'expo-router';
+import { Pressable, View } from 'react-native';
 
 import { RoleGate } from '@/features/auth/components/RoleGate';
 import { useAuthStore } from '@/features/auth/store/useAuthStore';
@@ -7,7 +8,6 @@ import { useCustomerVehiclesQuery } from '@/features/vehicles/hooks/useVehiclesQ
 import { useVehicleStore } from '@/features/vehicles/store/useVehicleStore';
 import { EmptyState } from '@/shared/components/EmptyState';
 import { LoadingSpinner } from '@/shared/components/LoadingSpinner';
-import { ScreenContainer } from '@/shared/components/ScreenContainer';
 import type { VehicleFormValues } from '@/features/vehicles/schemas/vehicleSchema';
 
 import { AppText as Text } from '@/shared/components/AppText';
@@ -21,17 +21,30 @@ function EditVehicleScreen() {
 
   if (isVehiclesLoading && !vehicle) {
     return (
-      <ScreenContainer>
+      <View className="flex-1 bg-background justify-center">
         <LoadingSpinner label="جارٍ تحميل بيانات المركبة..." />
-      </ScreenContainer>
+      </View>
     );
   }
 
   if (!vehicle) {
     return (
-      <ScreenContainer>
+      <View className="flex-1 bg-background">
+        {/* Top Navigation */}
+        <View className="flex-row-reverse items-center justify-between px-margin-mobile h-16 bg-surface-container-lowest z-50 shadow-[0px_1px_2px_rgba(0,0,0,0.05)]">
+          <View className="flex-1" />
+          <Text className="font-title-md text-[20px] leading-[28px] font-bold text-on-surface text-center flex-1">تعديل مركبة</Text>
+          <View className="flex-1 flex-row-reverse justify-end">
+            <Pressable 
+              onPress={() => router.back()}
+              className="px-2 py-1 rounded-md active:bg-surface-container-low"
+            >
+              <Text className="text-primary font-label-sm text-[13px] leading-[18px] font-bold">إلغاء</Text>
+            </Pressable>
+          </View>
+        </View>
         <EmptyState message="لم يتم العثور على المركبة." title="غير موجودة" />
-      </ScreenContainer>
+      </View>
     );
   }
 
@@ -41,8 +54,21 @@ function EditVehicleScreen() {
   };
 
   return (
-    <ScreenContainer scroll={false}>
-      <Text className="font-sans mb-4 px-4 text-2xl font-bold text-ink">تعديل بيانات السيارة</Text>
+    <View className="flex-1 bg-background">
+      {/* Top Navigation */}
+      <View className="flex-row-reverse items-center justify-between px-margin-mobile h-16 bg-surface-container-lowest z-50 shadow-[0px_1px_2px_rgba(0,0,0,0.05)]">
+        <View className="flex-1" />
+        <Text className="font-title-md text-[20px] leading-[28px] font-bold text-on-surface text-center flex-1">تعديل مركبة</Text>
+        <View className="flex-1 flex-row-reverse justify-end">
+          <Pressable 
+            onPress={() => router.back()}
+            className="px-2 py-1 rounded-md active:bg-surface-container-low"
+          >
+            <Text className="text-primary font-label-sm text-[13px] leading-[18px] font-bold">إلغاء</Text>
+          </Pressable>
+        </View>
+      </View>
+
       <VehicleForm
         initialValues={{
           make: vehicle.make,
@@ -57,7 +83,7 @@ function EditVehicleScreen() {
         onSubmit={handleSubmit}
         submitLabel="حفظ التغييرات"
       />
-    </ScreenContainer>
+    </View>
   );
 }
 

@@ -10,13 +10,17 @@ import Animated, {
 import { Feather } from "@expo/vector-icons";
 
 import { AppText as Text } from "@/shared/components/AppText";
+import { AppButton } from "@/shared/components/AppButton";
 
 interface EmptyStateProps {
   title: string;
   message: string;
+  iconName?: keyof typeof Feather.glyphMap;
+  ctaText?: string;
+  onCtaPress?: () => void;
 }
 
-function FloatingIcon() {
+function FloatingIcon({ iconName }: { iconName: keyof typeof Feather.glyphMap }) {
   const translateY = useSharedValue(0);
 
   useEffect(() => {
@@ -37,26 +41,32 @@ function FloatingIcon() {
   return (
     <Animated.View
       style={animStyle}
-      className="mb-5 h-14 w-14 items-center justify-center rounded-lg border border-brand-500/15 bg-brand-50 shadow-tactile-sm dark:border-dark-brand-500/20 dark:bg-dark-brand-50"
+      className="mb-5 h-16 w-16 items-center justify-center rounded-2xl bg-secondary-container"
     >
-      <Feather name="inbox" size={24} color="#0284C7" />
+      <Feather name={iconName} size={32} color="#00685f" />
     </Animated.View>
   );
 }
 
-export function EmptyState({ title, message }: EmptyStateProps) {
+export function EmptyState({ title, message, iconName = 'inbox', ctaText, onCtaPress }: EmptyStateProps) {
   return (
     <Animated.View
       entering={FadeInDown.duration(400).springify()}
-      className="items-center justify-center rounded-lg border border-dashed border-line bg-white p-8 shadow-tactile-sm dark:border-dark-line dark:bg-dark-card/30"
+      className="items-center justify-center rounded-[24px] border border-dashed border-outline-variant bg-surface-container-lowest p-8 shadow-soft"
     >
-      <FloatingIcon />
-      <Text className="font-sans text-center text-lg font-bold text-ink dark:text-dark-ink">
+      <FloatingIcon iconName={iconName} />
+      <Text className="font-sans text-center text-[20px] font-bold text-on-surface">
         {title}
       </Text>
-      <Text className="font-sans mt-2 text-center text-sm leading-5 text-muted dark:text-dark-muted">
+      <Text className="font-sans mt-2 text-center text-[16px] leading-6 text-on-surface-variant">
         {message}
       </Text>
+      
+      {ctaText && onCtaPress && (
+        <View className="mt-6 w-full max-w-[200px]">
+          <AppButton label={ctaText} onPress={onCtaPress} variant="primary" />
+        </View>
+      )}
     </Animated.View>
   );
 }

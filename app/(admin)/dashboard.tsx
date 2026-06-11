@@ -1,5 +1,6 @@
 import { router } from 'expo-router';
-import { View } from 'react-native';
+import { View, ScrollView, Pressable } from 'react-native';
+import { MaterialIcons } from '@expo/vector-icons';
 
 import { useAuthStore } from '@/features/auth/store/useAuthStore';
 import { RequestCard } from '@/features/requests/components/RequestCard';
@@ -9,24 +10,13 @@ import {
   selectByStatus,
   selectCompletedToday,
 } from '@/features/requests/selectors/requestSelectors';
-import { AppButton } from '@/shared/components/AppButton';
-import { AppCard } from '@/shared/components/AppCard';
+import { AppText as Text } from '@/shared/components/AppText';
 import { EmptyState } from '@/shared/components/EmptyState';
-import {
-  CommandHeader,
-  MetricTile,
-  QuickActionTile,
-  SectionHeader,
-} from '@/shared/components/OperationalUI';
-import { ScreenContainer } from '@/shared/components/ScreenContainer';
-import { ThemeToggle } from '@/shared/components/ThemeToggle';
-import { useScreenRefresh } from '@/shared/hooks/useScreenRefresh';
 
 export default function AdminDashboardScreen() {
   const { signOut, user } = useAuthStore();
   const requestsQuery = useAllRequestsQuery();
   const { data: requests = [] } = requestsQuery;
-  const refreshControl = useScreenRefresh(requestsQuery.refetch);
 
   const active = selectActiveRequests(requests);
   const pending = selectByStatus(requests, 'pending');
@@ -42,96 +32,107 @@ export default function AdminDashboardScreen() {
   };
 
   return (
-    <ScreenContainer refreshControl={refreshControl}>
-      <View className="gap-5">
-        <CommandHeader
-          eyebrow="مركز الإدارة"
-          subtitle="ابدأ بالطلبات التي تحتاج قراراً، ثم تابع التنفيذ والخدمات."
-          title={user?.fullName ?? 'لوحة التشغيل'}
-        >
-          <View className="flex-row-reverse gap-2">
-            <View className="flex-1">
-              <AppButton onPress={() => router.push('/(admin)/manage-orders')}>
-                مراجعة الطلبات
-              </AppButton>
-            </View>
-            <ThemeToggle />
-            <AppButton className="min-h-12 px-3" onPress={handleSignOut} variant="secondary">
-              خروج
-            </AppButton>
-          </View>
-        </CommandHeader>
+    <View className="flex-1 bg-[#F7F7F8] pb-24 relative">
+      {/* TopAppBar Semantic Shell Substitute */}
+      <View className="flex-row-reverse justify-between items-center px-margin-mobile pt-8 pb-4 w-full z-40 bg-surface shadow-sm sticky top-0">
+        <View className="flex-row-reverse items-center gap-3">
+          <Pressable onPress={handleSignOut} className="w-10 h-10 rounded-full bg-surface-container-high flex items-center justify-center overflow-hidden active:scale-95 transition-transform">
+            <MaterialIcons name="logout" size={20} color="#6d7a77" />
+          </Pressable>
+        </View>
+        <View className="items-end">
+          <Text className="text-[14px] text-[#6B7280] font-body-md leading-tight text-right">مركز الخدمة</Text>
+          <Text className="font-title-md text-[20px] text-[#1A1A2E] text-right font-bold">{user?.fullName ?? 'مركز الصيانة المتقدم'}</Text>
+        </View>
+      </View>
 
-        <View className="flex-row-reverse flex-wrap gap-3">
-          <MetricTile label="تحتاج إجراء" tone="gold" value={String(needsAction)} />
-          <MetricTile label="قيد التنفيذ" value={String(inProgress.length)} />
-          <MetricTile label="مكتملة اليوم" tone="muted" value={String(completedToday.length)} />
-          <MetricTile label="نشطة" value={String(active.length)} />
+      <ScrollView className="flex-1 px-margin-mobile pt-stack-md space-y-stack-lg" showsVerticalScrollIndicator={false}>
+        
+        {/* Metrics Grid */}
+        <View className="grid flex-row-reverse flex-wrap gap-gutter mb-stack-lg">
+          {/* Top Right */}
+          <View className="bg-white rounded-2xl p-4 shadow-[0px_4px_20px_rgba(0,0,0,0.04)] flex-col items-center justify-center text-center flex-1 min-w-[45%]">
+            <Text className="text-[32px] leading-[40px] font-bold text-[#F59E0B]">{needsAction}</Text>
+            <Text className="text-[14px] font-body-md text-[#6B7280] mt-1">تحتاج إجراء</Text>
+          </View>
+          {/* Top Left */}
+          <View className="bg-white rounded-2xl p-4 shadow-[0px_4px_20px_rgba(0,0,0,0.04)] flex-col items-center justify-center text-center flex-1 min-w-[45%]">
+            <Text className="text-[32px] leading-[40px] font-bold text-[#0D9488]">{inProgress.length}</Text>
+            <Text className="text-[14px] font-body-md text-[#6B7280] mt-1">قيد التنفيذ</Text>
+          </View>
+          {/* Bottom Right */}
+          <View className="bg-white rounded-2xl p-4 shadow-[0px_4px_20px_rgba(0,0,0,0.04)] flex-col items-center justify-center text-center flex-1 min-w-[45%] mt-4">
+            <Text className="text-[32px] leading-[40px] font-bold text-[#1A1A2E]">{completedToday.length}</Text>
+            <Text className="text-[14px] font-body-md text-[#6B7280] mt-1">مكتملة اليوم</Text>
+          </View>
+          {/* Bottom Left */}
+          <View className="bg-white rounded-2xl p-4 shadow-[0px_4px_20px_rgba(0,0,0,0.04)] flex-col items-center justify-center text-center flex-1 min-w-[45%] mt-4">
+            <Text className="text-[32px] leading-[40px] font-bold text-[#1A1A2E]">{active.length}</Text>
+            <Text className="text-[14px] font-body-md text-[#6B7280] mt-1">إجمالي نشطة</Text>
+          </View>
         </View>
 
-        <AppCard tone="quiet">
-          <SectionHeader subtitle="إدارة عناصر التشغيل اليومية بدون ازدحام." title="اختصارات التشغيل" />
-          <View className="mt-4 flex-row-reverse flex-wrap gap-3">
-            <QuickActionTile
-              className="min-w-[47%] flex-1"
-              icon="inbox"
+        {/* Quick Actions */}
+        <View className="mb-stack-lg">
+          <Text className="font-title-md text-[20px] text-on-surface mb-stack-md text-right font-bold">اختصارات التشغيل</Text>
+          <View className="bg-white rounded-2xl shadow-[0px_4px_20px_rgba(0,0,0,0.04)] overflow-hidden">
+            <Pressable 
               onPress={() => router.push('/(admin)/manage-orders')}
-              subtitle="قبول ومتابعة الطلبات"
-              title="الطلبات"
-              tone="brand"
-            />
-            <QuickActionTile
-              className="min-w-[47%] flex-1"
-              icon="settings"
+              className="flex-row-reverse items-center justify-between p-4 border-b border-surface-container-low hover:bg-surface-container-lowest transition-colors active:bg-surface-container-lowest"
+            >
+              <View className="flex-row-reverse items-center gap-3">
+                <MaterialIcons name="inbox" size={24} color="#0D9488" />
+                <Text className="font-body-md text-[16px] text-on-surface font-bold">مراجعة الطلبات</Text>
+              </View>
+              <MaterialIcons name="chevron-left" size={20} color="#6d7a77" />
+            </Pressable>
+            
+            <Pressable 
               onPress={() => router.push('/(admin)/services')}
-              subtitle="الأسعار والعروض"
-              title="الخدمات"
-              tone="brand"
-            />
-            <QuickActionTile
-              className="min-w-[47%] flex-1"
-              icon="map"
-              onPress={() => router.push('/(admin)/branches')}
-              subtitle="المواقع والسعة"
-              title="الفروع"
-              tone="action"
-            />
-            <QuickActionTile
-              className="min-w-[47%] flex-1"
-              icon="users"
-              onPress={() => router.push('/(admin)/technicians')}
-              subtitle="الفريق الميداني"
-              title="الفنيون"
-              tone="amber"
-            />
-            <QuickActionTile
-              className="min-w-[47%] flex-1"
-              icon="calendar"
-              onPress={() => router.push('/(admin)/maintenance-plans')}
-              subtitle="مواعيد الصيانة الدورية"
-              title="خطط الصيانة"
-              tone="action"
-            />
-          </View>
-        </AppCard>
+              className="flex-row-reverse items-center justify-between p-4 border-b border-surface-container-low hover:bg-surface-container-lowest transition-colors active:bg-surface-container-lowest"
+            >
+              <View className="flex-row-reverse items-center gap-3">
+                <MaterialIcons name="build" size={24} color="#6B7280" />
+                <Text className="font-body-md text-[16px] text-on-surface font-bold">الخدمات والأسعار</Text>
+              </View>
+              <MaterialIcons name="chevron-left" size={20} color="#6d7a77" />
+            </Pressable>
 
-        <View className="gap-4">
-          <SectionHeader
-            action={
-              <AppButton
-                className="min-h-9 px-3"
-                onPress={() => router.push('/(admin)/manage-orders')}
-                variant="ghost"
-              >
-                عرض الكل
-              </AppButton>
-            }
-            subtitle="أحدث الطلبات التي ما زالت ضمن العمل."
-            title="قائمة العمل"
-          />
+            <Pressable 
+              onPress={() => router.push('/(admin)/branches')}
+              className="flex-row-reverse items-center justify-between p-4 border-b border-surface-container-low hover:bg-surface-container-lowest transition-colors active:bg-surface-container-lowest"
+            >
+              <View className="flex-row-reverse items-center gap-3">
+                <MaterialIcons name="map" size={24} color="#6B7280" />
+                <Text className="font-body-md text-[16px] text-on-surface font-bold">الفروع والمواقع</Text>
+              </View>
+              <MaterialIcons name="chevron-left" size={20} color="#6d7a77" />
+            </Pressable>
+
+            <Pressable 
+              onPress={() => router.push('/(admin)/technicians')}
+              className="flex-row-reverse items-center justify-between p-4 hover:bg-surface-container-lowest transition-colors active:bg-surface-container-lowest"
+            >
+              <View className="flex-row-reverse items-center gap-3">
+                <MaterialIcons name="group" size={24} color="#F59E0B" />
+                <Text className="font-body-md text-[16px] text-on-surface font-bold">الفنيون والفريق</Text>
+              </View>
+              <MaterialIcons name="chevron-left" size={20} color="#6d7a77" />
+            </Pressable>
+          </View>
+        </View>
+
+        {/* Live Queue */}
+        <View className="mb-stack-lg pb-10">
+          <View className="flex-row-reverse items-center justify-between mb-stack-md">
+            <Text className="font-title-md text-[20px] text-on-surface font-bold">قائمة العمل</Text>
+            <Pressable onPress={() => router.push('/(admin)/manage-orders')}>
+              <Text className="font-label-sm text-[13px] text-[#0D9488] hover:underline font-bold">عرض الكل</Text>
+            </Pressable>
+          </View>
 
           {recentActive.length ? (
-            <View className="gap-3">
+            <View className="flex-col gap-stack-sm">
               {recentActive.map((request) => (
                 <RequestCard
                   key={request.id}
@@ -152,7 +153,8 @@ export default function AdminDashboardScreen() {
             />
           )}
         </View>
-      </View>
-    </ScreenContainer>
+
+      </ScrollView>
+    </View>
   );
 }
