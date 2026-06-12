@@ -13,6 +13,7 @@ import { useCustomerVehiclesQuery } from '@/features/vehicles/hooks/useVehiclesQ
 import { AppText as Text } from '@/shared/components/AppText';
 import { EmptyState } from '@/shared/components/EmptyState';
 import { LoadingSpinner } from '@/shared/components/LoadingSpinner';
+import { StatusBadge } from '@/shared/components/StatusBadge';
 import { isSupabaseConfigured } from '@/shared/lib/supabase';
 
 function formatDate(iso?: string): string {
@@ -49,10 +50,7 @@ function UrgentPlanCard({ plan, nowMs }: { plan: MaintenancePlan; nowMs: number 
  <View className="absolute -top-10 -right-10 w-32 h-32 bg-warning/5 rounded-full" />
  
  <View className="flex-row-reverse justify-between items-start z-10">
- <View className="bg-warning/10 px-3 py-1 rounded-full flex-row-reverse items-center gap-1">
- <MaterialIcons name="warning" size={16} color="#F59E0B" />
- <Text className="font-label-sm text-label-sm text-warning font-bold">الصيانة القادمة</Text>
- </View>
+ <StatusBadge label="الصيانة القادمة" variant="warning" icon="warning" />
  <Pressable onPress={() => router.push({ pathname: '/edit-maintenance-plan', params: { id: plan.id } })}>
  <MaterialIcons name="edit" size={20} color="#6d7a77" />
  </Pressable>

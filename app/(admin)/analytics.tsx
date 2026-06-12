@@ -12,6 +12,7 @@ import {
 import { AppText as Text } from '@/shared/components/AppText';
 import { LoadingSpinner } from '@/shared/components/LoadingSpinner';
 import { useScreenRefresh } from '@/shared/hooks/useScreenRefresh';
+import { FilterChips } from '@/shared/components/FilterChips';
 
 const PERIOD_LABELS: Record<AnalyticsPeriod, string> = {
  '7d': 'الأسبوع',
@@ -78,24 +79,13 @@ export default function AdminAnalyticsScreen() {
  ) : (
  <>
  {/* Period Selector */}
- <ScrollView 
- horizontal 
- showsHorizontalScrollIndicator={false} 
- className="flex-row-reverse gap-2"
- contentContainerStyle={{ paddingRight: 4 }}
- >
- {periods.map(p => (
- <Pressable
- key={p}
- onPress={() => setPeriod(p)}
- className={`px-6 py-2.5 rounded-full ml-2 active:scale-95 ${period === p ? 'bg-[#0D9488] shadow-md' : 'bg-surface shadow-sm'}`}
- >
- <Text className={`font-button-text text-[16px] font-bold ${period === p ? 'text-white' : 'text-on-surface-variant'}`}>
- {PERIOD_LABELS[p]}
- </Text>
- </Pressable>
- ))}
- </ScrollView>
+ <View className="-mx-margin-mobile px-margin-mobile pb-4">
+ <FilterChips<AnalyticsPeriod>
+ options={periods.map(p => ({ id: p, label: PERIOD_LABELS[p] }))}
+ activeId={period}
+ onChange={setPeriod}
+ />
+ </View>
 
  {/* Revenue Card */}
  <View className="bg-surface-container-lowest rounded-2xl p-6 shadow-soft">
