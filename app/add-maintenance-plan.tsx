@@ -16,70 +16,70 @@ import { ScreenContainer } from '@/shared/components/ScreenContainer';
 import { invalidateMaintenancePlanQueries } from '@/shared/lib/invalidateQueries';
 
 function AddMaintenancePlanScreen() {
-  const user = useAuthStore((s) => s.user);
-  const { data: vehicles = [], isLoading: isVehiclesLoading } = useCustomerVehiclesQuery(user?.id);
+ const user = useAuthStore((s) => s.user);
+ const { data: vehicles = [], isLoading: isVehiclesLoading } = useCustomerVehiclesQuery(user?.id);
 
-  const createMutation = useMutation({
-    mutationFn: async (values: MaintenancePlanFormValues) => {
-      if (!user?.id) {
-        throw new Error('يجب تسجيل الدخول أولاً.');
-      }
-      return createMaintenancePlan(toMaintenancePlanValues(user.id, values));
-    },
-    onSuccess: async () => {
-      await invalidateMaintenancePlanQueries();
-      router.back();
-    },
-  });
+ const createMutation = useMutation({
+ mutationFn: async (values: MaintenancePlanFormValues) => {
+ if (!user?.id) {
+ throw new Error('يجب تسجيل الدخول أولاً.');
+ }
+ return createMaintenancePlan(toMaintenancePlanValues(user.id, values));
+ },
+ onSuccess: async () => {
+ await invalidateMaintenancePlanQueries();
+ router.back();
+ },
+ });
 
-  const handleSubmit = async (values: MaintenancePlanFormValues) => {
-    try {
-      await createMutation.mutateAsync(values);
-    } catch {
-      Alert.alert('خطأ', 'تعذّر إنشاء خطة الصيانة. يرجى المحاولة مجدداً.');
-    }
-  };
+ const handleSubmit = async (values: MaintenancePlanFormValues) => {
+ try {
+ await createMutation.mutateAsync(values);
+ } catch {
+ Alert.alert('خطأ', 'تعذّر إنشاء خطة الصيانة. يرجى المحاولة مجدداً.');
+ }
+ };
 
-  if (isVehiclesLoading && vehicles.length === 0) {
-    return (
-      <ScreenContainer>
-        <LoadingSpinner label="جارٍ تحميل مركباتك..." />
-      </ScreenContainer>
-    );
-  }
+ if (isVehiclesLoading && vehicles.length === 0) {
+ return (
+ <ScreenContainer>
+ <LoadingSpinner label="جارٍ تحميل مركباتك..." />
+ </ScreenContainer>
+ );
+ }
 
-  if (vehicles.length === 0) {
-    return (
-      <ScreenContainer>
-        <EmptyState
-          message="أضف مركبة أولاً لتتمكن من إنشاء خطة صيانة."
-          title="لا توجد مركبات"
-        />
-      </ScreenContainer>
-    );
-  }
+ if (vehicles.length === 0) {
+ return (
+ <ScreenContainer>
+ <EmptyState
+ message="أضف مركبة أولاً لتتمكن من إنشاء خطة صيانة."
+ title="لا توجد مركبات"
+ />
+ </ScreenContainer>
+ );
+ }
 
-  return (
-    <ScreenContainer scroll={false}>
-      <CommandHeader
-        eyebrow="خطط الصيانة"
-        subtitle="حدد التكرار والموعد القادم لتذكيرك بالصيانة الدورية."
-        title="خطة صيانة جديدة"
-      />
-      <MaintenancePlanForm
-        isLoading={createMutation.isPending}
-        onSubmit={handleSubmit}
-        submitLabel="إنشاء الخطة"
-        vehicles={vehicles}
-      />
-    </ScreenContainer>
-  );
+ return (
+ <ScreenContainer scroll={false}>
+ <CommandHeader
+ eyebrow="خطط الصيانة"
+ subtitle="حدد التكرار والموعد القادم لتذكيرك بالصيانة الدورية."
+ title="خطة صيانة جديدة"
+ />
+ <MaintenancePlanForm
+ isLoading={createMutation.isPending}
+ onSubmit={handleSubmit}
+ submitLabel="إنشاء الخطة"
+ vehicles={vehicles}
+ />
+ </ScreenContainer>
+ );
 }
 
 export default function AddMaintenancePlanRoute() {
-  return (
-    <RoleGate role="customer">
-      <AddMaintenancePlanScreen />
-    </RoleGate>
-  );
+ return (
+ <RoleGate role="customer">
+ <AddMaintenancePlanScreen />
+ </RoleGate>
+ );
 }

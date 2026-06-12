@@ -4,19 +4,19 @@ import { fetchActiveBranches, fetchAllBranches } from '@/features/branches/servi
 import { isSupabaseConfigured } from '@/shared/lib/supabase';
 
 export function useActiveBranchesQuery() {
-  return useQuery({
-    queryKey: ['branches', 'active'],
-    enabled: isSupabaseConfigured,
-    queryFn: fetchActiveBranches,
-    staleTime: 5 * 60 * 1000,
-  });
+ return useQuery({
+ queryKey: ['branches', 'active'],
+ enabled: isSupabaseConfigured,
+ queryFn: fetchActiveBranches,
+ staleTime: 5 * 60 * 1000,
+ });
 }
 
 export function useAllBranchesQuery() {
-  return useQuery({
-    queryKey: ['branches', 'all'],
-    enabled: isSupabaseConfigured,
-    queryFn: fetchAllBranches,
-    staleTime: 5 * 60 * 1000,
-  });
+ return useQuery({
+ queryKey: ['branches', 'all'],
+ enabled: isSupabaseConfigured,
+ queryFn: fetchAllBranches,
+ staleTime: 5 * 60 * 1000,
+ });
 }

@@ -4,9 +4,9 @@ import { fetchCustomerVehicles } from '@/features/vehicles/services/supabaseVehi
 import { isSupabaseConfigured } from '@/shared/lib/supabase';
 
 export function useCustomerVehiclesQuery(ownerId?: string) {
-  return useQuery({
-    queryKey: ['vehicles', 'customer', ownerId],
-    enabled: Boolean(ownerId) && isSupabaseConfigured,
-    queryFn: () => fetchCustomerVehicles(ownerId as string),
-  });
+ return useQuery({
+ queryKey: ['vehicles', 'customer', ownerId],
+ enabled: Boolean(ownerId) && isSupabaseConfigured,
+ queryFn: () => fetchCustomerVehicles(ownerId as string),
+ });
 }

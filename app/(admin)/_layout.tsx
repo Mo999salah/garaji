@@ -11,36 +11,36 @@ import { LoadingSpinner } from '@/shared/components/LoadingSpinner';
 import { ScreenContainer } from '@/shared/components/ScreenContainer';
 
 export default function AdminLayout() {
-  const { errorMessage, hasHydrated, status, user } = useAuthStore();
+ const { errorMessage, hasHydrated, status, user } = useAuthStore();
 
-  usePushNotifications(user?.role === 'merchant' ? user : null);
+ usePushNotifications(user?.role === 'merchant' ? user : null);
 
-  useEffect(() => {
-    if (user?.role === 'merchant') {
-      void useServiceStore.getState().loadAllServices();
-      void useBranchStore.getState().loadAllBranches();
-    }
-  }, [user?.id, user?.role]);
+ useEffect(() => {
+ if (user?.role === 'merchant') {
+ void useServiceStore.getState().loadAllServices();
+ void useBranchStore.getState().loadAllBranches();
+ }
+ }, [user?.id, user?.role]);
 
-  if (!hasHydrated || status === 'idle' || status === 'loading') {
-    return (
-      <ScreenContainer scroll={false}>
-        <LoadingSpinner label="جارٍ التحقق..." />
-      </ScreenContainer>
-    );
-  }
+ if (!hasHydrated || status === 'idle' || status === 'loading') {
+ return (
+ <ScreenContainer scroll={false}>
+ <LoadingSpinner label="جارٍ التحقق..." />
+ </ScreenContainer>
+ );
+ }
 
-  if (!user) {
-    if (status === 'blocked') {
-      return <AuthBlockedState message={errorMessage ?? 'حسابك غير جاهز بعد.'} />;
-    }
+ if (!user) {
+ if (status === 'blocked') {
+ return <AuthBlockedState message={errorMessage ?? 'حسابك غير جاهز بعد.'} />;
+ }
 
-    return <Redirect href="/login" />;
-  }
+ return <Redirect href="/login" />;
+ }
 
-  if (user.role !== 'merchant') {
-    return <Redirect href={getHomePathForRole(user.role) as Href} />;
-  }
+ if (user.role !== 'merchant') {
+ return <Redirect href={getHomePathForRole(user.role) as Href} />;
+ }
 
-  return <Stack screenOptions={{ headerShown: false }} />;
+ return <Stack screenOptions={{ headerShown: false }} />;
 }

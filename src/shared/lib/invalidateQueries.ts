@@ -1,29 +1,29 @@
 import { queryClient } from '@/shared/lib/queryClient';
 
 export function invalidateRequestQueries() {
-  return queryClient.invalidateQueries({ queryKey: ['requests'] });
+ return queryClient.invalidateQueries({ queryKey: ['requests'] });
 }
 
 export function invalidateVehicleQueries(ownerId?: string) {
-  if (ownerId) {
-    return queryClient.invalidateQueries({ queryKey: ['vehicles', 'customer', ownerId] });
-  }
+ if (ownerId) {
+ return queryClient.invalidateQueries({ queryKey: ['vehicles', 'customer', ownerId] });
+ }
 
-  return queryClient.invalidateQueries({ queryKey: ['vehicles'] });
+ return queryClient.invalidateQueries({ queryKey: ['vehicles'] });
 }
 
 export function invalidateBranchQueries() {
-  return queryClient.invalidateQueries({ queryKey: ['branches'] });
+ return queryClient.invalidateQueries({ queryKey: ['branches'] });
 }
 
 export function invalidateServiceQueries() {
-  return queryClient.invalidateQueries({ queryKey: ['services'] });
+ return queryClient.invalidateQueries({ queryKey: ['services'] });
 }
 
 export function invalidateTechnicianQueries() {
-  return queryClient.invalidateQueries({ queryKey: ['technicians'] });
+ return queryClient.invalidateQueries({ queryKey: ['technicians'] });
 }
 
 export function invalidateMaintenancePlanQueries() {
-  return queryClient.invalidateQueries({ queryKey: ['maintenance-plans'] });
+ return queryClient.invalidateQueries({ queryKey: ['maintenance-plans'] });
 }

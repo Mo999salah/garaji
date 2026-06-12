@@ -6,22 +6,22 @@ import { useBranchStore } from '@/features/branches/store/useBranchStore';
 import { ScreenContainer } from '@/shared/components/ScreenContainer';
 
 export default function AdminBranchNewScreen() {
-  const { addBranch, isLoading } = useBranchStore();
+ const { addBranch, isLoading } = useBranchStore();
 
-  return (
-    <ScreenContainer scroll={false}>
-      <BranchForm
-        isLoading={isLoading}
-        onSubmit={async (values) => {
-          try {
-            await addBranch(values);
-            router.back();
-          } catch {
-            Alert.alert('خطأ', 'تعذّر إضافة الفرع. يرجى المحاولة مجدداً.');
-          }
-        }}
-        submitLabel="إضافة الفرع"
-      />
-    </ScreenContainer>
-  );
+ return (
+ <ScreenContainer scroll={false}>
+ <BranchForm
+ isLoading={isLoading}
+ onSubmit={async (values) => {
+ try {
+ await addBranch(values);
+ router.back();
+ } catch {
+ Alert.alert('خطأ', 'تعذّر إضافة الفرع. يرجى المحاولة مجدداً.');
+ }
+ }}
+ submitLabel="إضافة الفرع"
+ />
+ </ScreenContainer>
+ );
 }
