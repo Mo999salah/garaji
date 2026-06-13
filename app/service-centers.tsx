@@ -1,7 +1,7 @@
 import { router } from 'expo-router';
 import * as Location from 'expo-location';
 import { useEffect, useMemo, useState } from 'react';
-import { Alert, ScrollView, View, Pressable, TextInput } from 'react-native';
+import { Alert, ScrollView, View, TextInput } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
 
 import { RoleGate } from '@/features/auth/components/RoleGate';
@@ -13,9 +13,13 @@ import {
  AppMapView,
  type AppMapRegion,
 } from '@/shared/components/AppMap';
+import { AppButton } from '@/shared/components/AppButton';
 import { AppText as Text } from '@/shared/components/AppText';
+import { AnimatedPressable } from '@/shared/components/AnimatedPressable';
+import { AppHeader } from '@/shared/components/AppHeader';
 import { EmptyState } from '@/shared/components/EmptyState';
 import { LoadingSpinner } from '@/shared/components/LoadingSpinner';
+import { AppColors } from '@/shared/lib/colors';
 
 const RIYADH_REGION: AppMapRegion = {
  latitude: 24.7136,
@@ -147,30 +151,29 @@ function BranchesIndexScreen() {
  };
 
  return (
- <View className="flex-1 bg-background pb-24">
- {/* TopAppBar */}
- <View className="flex-row-reverse justify-between items-center px-margin-mobile py-stack-md w-full z-50 bg-surface shadow-soft">
- <View className="w-10" />
- <Text className="font-title-md text-title-md text-primary font-bold">مراكز الخدمة</Text>
- <Pressable onPress={() => router.back()} className="active:scale-95 p-2 w-10 items-center justify-center">
- <MaterialIcons name="arrow-forward" size={24} color="#3d4947" />
- </Pressable>
- </View>
+  <View className="flex-1 bg-background pb-24">
+      <AppHeader
+        title="مراكز الخدمة"
+        showBack
+        onBack={() => router.back()}
+      />
 
- <ScrollView className="flex-1" showsVerticalScrollIndicator={false}>
+  <ScrollView className="flex-1" showsVerticalScrollIndicator={false}>
  {/* Search Bar */}
  <View className="px-margin-mobile py-stack-md">
  <View className="relative">
- <TextInput
- value={searchQuery}
- onChangeText={setSearchQuery}
- placeholder="ابحث عن مركز خدمة..."
- placeholderTextColor="#3d4947"
- className="w-full h-12 bg-surface-container-lowest rounded-2xl pr-4 pl-12 text-[16px] text-right font-body-md text-on-surface border border-surface-container shadow-soft"
- />
- <View className="absolute left-4 top-1/2 -translate-y-1/2">
- <MaterialIcons name="search" size={24} color="#3d4947" />
- </View>
+  <TextInput
+            value={searchQuery}
+            onChangeText={setSearchQuery}
+            placeholder="ابحث عن مركز خدمة..."
+            placeholderTextColor={AppColors.onSurfaceVariant}
+            accessibilityLabel="البحث عن مركز خدمة"
+            accessibilityRole="search"
+            className="w-full h-12 bg-surface-container-lowest rounded-2xl pr-4 pl-12 text-body-md text-right font-body-md text-on-surface border border-surface-container shadow-soft"
+          />
+  <View className="absolute left-4 top-1/2 -translate-y-1/2">
+  <MaterialIcons name="search" size={24} color={AppColors.onSurfaceVariant} />
+  </View>
  </View>
  </View>
 
@@ -197,30 +200,35 @@ function BranchesIndexScreen() {
  title={branch.name}
  >
  <AppMapCallout tooltip>
- <View className="min-w-56 rounded-lg bg-surface-container-lowest p-4 shadow-sm border border-surface-container">
- <Text className="font-title-md text-[16px] text-right font-bold text-on-surface">
- {branch.name}
- </Text>
- <Text className="font-label-sm mt-1 text-right text-[12px] text-on-surface-variant">
- {branch.city}
- </Text>
- <Text
- className="font-body-md mt-1 text-right text-[14px] text-on-surface-variant"
- numberOfLines={2}
- >
- {branch.address}
- </Text>
- </View>
+  <View className="min-w-56 rounded-lg bg-surface-container-lowest p-4 shadow-sm border border-surface-container">
+  <Text className="text-title-md text-right font-bold text-on-surface">
+  {branch.name}
+  </Text>
+  <Text className="font-label-sm mt-1 text-right text-label-sm text-on-surface-variant">
+  {branch.city}
+  </Text>
+  <Text
+  className="text-body-md mt-1 text-right text-on-surface-variant"
+  numberOfLines={2}
+  >
+  {branch.address}
+  </Text>
+  </View>
  </AppMapCallout>
  </AppMapMarker>
  ))}
  </AppMapView>
  
- <View className="absolute bottom-4 right-4 z-10">
- <Pressable onPress={handleLocateMe} className="bg-surface-container-lowest p-2 rounded-full shadow-md border border-surface-container active:scale-95">
- <MaterialIcons name="my-location" size={20} color="#00685f" />
- </Pressable>
- </View>
+  <View className="absolute bottom-4 right-4 z-10">
+  <AnimatedPressable
+            onPress={handleLocateMe}
+            accessibilityLabel="تحديد موقعي"
+            accessibilityRole="button"
+            className="bg-surface-container-lowest p-2 rounded-full shadow-md border border-surface-container"
+          >
+  <MaterialIcons name="my-location" size={20} color={AppColors.primary} />
+  </AnimatedPressable>
+  </View>
  </View>
 
  {/* Branch List */}
@@ -239,23 +247,23 @@ function BranchesIndexScreen() {
  <View key={branch.id} className="bg-surface-container-lowest rounded-2xl p-4 shadow-soft flex-col gap-3">
   <View className="flex-row-reverse justify-between items-start">
   <View className="items-end">
-  <Text className="text-title-md text-title-md font-bold text-on-surface text-right">{branch.name}</Text>
+  <Text className="text-title-md font-bold text-on-surface text-right">{branch.name}</Text>
   </View>
   </View>
 
   <View className="flex-row-reverse items-center gap-2">
-  <MaterialIcons name="map" size={16} color="#3d4947" />
+  <MaterialIcons name="map" size={16} color={AppColors.onSurfaceVariant} />
   <Text className="text-label-sm font-label-sm text-on-surface-variant text-right">
   {branch.address}
   </Text>
   </View>
 
- <Pressable
- onPress={() => handleBookBranch(branch.id)}
- className="mt-2 w-full h-12 bg-primary rounded-xl active:scale-[0.98] flex-row-reverse items-center justify-center shadow-md"
- >
- <Text className="text-white text-[16px] font-bold font-button-text">حجز موعد</Text>
- </Pressable>
+          <AppButton
+            onPress={() => handleBookBranch(branch.id)}
+            label="حجز موعد"
+            accessibilityLabel={`حجز موعد في ${branch.name}`}
+            className="mt-2 w-full"
+          />
  </View>
  ))
  )}
