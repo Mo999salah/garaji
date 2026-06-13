@@ -13,7 +13,7 @@ const tones = {
  elevated:
  "border-outline-variant bg-surface-container-lowest shadow-elevated ",
  quiet:
- "border-outline-variant/70 bg-surface-container-low shadow-soft /70",
+ "border-outline-variant/70 bg-surface-container-low shadow-soft",
 };
 
 export function AppCard({

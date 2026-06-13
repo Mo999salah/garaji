@@ -55,6 +55,7 @@ export function AppHeader({
  {showBack ? (
  <Pressable
  accessibilityLabel="رجوع"
+ accessibilityHint="اضغط للرجوع للشاشة السابقة"
  accessibilityRole="button"
  className="w-10 h-10 items-center justify-center rounded-full active:bg-surface-container-high"
  onPress={handleBack}

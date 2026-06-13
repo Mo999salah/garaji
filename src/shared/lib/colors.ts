@@ -52,6 +52,11 @@ export const AppColors = {
  onSuccess: '#ffffff',
  successContainer: '#d1fae5',
 
+ // ── Info (blue) ────────────────────────────
+ info: '#0284C7',
+ onInfo: '#ffffff',
+ infoContainer: '#e0f2fe',
+
  // ── Brand / third-party ───────────────────
  whatsapp: '#25D366',
 } as const;

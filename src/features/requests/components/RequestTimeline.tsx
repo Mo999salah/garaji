@@ -63,8 +63,8 @@ export function RequestTimeline({ currentStatus, events }: RequestTimelineProps)
 
  return (
  <View className="bg-surface-container-lowest rounded-2xl shadow-soft p-6 relative">
- {/* Vertical Line */}
- <View className="absolute right-9 top-10 bottom-10 w-0.5 bg-surface-variant z-0" />
+      {/* Vertical Line — circle center at 36px from right, line 2px wide → left edge at 35px */}
+      <View className="absolute top-10 bottom-10 w-0.5 bg-surface-variant z-0" style={{ right: 35 }} />
  
  <View className="flex-col gap-6 relative z-10">
  {ORDERED_STATUSES.map((step, index) => {

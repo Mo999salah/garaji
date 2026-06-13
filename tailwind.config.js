@@ -52,6 +52,10 @@ module.exports = {
         "success-container": "#d1fae5",
 
         whatsapp: "#25D366",
+
+        info: "#0284C7",
+        "on-info": "#ffffff",
+        "info-container": "#e0f2fe",
       },
       spacing: {
         'unit': '4px',

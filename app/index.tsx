@@ -27,7 +27,7 @@ export default function IndexRoute() {
  if (!hasHydrated || status === 'idle' || status === 'loading' || hasSeenOnboarding === null) {
  return (
  <ScreenContainer scroll={false}>
- <LoadingSpinner label="Restoring session" />
+ <LoadingSpinner label="جارٍ استعادة الجلسة..." />
  </ScreenContainer>
  );
  }
