@@ -1,7 +1,6 @@
 import { router } from 'expo-router';
 import { View } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
-import { Image } from 'expo-image';
 import type { Href } from 'expo-router';
 
 import { useAuthStore } from '@/features/auth/store/useAuthStore';
@@ -18,7 +17,7 @@ import { useScreenRefresh } from '@/shared/hooks/useScreenRefresh';
 import { AppColors } from '@/shared/lib/colors';
 
 export default function CustomerHomeScreen() {
- const { signOut, user } = useAuthStore();
+ const { user } = useAuthStore();
  useRequestRealtimeListener({ customerId: user?.id, enabled: Boolean(user?.id) });
  const vehiclesQuery = useCustomerVehiclesQuery(user?.id);
  const requestsQuery = useCustomerRequestsQuery(user?.id);
@@ -26,11 +25,6 @@ export default function CustomerHomeScreen() {
  const requests = requestsQuery.data ?? [];
  const refreshControl = useScreenRefresh(vehiclesQuery.refetch, requestsQuery.refetch);
  const activeRequests = selectActiveRequests(requests).slice(0, 3);
-
- const handleSignOut = async () => {
- await signOut();
- router.replace('/login');
- };
 
   const getStatusColor = (status: string) => {
   switch (status) {
