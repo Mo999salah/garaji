@@ -2,7 +2,6 @@ import { View } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
 import Animated, { FadeIn } from 'react-native-reanimated';
 
-import { STATUS_LABELS } from '@/features/requests/selectors/requestSelectors';
 import type { ServiceRequestEvent, ServiceRequestStatus } from '@/features/requests/types';
 
 import { AppText as Text } from '@/shared/components/AppText';

@@ -11,7 +11,6 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { vehicleSchema, type VehicleFormValues } from '@/features/vehicles/schemas/vehicleSchema';
 import { AppButton } from '@/shared/components/AppButton';
 import { AppInput } from '@/shared/components/AppInput';
-import { AppText as Text } from '@/shared/components/AppText';
 
 interface VehicleFormProps {
  initialValues?: Partial<VehicleFormValues>;
