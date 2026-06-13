@@ -1,6 +1,6 @@
 import { router } from 'expo-router';
 import { useState } from 'react';
-import { Pressable, ScrollView, View } from 'react-native';
+import { ScrollView, View } from 'react-native';
 import { MaterialIcons } from '@expo/vector-icons';
 
 import { useAuthStore } from '@/features/auth/store/useAuthStore';
@@ -13,11 +13,13 @@ import {
  selectCompletedRequests,
 } from '@/features/requests/selectors/requestSelectors';
 import { useCustomerVehiclesQuery } from '@/features/vehicles/hooks/useVehiclesQuery';
+import { AnimatedPressable } from '@/shared/components/AnimatedPressable';
 import { EmptyState } from '@/shared/components/EmptyState';
 import { SkeletonCard } from '@/shared/components/SkeletonCard';
 import { useScreenRefresh } from '@/shared/hooks/useScreenRefresh';
 import { AppHeader } from '@/shared/components/AppHeader';
 import { FilterChips } from '@/shared/components/FilterChips';
+import { AppColors } from '@/shared/lib/colors';
 
 type OrdersTab = 'all' | 'active' | 'completed' | 'cancelled';
 
@@ -62,19 +64,20 @@ export default function CustomerOrdersScreen() {
 
  return (
  <View className="flex-1 bg-background">
-      <AppHeader 
-        title="طلباتي" 
-        showBack={false} 
+      <AppHeader
+        title="طلباتي"
+        showBack={false}
         trailing={
-          <Pressable 
+          <AnimatedPressable
             accessibilityLabel="الإشعارات"
+            accessibilityHint="عرض الإشعارات"
             accessibilityRole="button"
             onPress={() => router.push('/notifications')}
-            className="w-10 h-10 items-center justify-center rounded-full active:bg-surface-container-high"
+            className="w-11 h-11 items-center justify-center rounded-full"
           >
-            <MaterialIcons name="notifications" size={24} color="#00685f" />
-          </Pressable>
-        } 
+            <MaterialIcons name="notifications" size={24} color={AppColors.primary} />
+          </AnimatedPressable>
+        }
       />
 
       <ScrollView
