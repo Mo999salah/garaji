@@ -3,7 +3,14 @@ import type { Href } from 'expo-router';
 import { router } from 'expo-router';
 import { useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
-import { Pressable, View, I18nManager } from 'react-native';
+import {
+ I18nManager,
+ KeyboardAvoidingView,
+ Platform,
+ SafeAreaView,
+ ScrollView,
+ View,
+} from 'react-native';
 import { z } from 'zod';
 import { MaterialIcons } from '@expo/vector-icons';
 import { Image } from 'expo-image';
@@ -11,8 +18,10 @@ import { Image } from 'expo-image';
 import { AppText as Text } from '@/shared/components/AppText';
 import { AppInput } from '@/shared/components/AppInput';
 import { AppButton } from '@/shared/components/AppButton';
+import { AnimatedPressable } from '@/shared/components/AnimatedPressable';
 import { AuthPublicGate } from '@/features/auth/components/AuthPublicGate';
 import { AuthNotice } from '@/features/auth/components/AuthScreen';
+import { AppColors } from '@/shared/lib/colors';
 import { getHomePathForRole, useAuthStore } from '@/features/auth/store/useAuthStore';
 
 const loginSchema = z.object({
@@ -51,118 +60,155 @@ export default function LoginScreen() {
  }
  });
 
- return (
- <AuthPublicGate>
- <View className="bg-background flex-1 flex-col items-center justify-center p-margin-mobile">
- {/* Main Container */}
- <View className="w-full max-w-md flex-col gap-stack-lg">
- 
- {/* 1. BRAND MARK */}
- <View className="flex-col items-center text-center gap-stack-sm">
- <View className="w-24 h-24 rounded-3xl bg-surface-container-lowest shadow-soft flex items-center justify-center mb-2 overflow-hidden">
- <Image 
- source={require('../assets/images/logo.png')} 
- className="w-full h-full"
- contentFit="cover" 
- />
- </View>
- </View>
- 
- {/* 2. PAGE TITLE */}
- <View className="flex-col gap-unit">
- <Text className="font-display-lg-mobile text-display-lg-mobile text-on-surface text-right font-bold">تسجيل الدخول</Text>
- <Text className="font-body-md text-body-md text-secondary text-right">أدخل بياناتك للوصول إلى حسابك</Text>
- </View>
+  return (
+  <AuthPublicGate>
+  <SafeAreaView className="flex-1 bg-background">
+  <KeyboardAvoidingView
+  behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+  className="flex-1"
+  >
+  <ScrollView
+  className="flex-1"
+  contentContainerClassName="grow justify-center p-margin-mobile"
+  keyboardShouldPersistTaps="handled"
+  showsVerticalScrollIndicator={false}
+  >
+  {/* Main Container */}
+  <View className="w-full max-w-md self-center flex-col gap-stack-lg">
+  
+  {/* 1. BRAND MARK */}
+  <View className="flex-col items-center text-center gap-stack-sm">
+  <View className="w-24 h-24 rounded-3xl bg-surface-container-lowest shadow-soft flex items-center justify-center mb-2 overflow-hidden">
+  <Image 
+  source={require('../assets/images/logo.png')} 
+  className="w-full h-full"
+  contentFit="cover"
+  accessibilityLabel="شعار كراجي"
+  />
+  </View>
+  </View>
+  
+  {/* 2. PAGE TITLE */}
+  <View className="flex-col gap-unit">
+  <Text className="font-display-lg-mobile text-display-lg-mobile text-on-surface text-right font-bold">تسجيل الدخول</Text>
+  <Text className="font-body-md text-body-md text-secondary text-right">أدخل بياناتك للوصول إلى حسابك</Text>
+  </View>
 
- {/* 3. LOGIN FORM */}
- <View className="bg-surface-container-lowest rounded-2xl shadow-soft p-6 flex-col gap-stack-md">
- 
- {/* Email Field */}
- <Controller
- control={control}
- name="email"
- render={({ field: { onBlur, onChange, value } }) => (
-            <AppInput
-              label="البريد الإلكتروني"
-              placeholder="example@email.com"
-              keyboardType="email-address"
-              autoComplete="email"
-              autoCapitalize="none"
-              inputMode="email"
-              value={value}
-              onChangeText={onChange}
-              onBlur={onBlur}
-              error={errors.email?.message}
-              trailing={<MaterialIcons name="mail-outline" size={20} color="#6d7a77" />}
-            />
- )}
- />
+  {/* 3. LOGIN FORM */}
+  <View className="bg-surface-container-lowest rounded-2xl shadow-soft p-6 flex-col gap-stack-md">
+  
+  {/* Email Field */}
+  <Controller
+  control={control}
+  name="email"
+  render={({ field: { onBlur, onChange, value } }) => (
+             <AppInput
+               label="البريد الإلكتروني"
+               placeholder="example@email.com"
+               keyboardType="email-address"
+               autoComplete="email"
+               autoCapitalize="none"
+               inputMode="email"
+               value={value}
+               onChangeText={onChange}
+               onBlur={onBlur}
+               error={errors.email?.message}
+               trailing={<MaterialIcons name="mail-outline" size={20} color={AppColors.outline} />}
+             />
+  )}
+  />
 
- {/* Password Field */}
- <Controller
- control={control}
- name="password"
- render={({ field: { onBlur, onChange, value } }) => (
-            <View className="mt-4">
-              <AppInput
-                label="كلمة المرور"
-                placeholder="••••••••"
-                secureTextEntry={!passwordVisible}
-                autoComplete="password"
-                autoCapitalize="none"
-                value={value}
-                onChangeText={onChange}
-                onBlur={onBlur}
-                error={errors.password?.message}
-                trailing={
-                  <Pressable className="p-2" onPress={() => setPasswordVisible(!passwordVisible)}>
-                    <MaterialIcons name={passwordVisible ? "visibility" : "visibility-off"} size={20} color="#6d7a77" />
-                  </Pressable>
-                }
-              />
-            </View>
- )}
- />
+  {/* Password Field */}
+  <Controller
+  control={control}
+  name="password"
+  render={({ field: { onBlur, onChange, value } }) => (
+             <View className="mt-4">
+               <AppInput
+                 label="كلمة المرور"
+                 placeholder="••••••••"
+                 secureTextEntry={!passwordVisible}
+                 autoComplete="password"
+                 autoCapitalize="none"
+                 value={value}
+                 onChangeText={onChange}
+                 onBlur={onBlur}
+                 error={errors.password?.message}
+                 trailing={
+                   <AnimatedPressable
+                     accessibilityLabel={passwordVisible ? 'إخفاء كلمة المرور' : 'إظهار كلمة المرور'}
+                     accessibilityHint="اضغط لإظهار أو إخفاء كلمة المرور"
+                     accessibilityRole="button"
+                     className="min-h-11 min-w-11 items-center justify-center px-2"
+                     onPress={() => setPasswordVisible(!passwordVisible)}
+                   >
+                     <MaterialIcons name={passwordVisible ? "visibility" : "visibility-off"} size={20} color={AppColors.outline} />
+                   </AnimatedPressable>
+                 }
+               />
+             </View>
+  )}
+  />
 
- <View className="mt-2">
- <AuthNotice message={infoMessage} tone="info" />
- <AuthNotice message={errorMessage} tone="error" />
- </View>
+  <View className="mt-2">
+  <AuthNotice message={infoMessage} tone="info" />
+  <AuthNotice message={errorMessage} tone="error" />
+  </View>
 
- {/* Utility Row */}
- <View className={`flex-row${I18nManager.isRTL ? '-reverse' : ''} justify-between items-center mt-2`}>
- <Pressable className={`flex-row${I18nManager.isRTL ? '-reverse' : ''} items-center gap-2`} onPress={() => setRememberMe(!rememberMe)}>
- <View className={`w-5 h-5 rounded-[4px] border-[1.5px] items-center justify-center ${rememberMe ? 'bg-primary border-primary' : 'border-outline'}`}>
- {rememberMe && <MaterialIcons name="check" size={16} color="#ffffff" />}
- </View>
- <Text className="font-label-sm text-label-sm text-secondary">تذكرني</Text>
- </Pressable>
- <Pressable onPress={() => router.push('/reset-password' as Href)}>
- <Text className="font-label-sm text-label-sm text-primary font-bold">نسيت كلمة المرور؟</Text>
- </Pressable>
- </View>
+  {/* Utility Row */}
+  <View className={`flex-row${I18nManager.isRTL ? '-reverse' : ''} justify-between items-center mt-2`}>
+  <AnimatedPressable
+  accessibilityLabel="تذكرني"
+  accessibilityRole="checkbox"
+  accessibilityState={{ checked: rememberMe }}
+  className={`flex-row${I18nManager.isRTL ? '-reverse' : ''} items-center gap-2 min-h-11`}
+  onPress={() => setRememberMe(!rememberMe)}
+  >
+  <View className={`w-5 h-5 rounded-[4px] border-[1.5px] items-center justify-center ${rememberMe ? 'bg-primary border-primary' : 'border-outline'}`}>
+  {rememberMe && <MaterialIcons name="check" size={16} color={AppColors.onPrimary} />}
+  </View>
+  <Text className="font-label-sm text-label-sm text-secondary">تذكرني</Text>
+  </AnimatedPressable>
+  <AnimatedPressable
+  accessibilityLabel="نسيت كلمة المرور؟"
+  accessibilityRole="link"
+  accessibilityHint="الانتقال إلى شاشة إعادة تعيين كلمة المرور"
+  className="min-h-11 justify-center px-1"
+  onPress={() => router.push('/reset-password' as Href)}
+  >
+  <Text className="font-label-sm text-label-sm text-primary font-bold">نسيت كلمة المرور؟</Text>
+  </AnimatedPressable>
+  </View>
 
-          <View className="mt-4">
-            <AppButton
-              label="تسجيل الدخول"
-              onPress={() => void onSubmit()}
-              disabled={isSubmitting}
-              loading={isSubmitting}
-            />
-          </View>
+           <View className="mt-4">
+             <AppButton
+               label="تسجيل الدخول"
+               onPress={() => void onSubmit()}
+               disabled={isSubmitting}
+               loading={isSubmitting}
+             />
+           </View>
 
- </View>
+  </View>
 
- {/* 5. FOOTER */}
- <View className={`flex-row${I18nManager.isRTL ? '-reverse' : ''} items-center justify-center gap-2 mt-4`}>
- <Text className="font-body-md text-body-md text-secondary">ليس لديك حساب؟</Text>
- <Pressable onPress={() => router.push('/register' as Href)}>
- <Text className="font-body-md text-body-md text-primary font-bold">إنشاء حساب جديد</Text>
- </Pressable>
- </View>
+  {/* 5. FOOTER */}
+  <View className={`flex-row${I18nManager.isRTL ? '-reverse' : ''} items-center justify-center gap-2 mt-4`}>
+  <Text className="font-body-md text-body-md text-secondary">ليس لديك حساب؟</Text>
+  <AnimatedPressable
+  accessibilityLabel="إنشاء حساب جديد"
+  accessibilityRole="link"
+  accessibilityHint="الانتقال إلى شاشة إنشاء حساب"
+  className="min-h-11 justify-center px-1"
+  onPress={() => router.push('/register' as Href)}
+  >
+  <Text className="font-body-md text-body-md text-primary font-bold">إنشاء حساب جديد</Text>
+  </AnimatedPressable>
+  </View>
 
- </View>
- </View>
- </AuthPublicGate>
- );
+  </View>
+  </ScrollView>
+  </KeyboardAvoidingView>
+  </SafeAreaView>
+  </AuthPublicGate>
+  );
 }

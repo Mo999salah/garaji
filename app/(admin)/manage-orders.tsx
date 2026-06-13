@@ -5,20 +5,15 @@ import { MaterialIcons } from '@expo/vector-icons';
 
 import { useAllRequestsQuery } from '@/features/requests/hooks/useRequestsQuery';
 import { useRequestRealtimeListener } from '@/features/requests/hooks/useRequestRealtimeListener';
-import {
- selectActiveRequests,
- selectByStatus,
-} from '@/features/requests/selectors/requestSelectors';
+import { selectByStatus } from '@/features/requests/selectors/requestSelectors';
 import type { ServiceRequest, ServiceRequestStatus } from '@/features/requests/types';
 import { AppText as Text } from '@/shared/components/AppText';
 import { EmptyState } from '@/shared/components/EmptyState';
 import { SkeletonCard } from '@/shared/components/SkeletonCard';
 import { useScreenRefresh } from '@/shared/hooks/useScreenRefresh';
-import { useAuthStore } from '@/features/auth/store/useAuthStore';
 import { StatusBadge } from '@/shared/components/StatusBadge';
 import { FilterChips } from '@/shared/components/FilterChips';
 import { AppHeader } from '@/shared/components/AppHeader';
-import { AppButton } from '@/shared/components/AppButton';
 
 type OrdersTab = 'all' | ServiceRequestStatus;
 
@@ -62,24 +57,6 @@ function AdminOrderCard({ request, onPress }: { request: ServiceRequest; onPress
         <MaterialIcons name="more-vert" size={20} color="#3d4947" />
       </View>
 
- <View className="flex-row-reverse items-center gap-4 mb-4">
- <View className="w-12 h-12 rounded-full bg-surface-container flex items-center justify-center shrink-0">
- <MaterialIcons name="person" size={24} color="#00685f" />
- </View>
- <View className="flex-1 items-end">
- <View className="flex-row-reverse justify-between items-center w-full">
- <Text className="font-title-md text-[16px] text-on-surface font-bold">عميل كراجي</Text>
- <Pressable className="w-8 h-8 rounded-full bg-surface-container flex items-center justify-center">
- <MaterialIcons name="call" size={18} color="#00685f" />
- </Pressable>
- </View>
- <View className="flex-row-reverse items-center gap-1 mt-1">
- <MaterialIcons name="directions-car" size={16} color="#3d4947" />
- <Text className="font-body-md text-[14px] text-on-surface-variant">المركبة</Text>
- </View>
- </View>
- </View>
-
  <View className="flex-row-reverse gap-4 mb-4 bg-surface-container-lowest border border-surface-container-low p-3 rounded-xl">
  <View className="flex-1 items-end">
  <Text className="font-label-sm text-[12px] text-on-surface-variant">الخدمة</Text>
@@ -95,29 +72,11 @@ function AdminOrderCard({ request, onPress }: { request: ServiceRequest; onPress
  <MaterialIcons name="calendar-today" size={18} color="#3d4947" />
  <Text className="font-body-md text-[14px] text-on-surface-variant">{dateStr}</Text>
  </View>
-
-      {isPending && (
-        <View className="flex-row-reverse gap-3">
-          <View className="flex-1">
-            <AppButton label="قبول (قريباً)" disabled={true} onPress={() => {}} />
-          </View>
-          <View className="flex-1">
-            <AppButton label="رفض (قريباً)" variant="secondary" disabled={true} onPress={() => {}} />
-          </View>
-        </View>
-      )}
-
-      {isConfirmed && (
-        <View className="w-full">
-          <AppButton label="بدء العمل (قريباً)" variant="secondary" disabled={true} onPress={() => {}} />
-        </View>
-      )}
  </Pressable>
  );
 }
 
 export default function AdminManageOrdersScreen() {
- const { user } = useAuthStore();
  const requestsQuery = useAllRequestsQuery();
  const { data: requests = [], isLoading } = requestsQuery;
  const refreshControl = useScreenRefresh(requestsQuery.refetch);

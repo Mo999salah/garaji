@@ -43,22 +43,10 @@ function AnimatedStar({ isSelected }: { isSelected: boolean }) {
 export default function RateServiceScreen() {
   const [rating, setRating] = useState(0);
  const [comment, setComment] = useState('');
- const [isSubmitting, setIsSubmitting] = useState(false);
 
- const handleSubmit = async () => {
- if (rating === 0) {
- Alert.alert('تنبيه', 'الرجاء اختيار تقييم قبل الإرسال.');
- return;
- }
-
- setIsSubmitting(true);
- // Simulate API call
- setTimeout(() => {
- setIsSubmitting(false);
- Alert.alert('شكراً لك!', 'تم استلام تقييمك بنجاح، ونتمنى خدمتك دائماً بأفضل شكل.', [
- { text: 'حسناً', onPress: () => router.back() }
- ]);
- }, 1500);
+  const handleSubmit = async () => {
+ // TODO: wire to real review API when available
+ Alert.alert('قريباً', 'سيتوفر حفظ التقييم قريباً.');
  };
 
  return (
@@ -112,13 +100,13 @@ export default function RateServiceScreen() {
 
  {/* Bottom Button */}
  <View className="absolute bottom-0 w-full bg-surface p-margin-mobile border-t border-surface-container-highest">
- <AppButton 
- label="إرسال التقييم" 
- onPress={handleSubmit} 
- variant="primary" 
- size="lg"
- loading={isSubmitting}
- />
+  <AppButton 
+  label="إرسال التقييم (قريباً)" 
+  onPress={handleSubmit} 
+  variant="primary" 
+  size="lg"
+  disabled={true}
+  />
  </View>
  </View>
  );

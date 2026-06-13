@@ -3,8 +3,14 @@ import type { Href } from 'expo-router';
 import { router } from 'expo-router';
 import { useMemo, useState } from 'react';
 import { Controller, useForm, useWatch } from 'react-hook-form';
-import { Pressable, View, I18nManager } from 'react-native';
-import type { TextInputProps } from 'react-native';
+import {
+ I18nManager,
+ KeyboardAvoidingView,
+ Platform,
+ SafeAreaView,
+ ScrollView,
+ View,
+} from 'react-native';
 import { z } from 'zod';
 import { MaterialIcons } from '@expo/vector-icons';
 import { Image } from 'expo-image';
@@ -12,8 +18,10 @@ import { Image } from 'expo-image';
 import { AppText as Text } from '@/shared/components/AppText';
 import { AppInput } from '@/shared/components/AppInput';
 import { AppButton } from '@/shared/components/AppButton';
+import { AnimatedPressable } from '@/shared/components/AnimatedPressable';
 import { AuthPublicGate } from '@/features/auth/components/AuthPublicGate';
 import { AuthNotice } from '@/features/auth/components/AuthScreen';
+import { AppColors } from '@/shared/lib/colors';
 import { getHomePathForRole, useAuthStore } from '@/features/auth/store/useAuthStore';
 import type { UserRole } from '@/shared/types/auth';
 
@@ -51,8 +59,12 @@ function getPasswordScore(password: string) {
 function CustomRoleSelector({ value, onChange }: { value: UserRole; onChange: (role: UserRole) => void }) {
  return (
  <View className={`flex-row${I18nManager.isRTL ? '-reverse' : ''} gap-4`}>
- <Pressable 
- className={`flex-1 flex-col items-end p-4 border-2 rounded-2xl shadow-soft active:scale-95 ${
+ <AnimatedPressable
+ accessibilityLabel="عميل"
+ accessibilityRole="radio"
+ accessibilityState={{ checked: value === 'customer' }}
+ accessibilityHint="إنشاء حساب كعميل لحجز الصيانة"
+ className={`flex-1 flex-col items-end p-4 border-2 rounded-2xl shadow-soft ${
  value === 'customer' 
  ? 'bg-primary-container/10 border-primary' 
  : 'bg-surface-container-lowest border-transparent'
@@ -62,15 +74,19 @@ function CustomRoleSelector({ value, onChange }: { value: UserRole; onChange: (r
  <MaterialIcons 
  name="directions-car" 
  size={32} 
- color={value === 'customer' ? "#00685f" : "#3d4947"} 
+ color={value === 'customer' ? AppColors.primary : AppColors.onSurfaceVariant} 
  style={{ marginBottom: 12 }}
  />
  <Text className="text-on-background font-title-md text-body-md font-bold mb-1">عميل</Text>
  <Text className="text-on-surface-variant font-label-sm text-label-sm text-right">حجز صيانة ومتابعة سياراتك</Text>
- </Pressable>
+ </AnimatedPressable>
 
- <Pressable 
- className={`flex-1 flex-col items-end p-4 border-2 rounded-2xl shadow-soft active:scale-95 ${
+ <AnimatedPressable
+ accessibilityLabel="مركز خدمة"
+ accessibilityRole="radio"
+ accessibilityState={{ checked: value === 'merchant' }}
+ accessibilityHint="إنشاء حساب كمركز خدمة لإدارة الطلبات"
+ className={`flex-1 flex-col items-end p-4 border-2 rounded-2xl shadow-soft ${
  value === 'merchant' 
  ? 'bg-primary-container/10 border-primary' 
  : 'bg-surface-container-lowest border-transparent'
@@ -80,12 +96,12 @@ function CustomRoleSelector({ value, onChange }: { value: UserRole; onChange: (r
  <MaterialIcons 
  name="build" 
  size={32} 
- color={value === 'merchant' ? "#00685f" : "#3d4947"} 
+ color={value === 'merchant' ? AppColors.primary : AppColors.onSurfaceVariant} 
  style={{ marginBottom: 12 }}
  />
  <Text className="text-on-background font-title-md text-body-md font-bold mb-1">مركز خدمة</Text>
  <Text className="text-on-surface-variant font-label-sm text-label-sm text-right">إدارة الطلبات والفروع</Text>
- </Pressable>
+ </AnimatedPressable>
  </View>
  );
 }
@@ -160,182 +176,204 @@ export default function SignupScreen() {
  }
  });
 
- return (
- <AuthPublicGate>
- <View className="bg-background flex-1 flex-col items-center justify-center p-margin-mobile">
- <View className="w-full max-w-md flex-col gap-stack-lg pt-12 pb-12">
- 
- {/* Header Section */}
- <View className="flex-col items-center gap-stack-sm">
- <View className="w-16 h-16 rounded-full bg-surface-container-lowest shadow-soft flex items-center justify-center mb-2 overflow-hidden">
- <Image 
- source={require('../assets/images/logo.png')} 
- className="w-full h-full"
- contentFit="cover" 
- />
- </View>
- <Text className="text-on-background font-bold text-title-lg">كراجي</Text>
- <Text className="text-on-surface-variant text-body-sm">منصة خدمات سيارتك</Text>
- </View>
-
- {/* Title Section */}
- <View className="text-right gap-stack-sm">
- <Text className="text-on-background font-display-lg-mobile text-display-lg-mobile font-bold text-right">إنشاء حساب جديد</Text>
- <Text className="text-on-surface-variant font-body-md text-body-md text-right">اختر نوع حسابك وأكمل بياناتك</Text>
- </View>
-
- {/* Account Type Selector */}
- <CustomRoleSelector onChange={setRole} value={selectedRole} />
-
- {/* Form Card */}
- <View className="bg-surface-container-lowest rounded-2xl p-6 shadow-soft flex-col gap-stack-md">
- 
- <Controller
- control={control}
- name="fullName"
- render={({ field: { onBlur, onChange, value } }) => (
- <AppInput
- autoComplete="name"
- error={errors.fullName?.message}
- label="الاسم الكامل"
- onBlur={onBlur}
- onChangeText={onChange}
- placeholder="الاسم الكامل"
- value={value}
- />
- )}
- />
-
- <Controller
- control={control}
- name="phone"
- render={({ field: { onBlur, onChange, value } }) => (
- <View className="mt-4">
- <AppInput
- autoComplete="tel"
- error={errors.phone?.message}
- inputMode="tel"
- keyboardType="phone-pad"
- label="رقم الجوال"
- onBlur={onBlur}
- onChangeText={onChange}
- placeholder="+966 5X XXX XXXX"
- value={value ?? ''}
- />
- </View>
- )}
- />
-
- <Controller
- control={control}
- name="email"
- render={({ field: { onBlur, onChange, value } }) => (
- <View className="mt-4">
- <AppInput
- autoCapitalize="none"
- autoComplete="email"
- error={errors.email?.message}
- inputMode="email"
- keyboardType="email-address"
- label="البريد الإلكتروني"
- onBlur={onBlur}
- onChangeText={onChange}
- placeholder="example@email.com"
- value={value}
- />
- </View>
- )}
- />
-
- <Controller
- control={control}
- name="password"
- render={({ field: { onBlur, onChange, value } }) => (
- <View className="mt-4">
- <AppInput
- autoCapitalize="none"
- autoComplete="new-password"
- error={errors.password?.message}
- label="كلمة المرور"
- onBlur={onBlur}
- onChangeText={onChange}
- placeholder="*********"
- secureTextEntry={!passwordVisible}
- trailing={
- <Pressable 
- className="p-2"
- onPress={() => setPasswordVisible((current) => !current)}
- >
- <MaterialIcons 
- name={passwordVisible ? "visibility" : "visibility-off"} 
- size={20} 
- color="#6d7a77" 
- />
- </Pressable>
- }
- value={value}
- />
- <PasswordMeter score={passwordScore} />
- </View>
- )}
- />
-
- {selectedRole === 'merchant' ? (
- <View className="flex-col gap-4 border-t border-black/5 mt-4 pt-4 dark:border-white/5">
- <Controller
- control={control}
- name="merchantName"
- render={({ field: { onBlur, onChange, value } }) => (
- <AppInput
- error={errors.merchantName?.message}
- label="اسم المنشأة"
- onBlur={onBlur}
- onChangeText={onChange}
- placeholder="أدخل اسم المنشأة"
- value={value ?? ''}
- />
- )}
- />
- <Controller
- control={control}
- name="region"
- render={({ field: { onBlur, onChange, value } }) => (
- <AppInput
- error={errors.region?.message}
- label="المنطقة"
- onBlur={onBlur}
- onChangeText={onChange}
- placeholder="مثال: الرياض"
- value={value ?? ''}
- />
- )}
- />
- </View>
- ) : null}
-
- <AuthNotice message={errorMessage} tone="error" />
-
- <View className="mt-6">
-  <AppButton
-    label="إنشاء الحساب"
-    onPress={() => void onSubmit()}
-    disabled={isSubmitting}
-    loading={isSubmitting}
+  return (
+  <AuthPublicGate>
+  <SafeAreaView className="flex-1 bg-background">
+  <KeyboardAvoidingView
+  behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+  className="flex-1"
+  >
+  <ScrollView
+  className="flex-1"
+  contentContainerClassName="grow justify-center p-margin-mobile"
+  keyboardShouldPersistTaps="handled"
+  showsVerticalScrollIndicator={false}
+  >
+  <View className="w-full max-w-md self-center flex-col gap-stack-lg py-12">
+  
+  {/* Header Section */}
+  <View className="flex-col items-center gap-stack-sm">
+  <View className="w-16 h-16 rounded-full bg-surface-container-lowest shadow-soft flex items-center justify-center mb-2 overflow-hidden">
+  <Image 
+  source={require('../assets/images/logo.png')} 
+  className="w-full h-full"
+  contentFit="cover"
+  accessibilityLabel="شعار كراجي"
   />
- </View>
+  </View>
+  <Text className="text-on-background font-bold text-title-md">كراجي</Text>
+  <Text className="text-on-surface-variant text-body-md">منصة خدمات سيارتك</Text>
+  </View>
 
- </View>
+  {/* Title Section */}
+  <View className="text-right gap-stack-sm">
+  <Text className="text-on-background font-display-lg-mobile text-display-lg-mobile font-bold text-right">إنشاء حساب جديد</Text>
+  <Text className="text-on-surface-variant font-body-md text-body-md text-right">اختر نوع حسابك وأكمل بياناتك</Text>
+  </View>
 
- {/* Footer Links */}
- <View className={`flex-row${I18nManager.isRTL ? '-reverse' : ''} items-center justify-center gap-2 mt-4`}>
- <Text className="text-on-surface-variant font-body-md text-body-sm">لديك حساب بالفعل؟</Text>
- <Pressable onPress={() => router.replace('/login' as Href)}>
- <Text className="text-primary font-bold text-body-sm">تسجيل الدخول</Text>
- </Pressable>
- </View>
+  {/* Account Type Selector */}
+  <CustomRoleSelector onChange={setRole} value={selectedRole} />
 
- </View>
- </View>
- </AuthPublicGate>
- );
+  {/* Form Card */}
+  <View className="bg-surface-container-lowest rounded-2xl p-6 shadow-soft flex-col gap-stack-md">
+  
+  <Controller
+  control={control}
+  name="fullName"
+  render={({ field: { onBlur, onChange, value } }) => (
+  <AppInput
+  autoComplete="name"
+  error={errors.fullName?.message}
+  label="الاسم الكامل"
+  onBlur={onBlur}
+  onChangeText={onChange}
+  placeholder="الاسم الكامل"
+  value={value}
+  />
+  )}
+  />
+
+  <Controller
+  control={control}
+  name="phone"
+  render={({ field: { onBlur, onChange, value } }) => (
+  <View className="mt-4">
+  <AppInput
+  autoComplete="tel"
+  error={errors.phone?.message}
+  inputMode="tel"
+  keyboardType="phone-pad"
+  label="رقم الجوال"
+  onBlur={onBlur}
+  onChangeText={onChange}
+  placeholder="+966 5X XXX XXXX"
+  value={value ?? ''}
+  />
+  </View>
+  )}
+  />
+
+  <Controller
+  control={control}
+  name="email"
+  render={({ field: { onBlur, onChange, value } }) => (
+  <View className="mt-4">
+  <AppInput
+  autoCapitalize="none"
+  autoComplete="email"
+  error={errors.email?.message}
+  inputMode="email"
+  keyboardType="email-address"
+  label="البريد الإلكتروني"
+  onBlur={onBlur}
+  onChangeText={onChange}
+  placeholder="example@email.com"
+  value={value}
+  />
+  </View>
+  )}
+  />
+
+  <Controller
+  control={control}
+  name="password"
+  render={({ field: { onBlur, onChange, value } }) => (
+  <View className="mt-4">
+  <AppInput
+  autoCapitalize="none"
+  autoComplete="new-password"
+  error={errors.password?.message}
+  label="كلمة المرور"
+  onBlur={onBlur}
+  onChangeText={onChange}
+  placeholder="*********"
+  secureTextEntry={!passwordVisible}
+  trailing={
+  <AnimatedPressable
+  accessibilityLabel={passwordVisible ? 'إخفاء كلمة المرور' : 'إظهار كلمة المرور'}
+  accessibilityHint="اضغط لإظهار أو إخفاء كلمة المرور"
+  accessibilityRole="button"
+  className="min-h-11 min-w-11 items-center justify-center px-2"
+  onPress={() => setPasswordVisible((current) => !current)}
+  >
+  <MaterialIcons 
+  name={passwordVisible ? "visibility" : "visibility-off"} 
+  size={20} 
+  color={AppColors.outline} 
+  />
+  </AnimatedPressable>
+  }
+  value={value}
+  />
+  <PasswordMeter score={passwordScore} />
+  </View>
+  )}
+  />
+
+  {selectedRole === 'merchant' ? (
+  <View className="flex-col gap-4 border-t border-outline-variant mt-4 pt-4">
+  <Controller
+  control={control}
+  name="merchantName"
+  render={({ field: { onBlur, onChange, value } }) => (
+  <AppInput
+  error={errors.merchantName?.message}
+  label="اسم المنشأة"
+  onBlur={onBlur}
+  onChangeText={onChange}
+  placeholder="أدخل اسم المنشأة"
+  value={value ?? ''}
+  />
+  )}
+  />
+  <Controller
+  control={control}
+  name="region"
+  render={({ field: { onBlur, onChange, value } }) => (
+  <AppInput
+  error={errors.region?.message}
+  label="المنطقة"
+  onBlur={onBlur}
+  onChangeText={onChange}
+  placeholder="مثال: الرياض"
+  value={value ?? ''}
+  />
+  )}
+  />
+  </View>
+  ) : null}
+
+  <AuthNotice message={errorMessage} tone="error" />
+
+  <View className="mt-6">
+   <AppButton
+     label="إنشاء الحساب"
+     onPress={() => void onSubmit()}
+     disabled={isSubmitting}
+     loading={isSubmitting}
+   />
+  </View>
+
+  </View>
+
+  {/* Footer Links */}
+  <View className={`flex-row${I18nManager.isRTL ? '-reverse' : ''} items-center justify-center gap-2 mt-4`}>
+  <Text className="text-on-surface-variant font-body-md text-body-md">لديك حساب بالفعل؟</Text>
+  <AnimatedPressable
+  accessibilityLabel="تسجيل الدخول"
+  accessibilityRole="link"
+  accessibilityHint="الانتقال إلى شاشة تسجيل الدخول"
+  className="min-h-11 justify-center px-1"
+  onPress={() => router.replace('/login' as Href)}
+  >
+  <Text className="text-primary font-bold text-body-md">تسجيل الدخول</Text>
+  </AnimatedPressable>
+  </View>
+
+  </View>
+  </ScrollView>
+  </KeyboardAvoidingView>
+  </SafeAreaView>
+  </AuthPublicGate>
+  );
 }

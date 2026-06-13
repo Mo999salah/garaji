@@ -35,16 +35,7 @@ function formatDueSummary(plan: MaintenancePlan): string {
  return parts.length ? parts.join(' · ') : 'لم يُحدد موعد بعد';
 }
 
-function UrgentPlanCard({ plan, nowMs }: { plan: MaintenancePlan; nowMs: number }) {
- // Let's assume progress based on a simple heuristic if intervalKm is available, otherwise default to 85%
- let progressPercent = 85;
- 
- if (plan.intervalKm && plan.nextDueMileage && plan.lastServiceMileage) {
- const driven = plan.nextDueMileage - plan.intervalKm - plan.lastServiceMileage; // simplistic assumption
- // Actually, we don't have current mileage, so we just show an arbitrary high progress since it's urgent
- progressPercent = 90;
- }
-
+function UrgentPlanCard({ plan }: { plan: MaintenancePlan }) {
  return (
  <View className="bg-surface-container-lowest rounded-2xl shadow-soft border-r-4 border-[#F59E0B] p-4 flex-col gap-4 relative overflow-hidden">
  <View className="absolute -top-10 -right-10 w-32 h-32 bg-warning/5 rounded-full" />
@@ -59,10 +50,6 @@ function UrgentPlanCard({ plan, nowMs }: { plan: MaintenancePlan; nowMs: number 
  <View className="z-10 items-end">
  <Text className="font-title-md text-title-md text-on-background font-bold mb-1">{plan.title}</Text>
  <Text className="font-body-md text-body-md text-outline text-right">{formatDueSummary(plan)}</Text>
- </View>
- 
- <View className="w-full bg-surface-container h-2 rounded-full overflow-hidden z-10">
- <View className="bg-warning h-full rounded-full" style={{ width: `${progressPercent}%` }} />
  </View>
  
  <Pressable 
@@ -132,15 +119,15 @@ function MaintenancePlansScreen() {
  queryFn: () => fetchCustomerMaintenancePlans(user!.id),
  staleTime: 60_000});
 
- const activePlans = plans.filter((plan) => plan.isActive);
- const vehiclePlans = activePlans.filter((plan) => selectedVehicleId ? plan.vehicleId === selectedVehicleId : true);
+  const activePlans = plans.filter((plan) => plan.isActive);
+  const vehiclePlans = activePlans.filter((plan) => selectedVehicleId ? plan.vehicleId === selectedVehicleId : true);
   const [nowMs] = useState(() => Date.now());
 
- // Split plans into Urgent, Upcoming, and History based on dates and status
- // Since we don't have a real history table, any plan with lastServiceAt but not due soon goes to history (for demo purposes)
- // And plans due soon go to Urgent. Others go to Upcoming.
- const urgentPlans = vehiclePlans.filter(p => isMaintenanceDueSoon(p.nextDueAt, nowMs));
- const otherPlans = vehiclePlans.filter(p => !isMaintenanceDueSoon(p.nextDueAt, nowMs));
+  // Split plans into Urgent, Upcoming, and History based on dates and status
+  // Since we don't have a real history table, any plan with lastServiceAt but not due soon goes to history (for demo purposes)
+  // And plans due soon go to Urgent. Others go to Upcoming.
+  const urgentPlans = vehiclePlans.filter(p => isMaintenanceDueSoon(p.nextDueAt, nowMs));
+  const otherPlans = vehiclePlans.filter(p => !isMaintenanceDueSoon(p.nextDueAt, nowMs));
  
  // Fake history for UI completeness if a plan has lastServiceAt
  const historyPlans = vehiclePlans.filter(p => p.lastServiceAt);
@@ -211,9 +198,9 @@ function MaintenancePlansScreen() {
  {/* Urgent Plans */}
  {urgentPlans.length > 0 && (
  <View className="gap-3">
- {urgentPlans.map(plan => (
- <UrgentPlanCard key={plan.id} plan={plan} nowMs={nowMs} />
- ))}
+  {urgentPlans.map(plan => (
+  <UrgentPlanCard key={plan.id} plan={plan} />
+  ))}
  </View>
  )}
 

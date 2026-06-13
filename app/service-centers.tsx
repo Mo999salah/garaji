@@ -237,28 +237,18 @@ function BranchesIndexScreen() {
  ) : (
  filteredBranches.map((branch) => (
  <View key={branch.id} className="bg-surface-container-lowest rounded-2xl p-4 shadow-soft flex-col gap-3">
- <View className="flex-row-reverse justify-between items-start">
- <View className="items-end">
- <Text className="text-title-md text-title-md font-bold text-on-surface text-right">{branch.name}</Text>
- <View className="flex-row-reverse items-center gap-1 mt-1">
- <Text className="text-warning font-bold text-label-sm font-label-sm">4.8 ★</Text>
- <Text className="text-on-surface-variant text-label-sm font-label-sm">(124 تقييم)</Text>
- </View>
- </View>
- </View>
+  <View className="flex-row-reverse justify-between items-start">
+  <View className="items-end">
+  <Text className="text-title-md text-title-md font-bold text-on-surface text-right">{branch.name}</Text>
+  </View>
+  </View>
 
- <View className="flex-row-reverse items-center gap-2">
- <MaterialIcons name="map" size={16} color="#3d4947" />
- <Text className="text-label-sm font-label-sm text-on-surface-variant text-right">
- 2.5 كم • {branch.address}
- </Text>
- </View>
-
- <View className="flex-row-reverse flex-wrap gap-2 mt-1">
- <View className="bg-surface-container px-3 py-1 rounded-full"><Text className="text-on-surface text-label-sm font-label-sm font-bold">زيت</Text></View>
- <View className="bg-surface-container px-3 py-1 rounded-full"><Text className="text-on-surface text-label-sm font-label-sm font-bold">فرامل</Text></View>
- <View className="bg-surface-container px-3 py-1 rounded-full"><Text className="text-on-surface text-label-sm font-label-sm font-bold">فحص</Text></View>
- </View>
+  <View className="flex-row-reverse items-center gap-2">
+  <MaterialIcons name="map" size={16} color="#3d4947" />
+  <Text className="text-label-sm font-label-sm text-on-surface-variant text-right">
+  {branch.address}
+  </Text>
+  </View>
 
  <Pressable
  onPress={() => handleBookBranch(branch.id)}

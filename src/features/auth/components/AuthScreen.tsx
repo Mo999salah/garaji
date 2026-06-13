@@ -85,25 +85,25 @@ function CinematicHeader() {
  </Text>
  </View>
 
- <View className="absolute right-6 top-7 rounded-full border border-brand-500/20 bg-dark-card px-3 py-1">
- <Text className="font-sans text-[10px] font-bold text-dark-brand-500">
- جاهز للخدمة
- </Text>
- </View>
+  <View className="absolute right-6 top-7 rounded-full border border-primary/20 bg-surface-container-lowest px-3 py-1">
+  <Text className="font-label-sm text-[10px] font-bold text-primary">
+  جاهز للخدمة
+  </Text>
+  </View>
 
- <View className="absolute bottom-7 left-6 right-6 rounded-2xl border border-dark-line bg-dark-card/95 p-5 shadow-soft">
- <View className="mb-4 h-20 w-20 self-center items-center justify-center rounded-2xl border border-dark-line bg-dark-surface">
- <Text className="font-sans text-4xl font-black text-dark-brand-500">
- K
- </Text>
- </View>
- <Text className="font-sans text-center text-2xl font-black text-dark-ink">
- Karaji
- </Text>
- <Text className="font-sans mt-2 text-center text-sm leading-5 text-dark-muted">
- خدمات السيارات، الحجوزات، والمتابعة في تجربة واحدة.
- </Text>
- </View>
+  <View className="absolute bottom-7 left-6 right-6 rounded-2xl border border-outline-variant bg-surface-container-lowest/95 p-5 shadow-soft">
+  <View className="mb-4 h-20 w-20 self-center items-center justify-center rounded-2xl border border-outline-variant bg-surface">
+  <Text className="font-sans text-4xl font-black text-primary">
+  K
+  </Text>
+  </View>
+  <Text className="font-sans text-center text-2xl font-black text-on-surface">
+  Karaji
+  </Text>
+  <Text className="font-sans mt-2 text-center text-sm leading-5 text-on-surface-variant">
+  خدمات السيارات، الحجوزات، والمتابعة في تجربة واحدة.
+  </Text>
+  </View>
  </View>
  );
 }
@@ -125,43 +125,43 @@ export function AuthScreen({
  title,
 }: AuthScreenProps) {
  return (
- <SafeAreaView
- className="flex-1 bg-dark-surface"
- edges={["top", "bottom", "left", "right"]}
- >
- <KeyboardAvoidingView
- behavior={Platform.OS === "ios" ? "padding" : undefined}
- className="flex-1"
- >
- <TouchableWithoutFeedback accessible={false} onPress={Keyboard.dismiss}>
- <ScrollView
- className="flex-1"
- contentContainerClassName="grow"
- keyboardShouldPersistTaps="handled"
- showsVerticalScrollIndicator={false}
- >
- <CinematicHeader />
+  <SafeAreaView
+  className="flex-1 bg-surface"
+  edges={["top", "bottom", "left", "right"]}
+  >
+  <KeyboardAvoidingView
+  behavior={Platform.OS === "ios" ? "padding" : undefined}
+  className="flex-1"
+  >
+  <TouchableWithoutFeedback accessible={false} onPress={Keyboard.dismiss}>
+  <ScrollView
+  className="flex-1"
+  contentContainerClassName="grow"
+  keyboardShouldPersistTaps="handled"
+  showsVerticalScrollIndicator={false}
+  >
+  <CinematicHeader />
 
- <View className="px-6 pb-14 pt-8">
- <Text className="font-sans text-center text-3xl font-black leading-tight text-dark-ink">
- {title}
- </Text>
- <Text className="font-sans mt-3 text-center text-base leading-6 text-dark-muted">
- {subtitle}
- </Text>
+  <View className="px-6 pb-14 pt-8">
+  <Text className="font-sans text-center text-3xl font-black leading-tight text-on-surface">
+  {title}
+  </Text>
+  <Text className="font-sans mt-3 text-center text-base leading-6 text-on-surface-variant">
+  {subtitle}
+  </Text>
 
- <View className="mt-8">{children}</View>
+  <View className="mt-8">{children}</View>
 
- {footer ? (
- <Text className="font-sans mt-10 text-center text-xs leading-5 text-dark-muted">
- {footer}
- </Text>
- ) : null}
- </View>
- </ScrollView>
- </TouchableWithoutFeedback>
- </KeyboardAvoidingView>
- </SafeAreaView>
+  {footer ? (
+  <Text className="font-sans mt-10 text-center text-xs leading-5 text-on-surface-variant">
+  {footer}
+  </Text>
+  ) : null}
+  </View>
+  </ScrollView>
+  </TouchableWithoutFeedback>
+  </KeyboardAvoidingView>
+  </SafeAreaView>
  );
 }
 
@@ -174,35 +174,39 @@ interface AuthNoticeProps {
 
 const noticeStyles = {
  success: {
- container: "rounded-lg border border-action-500/20 bg-success-container",
- text: "text-action-700",
- },
- error: {
- container: "rounded-lg border border-red-200 bg-red-50",
- text: "text-red-700",
- },
- info: {
- container: "rounded-lg border border-brand-500/20 bg-primary-container/10",
- text: "text-dark-brand-500",
- },
+  container: "rounded-xl border border-success bg-success-container",
+  text: "text-success",
+  },
+  error: {
+  container: "rounded-xl border border-error bg-error-container",
+  text: "text-error",
+  },
+  info: {
+  container: "rounded-xl border border-info bg-info-container",
+  text: "text-info",
+  },
 };
 
 export function AuthNotice({ message, tone = "info" }: AuthNoticeProps) {
  if (!message) {
- return null;
- }
+  return null;
+  }
 
- const styles = noticeStyles[tone];
+  const styles = noticeStyles[tone];
 
- return (
- <View className={`px-4 py-3 ${styles.container}`}>
- <Text
- className={`font-sans text-right text-sm font-medium leading-5 ${styles.text}`}
- >
- {message}
- </Text>
- </View>
- );
+  return (
+  <View
+  accessibilityRole="alert"
+  accessibilityLiveRegion="polite"
+  className={`px-4 py-3 ${styles.container}`}
+  >
+  <Text
+  className={`font-body-md text-body-md text-right font-medium leading-6 ${styles.text}`}
+  >
+  {message}
+  </Text>
+  </View>
+  );
 }
 
 /* ─────────────────────── Password Toggle ─────────────────────── */
@@ -214,17 +218,18 @@ interface PasswordToggleProps {
 
 export function PasswordToggle({ onPress, visible }: PasswordToggleProps) {
  return (
- <Pressable
- accessibilityLabel={visible ? "إخفاء كلمة المرور" : "إظهار كلمة المرور"}
- accessibilityRole="button"
- className="min-h-11 justify-center px-2 py-1 active:opacity-60"
- onPress={onPress}
- >
- <Text className="font-sans text-xs font-semibold text-dark-brand-500">
- {visible ? "إخفاء" : "إظهار"}
- </Text>
- </Pressable>
- );
+  <Pressable
+  accessibilityLabel={visible ? "إخفاء كلمة المرور" : "إظهار كلمة المرور"}
+  accessibilityHint="اضغط لإظهار أو إخفاء كلمة المرور"
+  accessibilityRole="button"
+  className="min-h-11 justify-center px-2 py-1 active:opacity-60"
+  onPress={onPress}
+  >
+  <Text className="font-label-sm text-label-sm font-semibold text-primary">
+  {visible ? "إخفاء" : "إظهار"}
+  </Text>
+  </Pressable>
+  );
 }
 
 /* ─────────────────────── Auth Text Button ─────────────────────── */
@@ -236,19 +241,20 @@ interface AuthTextButtonProps {
 
 export function AuthTextButton({ children, onPress }: AuthTextButtonProps) {
  return (
- <Pressable
- accessibilityRole="button"
- className="min-h-11 justify-center py-1 active:opacity-60"
- onPress={onPress}
- >
- <Text
- className="font-sans text-sm font-semibold text-dark-brand-500"
- style={{ textDecorationLine: "underline" }}
- >
- {children}
- </Text>
- </Pressable>
- );
+  <Pressable
+  accessibilityRole="button"
+  accessibilityHint="زر نصي للتنقل"
+  className="min-h-11 justify-center py-1 active:opacity-60"
+  onPress={onPress}
+  >
+  <Text
+  className="font-body-md text-body-md font-semibold text-primary"
+  style={{ textDecorationLine: "underline" }}
+  >
+  {children}
+  </Text>
+  </Pressable>
+  );
 }
 
 /* ─────────────────────── Role Selector ─────────────────────── */
@@ -260,33 +266,33 @@ interface RoleSelectorProps {
 
 export function RoleSelector({ onChange, value }: RoleSelectorProps) {
  return (
- <View className="gap-2.5">
- <Text className="font-sans text-right text-xs font-semibold text-dark-muted">
- نوع الحساب
- </Text>
- <View className="flex-row-reverse gap-3">
- <RoleOption
- description="حجوزات ومتابعة مركبات"
- label="عميل"
- onPress={() => onChange("customer")}
- selected={value === "customer"}
- />
- <RoleOption
- description="إدارة الطلبات والفروع"
- label="تاجر"
- onPress={() => onChange("merchant")}
- selected={value === "merchant"}
- />
- </View>
- </View>
- );
+  <View className="gap-2.5">
+  <Text className="font-label-sm text-label-sm text-right font-semibold text-on-surface-variant">
+  نوع الحساب
+  </Text>
+  <View className="flex-row-reverse gap-3">
+  <RoleOption
+  description="حجوزات ومتابعة مركبات"
+  label="عميل"
+  onPress={() => onChange("customer")}
+  selected={value === "customer"}
+  />
+  <RoleOption
+  description="إدارة الطلبات والفروع"
+  label="تاجر"
+  onPress={() => onChange("merchant")}
+  selected={value === "merchant"}
+  />
+  </View>
+  </View>
+  );
 }
 
 interface RoleOptionProps {
- description: string;
- label: string;
- onPress: () => void;
- selected: boolean;
+  description: string;
+  label: string;
+  onPress: () => void;
+  selected: boolean;
 }
 
 function RoleOption({
@@ -296,30 +302,30 @@ function RoleOption({
  selected,
 }: RoleOptionProps) {
  return (
- <Pressable
- accessibilityRole="radio"
- accessibilityState={{ checked: selected }}
- className={`min-h-[96px] flex-1 justify-between rounded-lg border p-4 active:opacity-80 ${
- selected
- ? "border-brand-600 bg-dark-brand-50"
- : "border-dark-line bg-dark-surface"
- }`}
- onPress={onPress}
- >
- <Text
- className={`font-sans text-right text-base font-bold ${
- selected ? "text-dark-brand-500" : "text-dark-ink"
- }`}
- >
- {label}
- </Text>
- <Text
- className={`font-sans mt-2 text-right text-xs leading-5 ${
- selected ? "text-dark-brand-500" : "text-dark-muted"
- }`}
- >
- {description}
- </Text>
- </Pressable>
- );
+  <Pressable
+  accessibilityRole="radio"
+  accessibilityState={{ checked: selected }}
+  className={`min-h-[96px] flex-1 justify-between rounded-xl border p-4 active:opacity-80 ${
+  selected
+  ? "border-primary bg-primary-container/10"
+  : "border-outline-variant bg-surface-container-lowest"
+  }`}
+  onPress={onPress}
+  >
+  <Text
+  className={`font-body-md text-body-md text-right font-bold ${
+  selected ? "text-primary" : "text-on-surface"
+  }`}
+  >
+  {label}
+  </Text>
+  <Text
+  className={`font-label-sm text-label-sm mt-2 text-right leading-5 ${
+  selected ? "text-primary" : "text-on-surface-variant"
+  }`}
+  >
+  {description}
+  </Text>
+  </Pressable>
+  );
 }

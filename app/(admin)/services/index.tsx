@@ -23,14 +23,15 @@ function AdminServiceCard({ service, onPress }: { service: Service; onPress: () 
  ) : null}
  </View>
  <View className="mr-2 mt-1">
- <Switch
- value={service.isActive}
- onValueChange={() => {
- // This should trigger an optimistic update or mutation in a real scenario
- }}
- trackColor={{ false: '#e2e2e3', true: '#008378' }}
- thumbColor={'#ffffff'}
- />
+  <Switch
+  value={service.isActive}
+  disabled={true}
+  onValueChange={() => {
+  // This should trigger an optimistic update or mutation in a real scenario
+  }}
+  trackColor={{ false: '#e2e2e3', true: '#008378' }}
+  thumbColor={'#ffffff'}
+  />
  </View>
  </View>
  
