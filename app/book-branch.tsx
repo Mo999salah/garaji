@@ -13,6 +13,8 @@ import {
 import { MaterialIcons } from '@expo/vector-icons';
 import { z } from 'zod';
 
+import { AnimatedPressable } from '@/shared/components/AnimatedPressable';
+import { AppColors } from '@/shared/lib/colors';
 import { RoleGate } from '@/features/auth/components/RoleGate';
 import { useAuthStore } from '@/features/auth/store/useAuthStore';
 import { BranchCard } from '@/features/branches/components/BranchCard';
@@ -50,6 +52,16 @@ type BranchBookingFormValues = z.infer<typeof branchBookingFormSchema>;
 
 function buildScheduledAt(dateStr: string, timeStr: string): string {
  return new Date(`${dateStr}T${timeStr}:00`).toISOString();
+}
+
+function formatDisplayDate(dateStr: string): string {
+ if (!dateStr || Number.isNaN(Date.parse(`${dateStr}T00:00:00`))) return '';
+ return new Date(`${dateStr}T00:00:00`).toLocaleDateString('ar-SA', {
+ weekday: 'long',
+ year: 'numeric',
+ month: 'long',
+ day: 'numeric',
+ });
 }
 
 function BookBranchScreen() {
@@ -155,9 +167,9 @@ function BookBranchScreen() {
  <View className={`w-8 h-8 rounded-full flex items-center justify-center shadow-sm z-10 ${
  isActive || isComplete ? 'bg-primary' : 'bg-surface-container-high'
  }`}>
- {isComplete ? (
- <MaterialIcons name="check" size={16} color="white" />
- ) : (
+  {isComplete ? (
+  <MaterialIcons name="check" size={16} color={AppColors.onPrimary} />
+  ) : (
  <Text className={`font-label-sm text-label-sm ${
  isActive || isComplete ? 'text-on-primary' : 'text-on-surface-variant'
  }`}>{stepNum}</Text>
@@ -173,7 +185,7 @@ function BookBranchScreen() {
  </View>
 
  <View className="gap-stack-md mb-stack-lg">
- <Text className="font-title-md text-title-md text-on-background text-right font-bold mb-2">اختر السيارة</Text>
+  <Text className="text-title-md text-on-surface text-right font-bold mb-2">اختر السيارة</Text>
  {vehicles.map((v) => (
  <VehicleCard
  key={v.id}
@@ -188,7 +200,7 @@ function BookBranchScreen() {
  </View>
 
  <View className="gap-stack-md mb-stack-lg">
- <Text className="font-title-md text-title-md text-on-background text-right font-bold mb-2">اختر الخدمة</Text>
+  <Text className="text-title-md text-on-surface text-right font-bold mb-2">اختر الخدمة</Text>
  {services.map((sv) => (
  <ServiceCard
  key={sv.id}
@@ -203,7 +215,7 @@ function BookBranchScreen() {
  </View>
 
  <View className="gap-stack-md mb-stack-lg">
- <Text className="font-title-md text-title-md text-on-background text-right font-bold mb-2">اختر الفرع</Text>
+  <Text className="text-title-md text-on-surface text-right font-bold mb-2">اختر الفرع</Text>
  {branches.map((b) => (
  <BranchCard
  key={b.id}
@@ -218,22 +230,30 @@ function BookBranchScreen() {
  </View>
 
  <View className="gap-stack-md mb-stack-lg pb-10">
- <Text className="font-title-md text-title-md text-on-background text-right font-bold mb-2">موعد الخدمة</Text>
- <Controller
- control={control}
- name="date"
- render={({ field: { onBlur, onChange, value } }) => (
- <AppInput
- error={errors.date?.message}
- label="اليوم (YYYY-MM-DD)"
- onBlur={onBlur}
- onChangeText={onChange}
- placeholder={todayStr}
- textAlign="right"
- value={value}
- />
- )}
- />
+  <Text className="text-title-md text-on-surface text-right font-bold mb-2">موعد الخدمة</Text>
+  <Controller
+          control={control}
+          name="date"
+          render={({ field: { onBlur, onChange, value } }) => (
+            <View className="gap-2">
+              <AppInput
+                error={errors.date?.message}
+                label="اليوم"
+                onBlur={onBlur}
+                onChangeText={onChange}
+                placeholder={todayStr}
+                textAlign="right"
+                value={value}
+                accessibilityLabel="تاريخ الموعد (YYYY-MM-DD)"
+              />
+              {value ? (
+                <Text className="font-label-sm text-label-sm text-on-surface-variant text-right">
+                  {formatDisplayDate(value)}
+                </Text>
+              ) : null}
+            </View>
+          )}
+        />
 
  <Controller
  control={control}
@@ -244,30 +264,31 @@ function BookBranchScreen() {
  الوقت المفضّل
  </Text>
  <View className="flex-row-reverse flex-wrap gap-2">
- {TIME_SLOTS.map((slot) => {
- const isSelected = value === slot;
- return (
- <Pressable
- accessibilityRole="radio"
- accessibilityState={{ selected: isSelected }}
- className={`rounded-2xl border px-4 py-2.5 ${
- isSelected
- ? 'border-primary bg-primary-container/10'
- : 'border-outline-variant bg-surface-container-lowest'
- }`}
- key={slot}
- onPress={() => onChange(slot)}
- >
- <Text
- className={`font-label-sm text-label-sm font-bold ${
- isSelected ? 'text-primary' : 'text-on-surface-variant'
- }`}
- >
- {slot}
- </Text>
- </Pressable>
- );
- })}
+  {TIME_SLOTS.map((slot) => {
+              const isSelected = value === slot;
+              return (
+                <AnimatedPressable
+                  accessibilityLabel={`الساعة ${slot}`}
+                  accessibilityRole="radio"
+                  accessibilityState={{ selected: isSelected }}
+                  onPress={() => onChange(slot)}
+                  className={`rounded-2xl border px-4 py-2.5 min-h-11 items-center justify-center ${
+                    isSelected
+                      ? 'border-primary bg-primary-container/10'
+                      : 'border-outline-variant bg-surface-container-lowest'
+                  }`}
+                  key={slot}
+                >
+                  <Text
+                    className={`font-label-sm text-label-sm font-bold ${
+                      isSelected ? 'text-primary' : 'text-on-surface-variant'
+                    }`}
+                  >
+                    {slot}
+                  </Text>
+                </AnimatedPressable>
+              );
+            })}
  </View>
  {errors.time ? (
  <Text className="font-label-sm text-label-sm text-error text-right">
@@ -303,17 +324,17 @@ function BookBranchScreen() {
 
  {/* Bottom Action Bar (Fixed) */}
  <View className="absolute bottom-0 left-0 right-0 bg-surface-container-lowest px-margin-mobile py-4 shadow-elevated z-40 rounded-t-2xl">
- <AppButton 
-   onPress={handleSubmit(onSubmit)} 
-   disabled={isLoading}
-   loading={isLoading}
-   size="lg"
- >
-   <View className="flex-row-reverse items-center justify-center gap-2">
-     <Text className="font-button-text text-on-primary">تأكيد الحجز</Text>
-     <MaterialIcons name="arrow-back" size={20} color="white" />
-   </View>
- </AppButton>
+  <AppButton
+    onPress={handleSubmit(onSubmit)}
+    disabled={isLoading}
+    loading={isLoading}
+    size="lg"
+    label="تأكيد الحجز"
+    accessibilityLabel="تأكيد حجز الموعد في الفرع"
+    icon={
+      <MaterialIcons name="arrow-back" size={20} color={AppColors.onPrimary} />
+    }
+  />
  </View>
  </View>
  );

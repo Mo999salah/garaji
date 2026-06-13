@@ -15,6 +15,8 @@ import {
 import { MaterialIcons } from '@expo/vector-icons';
 import { z } from 'zod';
 
+import { AnimatedPressable } from '@/shared/components/AnimatedPressable';
+import { AppColors } from '@/shared/lib/colors';
 import { RoleGate } from '@/features/auth/components/RoleGate';
 import { useAuthStore } from '@/features/auth/store/useAuthStore';
 import {
@@ -75,6 +77,16 @@ function buildAddressLabel(address: Location.LocationGeocodedAddress): string {
  ]
  .filter(Boolean)
  .join('، ');
+}
+
+function formatDisplayDate(dateStr: string): string {
+ if (!dateStr || Number.isNaN(Date.parse(`${dateStr}T00:00:00`))) return '';
+ return new Date(`${dateStr}T00:00:00`).toLocaleDateString('ar-SA', {
+ weekday: 'long',
+ year: 'numeric',
+ month: 'long',
+ day: 'numeric',
+ });
 }
 
 function BookMobileScreen() {
@@ -250,9 +262,9 @@ function BookMobileScreen() {
  <View className={`w-8 h-8 rounded-full flex items-center justify-center shadow-sm z-10 ${
  isActive || isComplete ? 'bg-primary' : 'bg-surface-container-high'
  }`}>
- {isComplete ? (
- <MaterialIcons name="check" size={16} color="white" />
- ) : (
+  {isComplete ? (
+  <MaterialIcons name="check" size={16} color={AppColors.onPrimary} />
+  ) : (
  <Text className={`font-label-sm text-label-sm ${
  isActive || isComplete ? 'text-on-primary' : 'text-on-surface-variant'
  }`}>{stepNum}</Text>
@@ -270,9 +282,13 @@ function BookMobileScreen() {
  {/* Map Section */}
  <View className="relative mb-stack-lg">
  {Platform.OS === 'web' ? (
- <View className="w-full h-48 bg-surface-container-high relative overflow-hidden flex items-center justify-center">
- <MaterialIcons name="map" size={48} color="#c0c7d6" />
- </View>
+  <View
+          className="w-full h-48 bg-surface-container-high relative overflow-hidden flex items-center justify-center"
+          accessibilityLabel="الخريطة غير متاحة على الويب"
+          accessibilityRole="image"
+        >
+          <MaterialIcons name="map" size={48} color={AppColors.outlineVariant} />
+        </View>
  ) : (
  <View className="w-full h-48 bg-surface-container-high relative overflow-hidden">
  <AppMapView
@@ -304,16 +320,22 @@ function BookMobileScreen() {
  <View className="bg-surface-container-lowest rounded-2xl shadow-soft p-4 flex-row-reverse items-center justify-between border border-surface-container/50">
  <View className="flex-col items-end flex-1">
  <Text className="font-label-sm text-label-sm text-on-surface-variant mb-1">موقع الخدمة</Text>
- <Text className="font-body-md text-[16px] font-bold text-on-surface text-right" numberOfLines={1}>
+  <Text className="text-body-md font-bold text-on-surface text-right" numberOfLines={1}>
  {locationCity ? `${locationCity}${watch('locationAddress') ? `، ${watch('locationAddress')}` : ''}` : 'الرجاء تحديد الموقع'}
  </Text>
  {locationMessage ? (
- <Text className="font-label-sm text-[11px] text-primary mt-1">{locationMessage}</Text>
+  <Text className="font-label-sm text-label-sm text-primary mt-1">{locationMessage}</Text>
  ) : null}
  </View>
- <Pressable onPress={handleUseCurrentLocation} className="active:opacity-70 mr-4">
- <Text className="text-primary font-label-sm text-label-sm font-bold">تحديد تلقائي</Text>
- </Pressable>
+  <AnimatedPressable
+            onPress={handleUseCurrentLocation}
+            accessibilityLabel="تحديد الموقع تلقائياً"
+            accessibilityHint="استخدام موقع الجهاز الحالي"
+            accessibilityRole="button"
+            className="mr-4 px-2 py-1 rounded-lg"
+          >
+            <Text className="text-primary font-label-sm text-label-sm font-bold">تحديد تلقائي</Text>
+          </AnimatedPressable>
  </View>
  </View>
  </View>
@@ -395,7 +417,7 @@ function BookMobileScreen() {
  </View>
 
  <View className="gap-stack-md px-margin-mobile mb-stack-lg">
- <Text className="font-title-md text-title-md text-on-background text-right font-bold mb-2">اختر السيارة</Text>
+  <Text className="text-title-md text-on-surface text-right font-bold mb-2">اختر السيارة</Text>
  {vehicles.map((v) => (
  <VehicleCard
  key={v.id}
@@ -410,7 +432,7 @@ function BookMobileScreen() {
  </View>
 
  <View className="gap-stack-md px-margin-mobile mb-stack-lg">
- <Text className="font-title-md text-title-md text-on-background text-right font-bold mb-2">اختر الخدمة</Text>
+  <Text className="text-title-md text-on-surface text-right font-bold mb-2">اختر الخدمة</Text>
  {services.map((sv) => (
  <ServiceCard
  key={sv.id}
@@ -425,22 +447,30 @@ function BookMobileScreen() {
  </View>
 
  <View className="gap-stack-md px-margin-mobile mb-stack-lg pb-10">
- <Text className="font-title-md text-title-md text-on-background text-right font-bold mb-2">الموعد</Text>
- <Controller
- control={control}
- name="date"
- render={({ field: { onBlur, onChange, value } }) => (
- <AppInput
- error={errors.date?.message}
- label="اليوم (YYYY-MM-DD)"
- onBlur={onBlur}
- onChangeText={onChange}
- placeholder={todayStr}
- textAlign="right"
- value={value}
- />
- )}
- />
+  <Text className="text-title-md text-on-surface text-right font-bold mb-2">الموعد</Text>
+  <Controller
+          control={control}
+          name="date"
+          render={({ field: { onBlur, onChange, value } }) => (
+            <View className="gap-2">
+              <AppInput
+                error={errors.date?.message}
+                label="اليوم"
+                onBlur={onBlur}
+                onChangeText={onChange}
+                placeholder={todayStr}
+                textAlign="right"
+                value={value}
+                accessibilityLabel="تاريخ الموعد (YYYY-MM-DD)"
+              />
+              {value ? (
+                <Text className="font-label-sm text-label-sm text-on-surface-variant text-right">
+                  {formatDisplayDate(value)}
+                </Text>
+              ) : null}
+            </View>
+          )}
+        />
 
  <Controller
  control={control}
@@ -451,30 +481,31 @@ function BookMobileScreen() {
  الوقت المفضّل
  </Text>
  <View className="flex-row-reverse flex-wrap gap-2">
- {TIME_SLOTS.map((slot) => {
- const isSelected = value === slot;
- return (
- <Pressable
- accessibilityRole="radio"
- accessibilityState={{ selected: isSelected }}
- className={`rounded-2xl border px-4 py-2.5 ${
- isSelected
- ? 'border-primary bg-primary-container/10'
- : 'border-outline-variant bg-surface-container-lowest'
- }`}
- key={slot}
- onPress={() => onChange(slot)}
- >
- <Text
- className={`font-label-sm text-label-sm font-bold ${
- isSelected ? 'text-primary' : 'text-on-surface-variant'
- }`}
- >
- {slot}
- </Text>
- </Pressable>
- );
- })}
+  {TIME_SLOTS.map((slot) => {
+              const isSelected = value === slot;
+              return (
+                <AnimatedPressable
+                  accessibilityLabel={`الساعة ${slot}`}
+                  accessibilityRole="radio"
+                  accessibilityState={{ selected: isSelected }}
+                  onPress={() => onChange(slot)}
+                  className={`rounded-2xl border px-4 py-2.5 min-h-11 items-center justify-center ${
+                    isSelected
+                      ? 'border-primary bg-primary-container/10'
+                      : 'border-outline-variant bg-surface-container-lowest'
+                  }`}
+                  key={slot}
+                >
+                  <Text
+                    className={`font-label-sm text-label-sm font-bold ${
+                      isSelected ? 'text-primary' : 'text-on-surface-variant'
+                    }`}
+                  >
+                    {slot}
+                  </Text>
+                </AnimatedPressable>
+              );
+            })}
  </View>
  {errors.time ? (
  <Text className="font-label-sm text-label-sm text-error text-right">
@@ -509,17 +540,17 @@ function BookMobileScreen() {
  </KeyboardAvoidingView>
 
       <View className="absolute bottom-0 left-0 right-0 bg-surface-container-lowest px-margin-mobile py-4 shadow-elevated z-40 rounded-t-2xl">
-        <AppButton 
-          onPress={handleSubmit(onSubmit)} 
+        <AppButton
+          onPress={handleSubmit(onSubmit)}
           disabled={isLoading}
           loading={isLoading}
           size="lg"
-        >
-          <View className="flex-row-reverse items-center justify-center gap-2">
-            <Text className="font-button-text text-on-primary">تأكيد الطلب</Text>
-            <MaterialIcons name="arrow-back" size={20} color="white" />
-          </View>
-        </AppButton>
+          label="تأكيد الطلب"
+          accessibilityLabel="تأكيد طلب الخدمة بالموقع"
+          icon={
+            <MaterialIcons name="arrow-back" size={20} color={AppColors.onPrimary} />
+          }
+        />
       </View>
  </View>
  );
